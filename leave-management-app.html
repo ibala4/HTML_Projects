@@ -1,0 +1,2529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LeaveDesk — Leave Management Portal</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAMhUlEQVR4nOWbe4zdxXXHP2dm7mPvPr3GENs8TLAhBBsDrpAS2/EDJVF4KI0SJ2qF4wYSCanln1ZtIC21XbVVVSollFZpSkElTqQKF/6InVQtxfZio7bQEIgDFEzCgp21Y3u9u97Hff1mTv/4/e7de+29670Xm93AdzV37+5v5szvzDlz5pwzM8JU2KqG7SiIwlaz4q77NojRO9BoraouAe0FnbLp7EEAOSUi/Yjbr0F2HXzsr/bC9gAqbEXYLmGqVnXYtEntzp3iAVbcPbJFxNwLrBKbRUMZQhlVf+H5aQEiFkwKMSnUFwB+rBoePvho9+NQz1u1Te0f69btdX19G6Jrf+fwspTtecSkOtapLxCicQCPiiDxUL9HPDULRVFEFbDGtSM2SyiP9ZX98Nde++fLDlV4rDSoMlJ5cN2Wo+ttqutJMaleXxqJAIOIiavONbVvhORdVQMQbLrbaSif8uXTn3/l8YX7agchHoCtatguYfnmgXWS6vwRorkQFSIR42aRi/MG1RAZl3WoTGh59Naf7VjUV+FZKgbv+juHl4SU/EREuoMveBFjf20Efi4IqAZvbNaq6ogp640//V5PP1sRU6kTTHmHsZnuEOUjQSyqxCr/PiiqCGJDlI+MzXQHU95RMzZw7ZeP3ZnKzN8RFQYjEXlfqH0jqGrksvNduTi4+bXvfuh7smmT2leyx160qfYVIZoIgJ3tl7zA8MbljC+PH7yu8KGb5KN3Ht5obNszGkoKMleXt/MMVTFpCT5/i1OVz2EzaCgF0Pe79CsIYjNWo8LnHMga9SUIKnPWvTnfUER9CZA1DnQJoQSign5ARkBUCCVAlziBnhA8xKvlLL/ZewRFVD0CPU71A8L0FFDAfWCk3gCOD7AGADhtUQOMCMbU/y8ECE0OqLONDa9WP0A1iXXPs7xa0gARYTzvKZbr22ZSQi5rmIldEcAHODnaOLkiyYcRsFZIOyGdkqTt+RmJpm2AESFf9Nz6sQ6uuzJdlbgR4eU3i/znC+O0Zcy0miBA5KG3y/B7X5iHEUGZTE4oEBRKZWV0IjB02nNsMOLw8YijgxFRpHS2W4xACBUHtrUBcU0rgIGJYuAzH8txx5qOukf/umeUH+wfpS1r0LOyb5MQgbJXujsN926aN+Ouh0c9B39e5Km+MXYfGCPySi5r3pU2ND8FkgEfzwcir3gft7dWGM+HRBhxCDo9HcV7KJYC1tZrQAj18jQS24qeTsvaG3KsvSHHnZ/u4v5vH+e1/hJd7QbfYprStBpfV16qthiTMD9DOoKeRcPZeJ5nakrKCSLxvA8BvIdVH8nyxJ8vZtU1GUbHPda0litoSQNoqHIKGkDNjDSgrk6iApFX/ub7gwyOeLIZ4aJux4qrMqxemSOTEkIAa+N6PZ2WR+5fyO1/cJiTIxFpJ02z0/QyGI9bYKp28bPJn+lpVKRQDx9g5zMjvDVQJpMWgoKzsOzSNFu/ejEbVrUn/xMiryyY5/j6l+fzuw8eJdNpm16GTVUSzZaGnL17Oj0dht6uuFzUZehuN7w1UGLL9iMceHm8av2tjSV+++pOrr0iTb7gMTTXf2s2oIH0zg8N8CHgfVyi5HdHm4Aqf/HYccqRIhL7AyEo6ZTwiRtz5Is+yXLOvH+jqrRSGml4U3QaEImFU1sXylEg1ya82l/glV8UEYlXiwqWX5Vtvn/VWGPOk+AuIJ24ogDFYuDNI4Uqs5Us3iW9DmdBgzbVf4vR4EzfvBUatXTOrq6qTOTP9rIyKZmc/02g6XxArXqe9Yx6FWxIg8Y0qKNRz0/8XWlvq43CFBCK5YAPyfrTBEuzpwE6XZ2pn6kqmbSw9LIMEAdllUE8NlimHIV4G7MJnlpzhBq9fOXZDF3hxstphcZkNyknjIx5Vi5r47oPZ1EFY6i6wAcP5UGTjeEmeDqvGiASe2l2GiHEWjy9llgzSSfRek6Pe4yBP/nqQpyVahRojFAqK8++OEo2I/gwTRQ2BVq2AVOhWAqcHCqjOhkknYmUEzpzdlobMHQ6YnA48QQDOCdcc0WWP7tnMR+/voOgYIwQRYpzwq79w7z6Vp55XbZhv43wLjRgsl1lP+mjH85yzxcW0N5m4+WoBkHjqO6dYyX++6ejSZuz+7YGvvipeQwOR2Qzhot6HCuX5VhzQyfpJBYwJo4FnBOOD0X85WMD5DKJVjA13UZwTfM/hfYaE4/A6pWdrF7ZOW3zp/9nhD3PD9OWtfXvmQyis8I3vrJoyrbeK0g8750Vhkc9d23/OUdPlOjMtZYXaG0KoISg1XyA1jwLDV7C+3henx7ziFBd5iI/GRZV8gE+UGfIjInDZFuTP3z+lTG+/tA7vPZWnq4OR9Sk6lfQ0hTQoHTkTDV+r8f0u0tdHTYZJMUYJZM2Z9Vxdmo6Q6cjXnpjgqf2nOKH+4fwQentspR9SAa1aVaaXwY1KG1p2P3sEP0DRULQ6hSYDpV6/9efJ5MCI8rQSJlvfX8AY6bICQalWFLGJjyDIxFHT5Q4crzEsZMlTk94Mql44MbGI6yNk7HplCGE5hwhufL2/2163EySEjszKzwTpJ3QnovXNx/i5a3hyyUfRiCTNkSRIgLLl+a48Zp2Fl+cplhS3ngnz/M/G2PgRImuDosRIajO6FhXS2nxoNDeZujMNd2UUGMnjIGLuqffkVfAGmF4NOLqK9q4/65LueXmHtKpeq371aky3911nIf/ZQCgqg3nglx52/OtWY/3AhonW0fGItb/Rg+P/OlSujviEzy+RtWNTK5E+18c4a5thyhFcb7xXEa+9YzQBS8xYxMFz9WXt/HotmV011h7ayaTqFJzsGXtTd383X1XUSx6hHP3Y2adz4b8K4hSKgW23nM5nTkbOz9nrDohxI7YLwYidj+Xpxwpn/74PD67YT7Do2WMmb6fd5kSu3DFoEzkPcuX5th4cw+qJCo9mZSubApNFJUvPTDIQ0+MERLGNt92MTbxN6brZ87uDosRCkXPzcs7sEbwPk6CipDkAiv1YPP2QfIF5d+/OZ9MYhyvv7qdRQvSnBwuk5omXd7y7vB7gaDKogXp5Ht8fu/tYxGRh6sWx8bw9/92mAMvF3nuO5fQ22XwIY4nutodvT2Oo4NFUs405HLOakAlt1AqT1r7oPBHfz/CC6+WePYfLmb3c3m+/dQYTz+0gKWXuqq7DfEqUS6HyfxAIw1o+GSWoRpL8vX+8VjtE9XfdncXX3pgkLX3HGc8H3jsj3tZszJD5GMXOmhc71eDJY6dKJJKTb8UmrOyOHOkhBDIZQ3/9dIwQ6cjrIlD4WuXpPjBX8cS33p3N7/1yVwSHcYMhRB7i/teGOL4qSKpii/QYKl1gTBsMD0a29Y5c05OFVIpw5HjBf7pySP84VeWEDQgaliy0PL0QwuAxDZUmNfYdyhHynd2HiGbNoQw5TaeCkZi3oP2Iy62OLO/+tUVHwV6Ohzf2vE2B34yTMqZahgeQhxLVHbjI69Vj/CBh9/k5ddHybUl7vCZtINqwnO/QfUA4qCST55jRSSW3pZvHGR334m6rXhrqNoHZ4VCKXDfN9/gH3ceprfT4qPQSPXjAVA9IJdveGYjLvOMhrLW+ZRzCBW1LpUDv7nxEn77toXc8JFOejpTRD5w9ESRfS8M8ehTR3jp9VHmdaWmD4RUVUxKiIq3CJvUXnZq74ti21ZoVAjI3DwuX5H0yGgc/y9akKG3J00UBY6dLHFiqEQmbWhvO0diVPHiskZ9/uDh3g03GXaKDxoeFJMWxE8xYeZGUY3TcD2djo6c5eRwiVffHOXQ2+MUSp7ebkcuY/BxPq1xER8fldfwIDvFV+8MXbpxz37j2leHaCwCM2f9A6gkSqR6OGxm22EChMi4Dhei8eeO7Nm4NrkztA0QTNltDlFhRCTt0JCkaWZf8lNqA4pqIIRA0HDOgCdmJXiRtAtRYcSU3ebEraq/Nnfp+v9YJybzI4SchuKc14SZIZa8mIxDmdBQvPXIvk/VXJurYN1eR9+GaPG6f1tvbO5JjOuNp4MYqbld9usEjU9sBeM6HCE6FfzE53/Z95l9FV7hTM+vMgif2LUMm3vEuPZ1Gkqoz4OKj6/Nqszdu0WqIJXrs1ZsG2LShGi8Dz/xtV8+e8ehWuZhKtd30xOWnV/0AIvWP71FxN4rqqvEptEQoRox7THQ2YQYRBxiHOpLqMiPVf3DA/s++ThQx1u1ydSUthrYppXr84vWr9tgVO9Q/FqFJULoveDMtADFnBLoF+z+ILJrYF/f3ur1ebZJ/L0e/w9LgAq8n1BRYAAAAABJRU5ErkJggg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F9;
+    --surface:#FFFFFF;
+    --border:#E3E7EF;
+    --ink:#1B2130;
+    --ink-soft:#6B7280;
+    --ink-faint:#9CA3AF;
+    --primary:#2354E6;
+    --primary-dark:#1B3FB8;
+    --primary-soft:#EAF0FE;
+    --success:#15803D;
+    --success-soft:#E7F6EC;
+    --warning:#B45F06;
+    --warning-soft:#FDF1E1;
+    --danger:#C0392B;
+    --danger-soft:#FBEAE8;
+    --slate-soft:#EEF1F6;
+    --sidebar-bg:#141A2A;
+    --sidebar-bg-2:#1B2338;
+    --sidebar-text:#AEB6C9;
+    --sidebar-active:#232C46;
+    --radius:12px;
+    --shadow: 0 1px 2px rgba(16,24,40,0.05), 0 1px 3px rgba(16,24,40,0.06);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  .hidden{ display:none !important; }
+  button{ font-family:'Inter',sans-serif; }
+  a{ color:inherit; }
+
+  /* ---------------- LOGIN ---------------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(35,84,230,0.10), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(35,84,230,0.08), transparent 45%),
+      var(--sidebar-bg);
+    padding:24px;
+  }
+  .login-wrap{ width:100%; max-width:920px; display:grid; grid-template-columns:1fr 1fr; border-radius:20px; overflow:hidden; box-shadow:0 30px 70px rgba(0,0,0,0.35); }
+  @media (max-width:760px){ .login-wrap{ grid-template-columns:1fr; } .login-side{ display:none; } }
+  .login-side{
+    background:linear-gradient(160deg, var(--sidebar-bg-2), var(--sidebar-bg));
+    color:#fff; padding:48px 40px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .login-side .brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.2rem; }
+  .login-side .brand .mark{ width:34px; height:34px; border-radius:9px; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1rem; }
+  .login-side h2{ font-size:1.5rem; line-height:1.4; font-weight:700; margin:36px 0 10px; }
+  .login-side p{ color:#9AA3B8; font-size:0.9rem; line-height:1.6; }
+  .role-card-list{ display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+  .role-card{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.09); border-radius:10px;
+    padding:11px 14px; cursor:pointer; transition:all .15s ease;
+  }
+  .role-card:hover{ background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.2); }
+  .role-card .rc-left{ display:flex; flex-direction:column; }
+  .role-card .rc-role{ font-size:0.68rem; letter-spacing:0.06em; text-transform:uppercase; color:#7C87A3; font-weight:700; }
+  .role-card .rc-name{ font-size:0.88rem; font-weight:600; }
+  .role-card .rc-creds{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:#9AA3B8; text-align:right; }
+
+  .login-form-side{ background:#fff; padding:48px 40px; display:flex; flex-direction:column; justify-content:center; }
+  .login-form-side h1{ font-size:1.4rem; font-weight:800; margin:0 0 4px; }
+  .login-form-side .lf-sub{ color:var(--ink-soft); font-size:0.86rem; margin:0 0 28px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.76rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid var(--border);
+    font-family:'Inter',sans-serif; font-size:0.92rem; background:#fff; color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft); }
+  .login-error{
+    background:var(--danger-soft); color:var(--danger); font-size:0.82rem; padding:10px 13px;
+    border-radius:9px; margin-bottom:14px; display:none;
+  }
+  .login-error.show{ display:block; }
+
+  .btn{
+    font-weight:700; font-size:0.87rem; padding:11px 18px; border-radius:9px; border:none;
+    cursor:pointer; transition:opacity .12s ease, transform .1s ease;
+  }
+  .btn:active{ transform:scale(0.98); }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .btn-outline{ background:#fff; border:1.5px solid var(--border); color:var(--ink); }
+  .btn-outline:hover{ background:var(--slate-soft); }
+  .btn-success{ background:var(--success); color:#fff; }
+  .btn-success:hover{ opacity:0.88; }
+  .btn-danger{ background:var(--danger); color:#fff; }
+  .btn-danger:hover{ opacity:0.88; }
+  .btn-sm{ padding:7px 13px; font-size:0.78rem; }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; }
+  .btn-block{ width:100%; }
+
+  /* ---------------- APP SHELL ---------------- */
+  #appShell{ display:flex; min-height:100vh; }
+  .sidebar{
+    width:250px; background:var(--sidebar-bg); color:var(--sidebar-text); flex-shrink:0;
+    display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; z-index:60;
+    transition:transform .25s ease;
+  }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:20px 20px 16px; font-weight:800; color:#fff; font-size:1.05rem; }
+  .sidebar-brand .mark{ width:30px; height:30px; border-radius:8px; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; }
+  .sidebar-nav{ flex:1; overflow-y:auto; padding:6px 12px 16px; }
+  .nav-group-label{ font-size:0.64rem; letter-spacing:0.09em; text-transform:uppercase; color:#5B6579; font-weight:700; margin:16px 10px 6px; }
+  .nav-group-label:first-child{ margin-top:4px; }
+  .nav-item{
+    display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:8px; cursor:pointer;
+    font-size:0.85rem; font-weight:500; color:var(--sidebar-text); margin-bottom:2px; transition:all .12s ease;
+  }
+  .nav-item svg{ width:17px; height:17px; flex-shrink:0; opacity:0.85; }
+  .nav-item:hover{ background:rgba(255,255,255,0.05); color:#fff; }
+  .nav-item.active{ background:var(--sidebar-active); color:#fff; }
+  .nav-item.active svg{ opacity:1; }
+  .sidebar-foot{ padding:14px 20px 18px; border-top:1px solid rgba(255,255,255,0.08); }
+  .sidebar-lock-note{ font-size:0.68rem; color:#5B6579; line-height:1.5; }
+
+  .main-area{ flex:1; margin-left:250px; display:flex; flex-direction:column; min-height:100vh; }
+  @media (max-width:960px){
+    .sidebar{ transform:translateX(-100%); }
+    .sidebar.open{ transform:translateX(0); box-shadow:0 0 0 100vmax rgba(0,0,0,0.4); }
+    .main-area{ margin-left:0; }
+  }
+
+  .topbar{
+    background:var(--surface); border-bottom:1px solid var(--border); padding:14px 26px;
+    display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:40;
+  }
+  .hamburger{
+    display:none; width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:#fff;
+    cursor:pointer; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  @media (max-width:960px){ .hamburger{ display:flex; } }
+  .topbar-title{ font-weight:700; font-size:1.05rem; flex:1; }
+  .topbar-title .tt-eyebrow{ display:block; font-size:0.66rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:2px; }
+  .bell-btn{
+    position:relative; width:38px; height:38px; border-radius:9px; border:1px solid var(--border); background:#fff;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .bell-btn:hover{ background:var(--slate-soft); }
+  .bell-btn svg{ width:18px; height:18px; }
+  .bell-badge{
+    position:absolute; top:-5px; right:-5px; background:var(--danger); color:#fff; font-family:'JetBrains Mono',monospace;
+    font-size:0.6rem; font-weight:700; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center;
+    justify-content:center; padding:0 3px; border:2px solid #fff;
+  }
+  .bell-badge.hidden{ display:none; }
+  .user-chip{ display:flex; align-items:center; gap:10px; padding-left:14px; border-left:1px solid var(--border); }
+  .user-avatar{
+    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.78rem; color:#fff; flex-shrink:0;
+  }
+  .user-meta{ display:flex; flex-direction:column; line-height:1.25; }
+  .user-meta .um-name{ font-size:0.82rem; font-weight:700; }
+  .user-meta .um-role{ font-size:0.68rem; color:var(--ink-soft); }
+  .logout-btn{ background:none; border:none; color:var(--ink-faint); cursor:pointer; font-size:0.78rem; margin-left:4px; }
+  .logout-btn:hover{ color:var(--danger); }
+
+  main.content{ padding:28px 26px 70px; max-width:1180px; margin:0 auto; width:100%; }
+  .view{ display:none; animation:fade .3s ease; }
+  .view.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .page-sub{ color:var(--ink-soft); font-size:0.92rem; margin:0 0 28px; max-width:600px; }
+  .section-label{
+    font-size:0.72rem; letter-spacing:0.08em; color:var(--ink-faint); text-transform:uppercase; font-weight:700;
+    margin:32px 0 12px; display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after{ content:""; flex:1; height:1px; background:var(--border); }
+
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+  .grid{ display:grid; gap:16px; }
+  .grid-3{ grid-template-columns:repeat(3,1fr); }
+  .grid-2{ grid-template-columns:1.3fr 1fr; }
+  @media (max-width:860px){ .grid-3{ grid-template-columns:1fr; } .grid-2{ grid-template-columns:1fr; } }
+
+  .stat-card .stat-label{ font-size:0.7rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-faint); }
+  .stat-card .stat-num{ font-weight:800; font-size:1.9rem; margin:8px 0 2px; }
+  .stat-card .stat-note{ font-size:0.78rem; color:var(--ink-soft); }
+
+  .badge{
+    font-size:0.68rem; font-weight:700; letter-spacing:0.02em; padding:4px 10px; border-radius:999px; white-space:nowrap;
+  }
+  .badge.Pending{ background:var(--warning-soft); color:var(--warning); }
+  .badge.PendingHR{ background:#EAF0FE; color:var(--primary); }
+  .badge.PendingCEO{ background:#F1EAFB; color:#7C4FE0; }
+  .badge.Approved{ background:var(--success-soft); color:var(--success); }
+  .badge.Rejected{ background:var(--danger-soft); color:var(--danger); }
+  .badge.Cancelled{ background:var(--slate-soft); color:var(--ink-soft); }
+  .badge.role{ background:var(--primary-soft); color:var(--primary); }
+
+  .list-row{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; background:var(--surface);
+    border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:9px;
+  }
+  .list-row .lr-left{ display:flex; align-items:center; gap:14px; }
+  .lr-type-tag{
+    font-size:0.66rem; font-weight:700; text-transform:uppercase; padding:5px 9px; border-radius:6px;
+    background:var(--slate-soft); color:var(--ink-soft); white-space:nowrap;
+  }
+  .lr-dates{ font-family:'JetBrains Mono',monospace; font-size:0.84rem; }
+  .lr-reason{ font-size:0.78rem; color:var(--ink-soft); }
+
+  .btn-cancel{
+    font-size:0.72rem; font-weight:700; color:var(--danger); background:none; border:1px solid var(--danger-soft);
+    border-radius:999px; padding:5px 11px; cursor:pointer;
+  }
+  .btn-cancel:hover{ background:var(--danger-soft); }
+
+  .empty-note{ color:var(--ink-soft); text-align:center; padding:30px; font-size:0.88rem; }
+
+  /* gauges */
+  .gauge-card{ text-align:center; }
+  .gauge{ width:112px; height:112px; margin:4px auto 12px; position:relative; }
+  .gauge svg.ring{ transform:rotate(-90deg); }
+  .gauge-num{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .gauge-num .n{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:1.4rem; }
+  .gauge-num .d{ font-size:0.6rem; color:var(--ink-faint); }
+  .gauge-title{ font-weight:700; font-size:0.92rem; }
+  .gauge-sub{ font-size:0.75rem; color:var(--ink-soft); margin-top:2px; }
+
+  /* filter chips */
+  .filter-row{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .filter-chip{
+    padding:7px 15px; border-radius:999px; border:1.5px solid var(--border); cursor:pointer;
+    font-size:0.79rem; font-weight:600; color:var(--ink-soft); background:#fff; transition:all .15s ease;
+  }
+  .filter-chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+
+  /* leave type picker */
+  .leave-type-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+  @media (max-width:600px){ .leave-type-grid{ grid-template-columns:repeat(2,1fr); } }
+  .lt-option{
+    border:1.5px solid var(--border); border-radius:10px; padding:12px 10px; cursor:pointer; text-align:center;
+    background:#fff; transition:all .15s ease;
+  }
+  .lt-option .lt-name{ font-weight:700; font-size:0.82rem; }
+  .lt-option .lt-left{ font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--ink-soft); margin-top:3px; }
+  .lt-option.selected{ border-color:var(--primary); background:var(--primary-soft); }
+  .lt-option.selected .lt-name{ color:var(--primary-dark); }
+
+  .date-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .upload-box{
+    border:1.5px dashed var(--border); border-radius:10px; padding:18px; text-align:center; color:var(--ink-soft);
+    font-size:0.82rem; cursor:pointer; margin-top:2px; transition:all .15s ease;
+  }
+  .upload-box:hover{ border-color:var(--primary); color:var(--primary); }
+  .upload-box .u-file{ font-family:'JetBrains Mono',monospace; color:var(--ink); margin-top:6px; font-size:0.78rem; }
+
+  .approval-row{
+    display:grid; grid-template-columns:1.6fr 1fr 1.2fr auto; gap:14px; align-items:center;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:15px 18px; margin-bottom:9px;
+  }
+  @media (max-width:820px){ .approval-row{ grid-template-columns:1fr; } }
+  .approval-row .emp-name{ font-weight:700; font-size:0.9rem; }
+  .approval-row .emp-id{ font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--ink-soft); }
+  .col-label{ font-size:0.62rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); margin-bottom:3px; font-weight:700; }
+  .row-actions{ display:flex; gap:8px; }
+
+  .flow-note{
+    display:flex; align-items:center; gap:9px; background:var(--primary-soft); color:var(--primary-dark);
+    border-radius:9px; padding:10px 14px; font-size:0.8rem; margin-bottom:18px;
+  }
+
+  /* calendar (team + attendance) */
+  .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .cal-nav{ display:flex; align-items:center; gap:10px; }
+  .cal-nav-btn{
+    width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cal-nav-btn:hover{ border-color:var(--primary); color:var(--primary); }
+  .cal-month{ font-weight:700; font-size:1rem; min-width:150px; text-align:center; }
+  .cal-layout{ display:grid; grid-template-columns:1fr 210px; gap:20px; }
+  @media (max-width:860px){ .cal-layout{ grid-template-columns:1fr; } }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-dow{ text-align:center; font-size:0.66rem; color:var(--ink-faint); font-weight:700; padding-bottom:4px; }
+  .cal-cell{
+    min-height:74px; background:var(--slate-soft); border:1px solid var(--border); border-radius:9px; padding:6px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .cal-cell.empty{ background:transparent; border-color:transparent; }
+  .cal-cell.today{ border-color:var(--primary); box-shadow:0 0 0 1px var(--primary) inset; }
+  .cal-cell.holiday-public{ background:var(--success-soft); border-color:#B9E4C7; }
+  .cal-cell.holiday-company{ background:var(--primary-soft); border-color:#C7D8FB; }
+  .cal-cell.holiday-optional{ background:var(--slate-soft); border-color:var(--border); }
+  .cal-daynum{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--ink-soft); }
+  .cal-tag{ font-size:0.6rem; font-weight:700; border-radius:5px; padding:2px 5px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .legend-item{ display:flex; align-items:center; gap:9px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .legend-item:last-child{ border-bottom:none; }
+  .legend-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .legend-name{ font-size:0.82rem; font-weight:600; }
+  .legend-dept{ font-size:0.68rem; color:var(--ink-soft); }
+
+  .att-cell{ cursor:pointer; }
+  .att-cell.Present{ background:var(--success-soft); border-color:#B9E4C7; }
+  .att-cell.WFH{ background:#EAF0FE; border-color:#C7D8FB; }
+  .att-cell.Half-day{ background:#F1EAFB; border-color:#DAC8F5; }
+  .att-cell.Absent{ background:var(--danger-soft); border-color:#F1C6C0; }
+  .att-tag{ font-size:0.58rem; font-weight:700; text-transform:uppercase; }
+  .att-legend{ display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; }
+  .att-legend-item{ display:flex; align-items:center; gap:7px; font-size:0.78rem; color:var(--ink-soft); }
+  .att-legend-dot{ width:10px; height:10px; border-radius:3px; }
+
+  /* team roster */
+  .team-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 4px; border-bottom:1px solid var(--border); }
+  .team-row:last-child{ border-bottom:none; }
+  .team-id{ display:flex; align-items:center; gap:12px; }
+  .avatar{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.78rem; color:#fff; flex-shrink:0; }
+  .team-name{ font-weight:700; font-size:0.87rem; }
+  .team-dept{ font-size:0.72rem; color:var(--ink-soft); }
+  .team-bars{ display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-end; max-width:60%; }
+  .team-bar{ text-align:center; }
+  .team-bar .tb-num{ font-family:'JetBrains Mono',monospace; font-size:0.8rem; font-weight:700; }
+  .team-bar .tb-label{ font-size:0.6rem; color:var(--ink-faint); text-transform:uppercase; }
+
+  /* tables */
+  .table-scroll{ overflow-x:auto; }
+  table.data-table{ width:100%; border-collapse:collapse; min-width:640px; }
+  table.data-table th{
+    text-align:left; font-size:0.64rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);
+    padding:0 10px 10px; border-bottom:1px solid var(--border); font-weight:700;
+  }
+  table.data-table td{ padding:12px 10px; border-bottom:1px solid var(--border); font-size:0.85rem; }
+  table.data-table tr:last-child td{ border-bottom:none; }
+  select.role-select{
+    padding:6px 9px; border-radius:7px; border:1px solid var(--border); font-size:0.78rem; font-family:'Inter',sans-serif;
+    background:#fff; color:var(--ink);
+  }
+
+  .add-form{ display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+  .add-form .field{ margin-bottom:0; min-width:150px; flex:1; }
+  .cred-callout{
+    margin-top:16px; background:var(--success-soft); border:1px solid #B9E4C7; border-radius:10px; padding:14px 16px;
+    font-size:0.85rem; display:none;
+  }
+  .cred-callout.show{ display:block; }
+  .cred-callout .cc-title{ font-weight:700; color:var(--success); margin-bottom:4px; }
+
+  /* policy cards */
+  .policy-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .policy-type{ font-weight:700; }
+  .policy-field{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
+  .policy-field:last-of-type{ border-bottom:none; }
+  .policy-field label{ font-size:0.78rem; color:var(--ink-soft); }
+  .policy-field input[type="number"]{ width:64px; padding:6px 8px; border-radius:7px; border:1px solid var(--border); text-align:center; font-family:'JetBrains Mono',monospace; }
+  .policy-field input[type="checkbox"]{ width:16px; height:16px; accent-color:var(--primary); }
+  .type-remove{ font-size:0.65rem; font-weight:700; color:var(--danger); background:none; border:1px solid var(--danger-soft); border-radius:999px; padding:4px 10px; cursor:pointer; }
+
+  /* notifications */
+  .notif-item{ display:flex; gap:14px; align-items:flex-start; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:9px; }
+  .notif-item.unread{ border-color:#C7D8FB; background:#F7F9FE; }
+  .notif-icon{ width:34px; height:34px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .notif-icon svg{ width:16px; height:16px; }
+  .notif-icon.submitted{ background:var(--slate-soft); color:var(--ink-soft); }
+  .notif-icon.approved{ background:var(--success-soft); color:var(--success); }
+  .notif-icon.rejected{ background:var(--danger-soft); color:var(--danger); }
+  .notif-icon.reminder{ background:var(--warning-soft); color:var(--warning); }
+  .notif-icon.info{ background:var(--primary-soft); color:var(--primary); }
+  .notif-icon.alert{ background:var(--danger-soft); color:var(--danger); }
+  .notif-msg{ font-size:0.86rem; }
+  .notif-time{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--ink-faint); margin-top:4px; }
+  .notif-dot{ width:8px; height:8px; border-radius:50%; background:var(--primary); flex-shrink:0; margin-top:6px; }
+
+  /* holidays */
+  .holiday-month-label{ font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--primary); margin:24px 0 10px; }
+  .holiday-month-label:first-child{ margin-top:0; }
+  .holiday-stub{ display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 18px; margin-bottom:8px; }
+  .holiday-date{ width:48px; height:48px; border-radius:9px; background:var(--slate-soft); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; }
+  .holiday-date .hd-day{ font-weight:800; font-size:1.05rem; line-height:1; }
+  .holiday-date .hd-dow{ font-family:'JetBrains Mono',monospace; font-size:0.53rem; margin-top:2px; color:var(--ink-soft); }
+  .holiday-name{ font-weight:600; font-size:0.88rem; }
+  .holiday-tag{ font-size:0.64rem; font-weight:700; padding:4px 10px; border-radius:999px; text-transform:uppercase; margin-left:auto; white-space:nowrap; }
+  .holiday-tag.Public{ background:var(--success-soft); color:var(--success); }
+  .holiday-tag.Company{ background:var(--primary-soft); color:var(--primary); }
+  .holiday-tag.Optional{ background:var(--slate-soft); color:var(--ink-soft); }
+
+  /* reports */
+  .report-select{ padding:9px 12px; border-radius:9px; border:1px solid var(--border); background:#fff; font-size:0.85rem; margin-bottom:20px; }
+  .hbar-row{ display:grid; grid-template-columns:110px 1fr 46px; align-items:center; gap:12px; margin-bottom:14px; }
+  .hbar-row .hbar-label{ font-size:0.82rem; font-weight:600; }
+  .hbar-row .hbar-val{ font-family:'JetBrains Mono',monospace; font-size:0.78rem; text-align:right; color:var(--ink-soft); }
+  .bar-track{ height:10px; border-radius:999px; background:var(--slate-soft); overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:999px; }
+  .month-chart{ display:flex; align-items:flex-end; gap:8px; height:170px; padding-top:10px; }
+  .month-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px; }
+  .month-bar-track{ width:100%; flex:1; display:flex; align-items:flex-end; }
+  .month-fill{ width:100%; border-radius:5px 5px 0 0; background:var(--primary); min-height:3px; }
+  .month-label{ font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--ink-faint); }
+
+  /* settings */
+  .settings-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--border); }
+  .settings-row:last-child{ border-bottom:none; }
+  .settings-row label{ font-size:0.85rem; font-weight:600; }
+  .settings-note{ font-size:0.74rem; color:var(--ink-soft); margin-top:2px; }
+  .switch{ position:relative; width:42px; height:24px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch-track{ position:absolute; inset:0; background:#D7DCE6; border-radius:999px; cursor:pointer; transition:background .2s ease; }
+  .switch-track::before{ content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s ease; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .switch input:checked + .switch-track{ background:var(--success); }
+  .switch input:checked + .switch-track::before{ transform:translateX(18px); }
+  .viewport-readout{ font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--primary-dark); background:var(--primary-soft); border-radius:8px; padding:8px 12px; display:inline-block; }
+  .sitemap-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media (max-width:860px){ .sitemap-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .sitemap-grid{ grid-template-columns:1fr; } }
+  .sitemap-card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; cursor:pointer; transition:all .15s ease; }
+  .sitemap-card:hover{ border-color:var(--primary); transform:translateY(-2px); }
+  .sitemap-card.locked{ opacity:0.5; cursor:not-allowed; }
+  .sitemap-card.locked:hover{ transform:none; border-color:var(--border); }
+  .sm-num{ font-family:'JetBrains Mono',monospace; font-size:0.64rem; color:var(--primary); font-weight:700; }
+  .sm-title{ font-weight:700; font-size:0.9rem; margin-top:4px; }
+  .sm-role{ font-size:0.66rem; color:var(--ink-faint); margin-top:2px; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(15,21,38,0.55); z-index:150;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.hidden{ display:none; }
+  .modal-card{
+    background:#fff; border-radius:14px; padding:24px; width:100%; max-width:420px;
+    box-shadow:0 30px 70px rgba(0,0,0,0.35); max-height:80vh; overflow-y:auto;
+  }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between; font-weight:700; font-size:1.05rem;
+    margin-bottom:18px;
+  }
+  .modal-close{ background:none; border:none; font-size:1rem; cursor:pointer; color:var(--ink-soft); width:28px; height:28px; border-radius:7px; }
+  .modal-close:hover{ background:var(--slate-soft); }
+  .day-away-row{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .day-away-row:last-child{ border-bottom:none; }
+  .day-away-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .day-away-name{ font-weight:600; font-size:0.88rem; }
+  .day-away-meta{ font-size:0.74rem; color:var(--ink-soft); }
+  .cal-cell.has-away{ cursor:pointer; }
+  .cal-cell.has-away:hover{ border-color:var(--primary); }
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:#fff; padding:12px 20px; border-radius:9px; font-weight:600; font-size:0.84rem;
+    box-shadow:0 12px 30px rgba(0,0,0,0.3); opacity:0; pointer-events:none; transition:all .3s ease; z-index:200;
+    display:flex; align-items:center; gap:10px;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast .dot{ width:8px; height:8px; border-radius:50%; background:#4ADE80; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-side">
+      <div>
+        <div class="brand"><span class="mark">LD</span> LeaveDesk</div>
+        <h2>One portal for the whole company's time off.</h2>
+        <p>Employees apply. Managers approve. HR signs off and runs the policy. Sign in below to see your view of the system.</p>
+      </div>
+      <div>
+        <div style="font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:#7C87A3; font-weight:700; margin-bottom:10px;">Demo accounts — tap to fill</div>
+        <div class="role-card-list" id="demoAccountList"></div>
+      </div>
+    </div>
+    <div class="login-form-side">
+      <h1>Sign in</h1>
+      <p class="lf-sub">Use your username and password. Access to each part of the portal depends on your role.</p>
+      <div class="login-error" id="loginError">Incorrect username or password.</div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="e.g. BALA" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="e.g. BAL1201" autocomplete="current-password" />
+      </div>
+      <button class="btn btn-primary btn-block" onclick="handleLogin()">Sign in</button>
+      <div style="text-align:center; margin-top:14px;">
+        <a style="font-size:0.8rem; color:var(--primary); cursor:pointer; font-weight:600;" onclick="toggleForgot(true)">Forgot password?</a>
+      </div>
+
+      <div id="forgotPanel" class="hidden" style="margin-top:18px; padding-top:18px; border-top:1px solid var(--border);">
+        <div class="field">
+          <label>Your username</label>
+          <input type="text" id="forgotUsername" placeholder="e.g. BALA" />
+        </div>
+        <div id="forgotResultBox" class="cred-callout" style="margin-top:0; margin-bottom:14px;"></div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" style="flex:1;" onclick="toggleForgot(false)">Cancel</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="handleForgotPassword()">Reset password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="appShell" class="hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><span class="mark">LD</span> LeaveDesk</div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div class="sidebar-foot">
+      <div class="sidebar-lock-note">Menu items adapt to your role — Employee, Manager, or HR.</div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title">
+        <span class="tt-eyebrow" id="topbarEyebrow">Overview</span>
+        <span id="topbarTitle">Dashboard</span>
+      </div>
+      <button class="bell-btn" onclick="showView('notifications')" aria-label="Notifications">
+        🔔<span class="bell-badge hidden" id="bellBadge">0</span>
+      </button>
+      <div class="user-chip">
+        <div class="user-avatar" id="topUserAvatar"></div>
+        <div class="user-meta">
+          <span class="um-name" id="topUserName">—</span>
+          <span class="um-role" id="topUserRole">—</span>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Sign out</button>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- PART 2 — DASHBOARD -->
+      <section class="view" id="view-dashboard">
+        <p class="page-sub" id="dashGreeting">Welcome back.</p>
+        <div class="grid grid-3" id="gaugeGrid"></div>
+        <div class="section-label">Upcoming leave</div>
+        <div id="upcomingLeave"></div>
+        <div class="section-label">Recent requests</div>
+        <div id="recentRequests"></div>
+      </section>
+
+      <!-- PART 3 — APPLY LEAVE -->
+      <section class="view" id="view-apply">
+        <p class="page-sub">Choose a leave type, pick your dates, and add anything your approver needs to see.</p>
+        <div class="grid grid-2">
+          <div class="panel">
+            <div class="section-label" style="margin-top:0;">Leave type</div>
+            <div class="leave-type-grid" id="leaveTypeGrid"></div>
+            <div class="date-row">
+              <div class="field"><label>From</label><input type="date" id="applyFrom" /></div>
+              <div class="field"><label>To</label><input type="date" id="applyTo" /></div>
+            </div>
+            <div class="settings-note" id="overlapWarning" style="display:none; color:var(--danger); margin:-8px 0 14px;"></div>
+            <div class="field" id="approverField">
+              <label id="approverLabel">Your Manager</label>
+              <select id="approverSelect"></select>
+              <div class="settings-note" id="approverNote" style="margin-top:4px;"></div>
+            </div>
+            <div class="field">
+              <label>Reason</label>
+              <textarea id="applyReason" rows="3" placeholder="Tell your approver what this is for..."></textarea>
+            </div>
+            <div class="field">
+              <label>Attachment (optional)</label>
+              <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
+                📎 Click to attach a document
+                <div class="u-file" id="fileName"></div>
+              </div>
+              <input type="file" id="fileInput" style="display:none;" onchange="handleFile(event)" />
+            </div>
+            <button class="btn btn-primary btn-block" onclick="submitLeave()">Submit request</button>
+          </div>
+          <div class="panel">
+            <div class="section-label" style="margin-top:0;">Summary</div>
+            <div style="font-weight:700; font-size:1.1rem;" id="prevType">Casual Leave</div>
+            <div style="display:flex; gap:24px; margin-top:14px;">
+              <div><div class="col-label">From</div><div class="mono" id="prevFrom">—</div></div>
+              <div><div class="col-label">To</div><div class="mono" id="prevTo">—</div></div>
+            </div>
+            <div style="margin-top:16px;"><div class="col-label">Days requested</div><div class="mono" style="font-size:1.3rem; font-weight:700;" id="prevDays">0</div></div>
+            <div style="margin-top:16px;"><div class="col-label">Balance after this request</div><div class="mono" id="prevAfter">—</div></div>
+            <div style="margin-top:18px;"><span class="badge" id="prevRoute">Routes to Manager</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 4 — APPROVALS (Manager stage) -->
+      <section class="view" id="view-approvals">
+        <p class="page-sub">First-stage review. Approve to send a request on to HR for final sign-off, or reject it here.</p>
+        <div class="flow-note">➜ Manager approval moves a request to HR for the final decision. Manager rejection ends it.</div>
+        <div id="approvalList"></div>
+      </section>
+
+      <!-- PART 5 — LEAVE BALANCE -->
+      <section class="view" id="view-balance">
+        <p class="page-sub">Your entitlement for the current cycle, Jan – Dec 2026.</p>
+        <div class="grid grid-3" id="balanceGrid"></div>
+      </section>
+
+      <!-- PART 6 — LEAVE HISTORY -->
+      <section class="view" id="view-history">
+        <p class="page-sub">Every request you've made — applied, approved, rejected, or cancelled.</p>
+        <div class="filter-row" id="historyFilterRow">
+          <div class="filter-chip active" data-hfilter="All">All</div>
+          <div class="filter-chip" data-hfilter="Pending">Awaiting manager</div>
+          <div class="filter-chip" data-hfilter="Pending HR">Awaiting HR</div>
+          <div class="filter-chip" data-hfilter="Pending CEO">Awaiting CEO</div>
+          <div class="filter-chip" data-hfilter="Approved">Approved</div>
+          <div class="filter-chip" data-hfilter="Rejected">Rejected</div>
+          <div class="filter-chip" data-hfilter="Cancelled">Cancelled</div>
+        </div>
+        <div id="historyList"></div>
+      </section>
+
+      <!-- PART 7 — TEAM CALENDAR -->
+      <section class="view" id="view-calendar">
+        <p class="page-sub">Who's away this month, across the company.</p>
+        <div class="panel">
+          <div class="cal-head">
+            <div class="cal-month" id="calMonthLabel">August 2026</div>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="shiftMonth(-1)">←</button>
+              <button class="cal-nav-btn" onclick="shiftMonth(1)">→</button>
+            </div>
+          </div>
+          <div class="cal-layout">
+            <div>
+              <div class="cal-grid" id="calDow"></div>
+              <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+            </div>
+            <div>
+              <div class="section-label" style="margin-top:0;">Team</div>
+              <div id="calLegend"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 8 — MANAGER DASHBOARD -->
+      <section class="view" id="view-manager">
+        <p class="page-sub">Your team's leave posture, and what's waiting on your decision.</p>
+        <div class="grid grid-3" id="managerStats"></div>
+        <div class="section-label">Team members</div>
+        <div class="panel" id="teamList"></div>
+        <div class="section-label">Awaiting your approval</div>
+        <div id="managerPending"></div>
+      </section>
+
+      <!-- PART 9 — HR DASHBOARD -->
+      <section class="view" id="view-hr">
+        <p class="page-sub">Final sign-off on leave, the employee roster, and who can access what.</p>
+        <div class="grid grid-3" id="hrStats"></div>
+
+        <div class="section-label">Final approval — awaiting HR</div>
+        <div id="hrApprovalList"></div>
+
+        <div class="section-label">Employees</div>
+        <div class="panel">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>ID</th><th>Department</th><th>Role</th><th>Username</th><th>Password</th><th></th></tr></thead>
+              <tbody id="employeeTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-label">Add employee</div>
+        <div class="panel">
+          <div class="add-form">
+            <div class="field" style="min-width:140px;"><label>First name</label><input type="text" id="newEmpFirstName" placeholder="e.g. Bala" /></div>
+            <div class="field" style="min-width:140px;"><label>Last name</label><input type="text" id="newEmpLastName" placeholder="e.g. Krishnan" /></div>
+            <div class="field" style="min-width:160px; flex:none;">
+              <label>Department</label>
+              <select id="newEmpDept"></select>
+            </div>
+            <div class="field" style="min-width:130px; flex:none;">
+              <label>Role</label>
+              <select id="newEmpRole">
+                <option>Employee</option>
+                <option>Manager</option>
+                <option>HR</option>
+                <option>CEO</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="addEmployee()">Add employee</button>
+          </div>
+          <div class="cred-callout" id="credCallout">
+            <div class="cc-title">Employee added</div>
+            <div id="credCalloutBody"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Adjust leave balance</div>
+        <div class="panel">
+          <p style="font-size:0.82rem; color:var(--ink-soft); margin:0 0 16px;">Grant an employee extra days on top of the standard policy — for example, correcting a shortfall or a one-off exception. A reason is required and kept on file.</p>
+          <div class="add-form">
+            <div class="field" style="min-width:170px;">
+              <label>Employee</label>
+              <select id="adjEmployee"></select>
+            </div>
+            <div class="field" style="min-width:130px; flex:none;">
+              <label>Leave type</label>
+              <select id="adjType"></select>
+            </div>
+            <div class="field" style="min-width:100px; flex:none;">
+              <label>Days to add</label>
+              <input type="number" id="adjDays" min="1" value="1" />
+            </div>
+            <div class="field" style="min-width:200px;">
+              <label>Reason</label>
+              <input type="text" id="adjReason" placeholder="e.g. Carried over from last cycle" />
+            </div>
+            <button class="btn btn-primary" onclick="adjustBalance()">Grant days</button>
+          </div>
+          <div class="section-label" style="margin:24px 0 10px;">Recent adjustments</div>
+          <div id="adjustmentLog"></div>
+        </div>
+
+        <div class="section-label" style="margin-top:34px;">Danger zone</div>
+        <div class="panel" style="border-color:var(--danger-soft);">
+          <div class="settings-row">
+            <div>
+              <label style="color:var(--danger);">Clear all data — keep only me as HR</label>
+              <div class="settings-note">Removes every other employee, all leave requests, notifications, attendance, and balance adjustments. Leave policies and the holiday calendar are kept. This cannot be undone.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="clearAllKeepHR()">Clear all data</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 16 — CEO APPROVALS -->
+      <section class="view" id="view-ceo">
+        <p class="page-sub">Final sign-off for HR's own leave requests. As CEO, every other part of this portal is also open to you from the sidebar.</p>
+        <div class="grid grid-3" id="ceoStats"></div>
+        <div class="section-label">Awaiting your approval</div>
+        <div id="ceoApprovalList"></div>
+      </section>
+
+      <!-- PART 10 — HOLIDAY CALENDAR -->
+      <section class="view" id="view-holidays">
+        <p class="page-sub">Public and company holidays — HR can add or remove holidays for any year.</p>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+          <label style="font-size:0.82rem; font-weight:600; color:var(--ink-soft);">Year</label>
+          <select class="report-select" id="holidayYearSelect" style="margin-bottom:0;" onchange="state.holidayYear=parseInt(this.value); renderHolidays();"></select>
+        </div>
+        <div id="holidayList"></div>
+
+        <div class="section-label hr-only-holiday" id="hrHolidayLabel">Add a holiday (HR only)</div>
+        <div class="panel hr-only-holiday" id="hrHolidayPanel">
+          <div class="add-form">
+            <div class="field" style="min-width:150px; flex:none;"><label>Date</label><input type="date" id="newHolidayDate" /></div>
+            <div class="field"><label>Name</label><input type="text" id="newHolidayName" placeholder="e.g. Regional Festival Day" /></div>
+            <div class="field" style="min-width:130px; flex:none;">
+              <label>Type</label>
+              <select id="newHolidayType"><option>Public</option><option>Company</option><option>Optional</option></select>
+            </div>
+            <button class="btn btn-primary" onclick="addHoliday()">Add holiday</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 11 — NOTIFICATIONS -->
+      <section class="view" id="view-notifications">
+        <p class="page-sub">Submissions, decisions, and reminders that concern you.</p>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+          <button class="btn btn-outline btn-sm" onclick="markAllRead()">Mark all as read</button>
+        </div>
+        <div id="notifList"></div>
+      </section>
+
+      <!-- PART 12 — REPORTS -->
+      <section class="view" id="view-reports">
+        <p class="page-sub">Employee, team, monthly, and yearly views of leave taken.</p>
+        <div class="filter-row" id="reportFilterRow">
+          <div class="filter-chip active" data-rtype="Employee">Employee</div>
+          <div class="filter-chip" data-rtype="Team">Team</div>
+          <div class="filter-chip" data-rtype="Monthly">Monthly</div>
+          <div class="filter-chip" data-rtype="Yearly">Yearly</div>
+        </div>
+        <div class="panel" id="reportPanel"></div>
+      </section>
+
+      <!-- PART 13 — ATTENDANCE -->
+      <section class="view" id="view-attendance">
+        <p class="page-sub">Present, absent, WFH, or half-day. Click a past weekday to change how it's logged.</p>
+        <div class="grid grid-3" id="attendanceStats"></div>
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="section-label" style="margin-top:0;">Mark today — <span id="markTodayStatus" class="mono" style="color:var(--ink-faint); text-transform:none; letter-spacing:0;">not marked yet</span></div>
+          <div class="filter-row" style="margin-bottom:0;" id="markTodayRow">
+            <div class="filter-chip" data-mt="Present" onclick="markToday('Present')">Present</div>
+            <div class="filter-chip" data-mt="WFH" onclick="markToday('WFH')">WFH</div>
+            <div class="filter-chip" data-mt="Half-day" onclick="markToday('Half-day')">Half-day</div>
+            <div class="filter-chip" data-mt="Absent" onclick="markToday('Absent')">Absent</div>
+          </div>
+        </div>
+        <div class="section-label">August 2026</div>
+        <div class="panel">
+          <div class="cal-grid" id="attDow"></div>
+          <div class="cal-grid" id="attGrid" style="margin-top:6px;"></div>
+          <div class="att-legend">
+            <div class="att-legend-item"><span class="att-legend-dot" style="background:var(--success);"></span>Present</div>
+            <div class="att-legend-item"><span class="att-legend-dot" style="background:var(--primary);"></span>WFH</div>
+            <div class="att-legend-item"><span class="att-legend-dot" style="background:#7C4FE0;"></span>Half-day</div>
+            <div class="att-legend-item"><span class="att-legend-dot" style="background:var(--danger);"></span>Absent</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 14 — LEAVE POLICIES -->
+      <section class="view" id="view-policies">
+        <p class="page-sub">Define every leave type — its annual limit, carry-forward rule, and approval requirement.</p>
+        <div class="grid grid-3" id="policiesGrid"></div>
+        <div class="section-label">Add a leave type</div>
+        <div class="panel">
+          <div class="add-form">
+            <div class="field"><label>Name</label><input type="text" id="newTypeName" placeholder="e.g. Maternity" /></div>
+            <div class="field" style="min-width:110px; flex:none;"><label>Annual days</label><input type="number" id="newTypeDays" min="0" value="10" /></div>
+            <button class="btn btn-primary" onclick="addLeaveType()">Add type</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 15 — FINAL INTEGRATION -->
+      <section class="view" id="view-integration">
+        <p class="page-sub">Local data, responsive layout, and a map of everything in this portal.</p>
+        <div class="grid grid-2">
+          <div class="panel">
+            <div class="settings-row">
+              <div><label>Save data locally</label><div class="settings-note">Keeps requests and settings on this device</div></div>
+              <label class="switch"><input type="checkbox" id="persistToggle" checked onchange="togglePersist(this.checked)" /><span class="switch-track"></span></label>
+            </div>
+            <div class="settings-row">
+              <div><label>Storage status</label><div class="settings-note" id="storageStatusNote">Checking…</div></div>
+            </div>
+            <div class="settings-row">
+              <div><label>Last saved</label><div class="settings-note" id="lastSavedNote">Not saved yet</div></div>
+            </div>
+            <div class="settings-row">
+              <div><label>Reset demo data</label><div class="settings-note">Clears local data and restores sample state</div></div>
+              <button class="btn btn-danger btn-sm" onclick="resetDemoData()">Reset</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-label" style="margin-top:0;">Responsive check</div>
+            <div class="viewport-readout" id="viewportReadout">— × —</div>
+            <p style="font-size:0.8rem; color:var(--ink-soft); margin-top:14px; line-height:1.6;">
+              The sidebar collapses into a menu under 960px, and every grid on this page reflows down to a single column on narrow screens.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-label">Change password</div>
+        <div class="panel">
+          <div class="add-form">
+            <div class="field"><label>Current password</label><input type="password" id="curPass" /></div>
+            <div class="field"><label>New password</label><input type="password" id="newPass" /></div>
+            <div class="field"><label>Confirm new password</label><input type="password" id="confirmPass" /></div>
+            <button class="btn btn-primary" onclick="changePassword()">Update password</button>
+          </div>
+        </div>
+
+        <div class="section-label">All 15 parts</div>
+        <div class="sitemap-grid" id="sitemapGrid"></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="editEmpModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span id="editEmpModalTitle">Edit employee</span>
+      <button class="modal-close" onclick="closeEditEmployee()">✕</button>
+    </div>
+    <input type="hidden" id="editEmpId" />
+    <div style="display:flex; gap:12px;">
+      <div class="field" style="flex:1;">
+        <label>First name</label>
+        <input type="text" id="editEmpFirstName" />
+      </div>
+      <div class="field" style="flex:1;">
+        <label>Last name</label>
+        <input type="text" id="editEmpLastName" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Department</label>
+      <select id="editEmpDept"></select>
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <select id="editEmpRole"></select>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:6px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeEditEmployee()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveEditEmployee()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="dayDetailModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span id="dayDetailTitle">Who's away</span>
+      <button class="modal-close" onclick="closeDayDetail()">✕</button>
+    </div>
+    <div id="dayDetailList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg">Done</span></div>
+
+<script>
+  // ==================== ICONS ====================
+  function ic(inner){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`; }
+  const ICONS = {
+    dashboard: ic('<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>'),
+    apply: ic('<rect x="4" y="3" width="16" height="18" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/>'),
+    pie: ic('<circle cx="12" cy="12" r="8"/><line x1="12" y1="4" x2="12" y2="12"/><line x1="12" y1="12" x2="18" y2="12"/>'),
+    clock: ic('<circle cx="12" cy="12" r="8.5"/><line x1="12" y1="12" x2="12" y2="7.5"/><line x1="12" y1="12" x2="15.5" y2="14"/>'),
+    calendar: ic('<rect x="3.5" y="5" width="17" height="15" rx="2"/><line x1="3.5" y1="10" x2="20.5" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/>'),
+    check: ic('<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M8 12l2.5 2.5L16 9"/>'),
+    users: ic('<circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 20c0-3.3 2.2-5.5 5-5.5s5 2.2 5 5.5"/><path d="M14 20c0-2.4 1.3-4.4 3-5.2"/>'),
+    shield: ic('<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/>'),
+    sliders: ic('<line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="11" cy="17" r="2"/>'),
+    flag: ic('<line x1="5" y1="3" x2="5" y2="21"/><path d="M5 4h11l-2.5 3.5L16 11H5"/>'),
+    bell: ic('<path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z"/><path d="M9.5 18a2.5 2.5 0 0 0 5 0"/>'),
+    bar: ic('<line x1="5" y1="21" x2="5" y2="12"/><line x1="12" y1="21" x2="12" y2="7"/><line x1="19" y1="21" x2="19" y2="15"/>'),
+    usercheck: ic('<circle cx="9" cy="8" r="3.3"/><path d="M3.5 20c0-3.3 2.4-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><path d="M16 11l1.7 1.7L21 9"/>'),
+    settings: ic('<circle cx="12" cy="12" r="3"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2 5.6 5.6"/>')
+  };
+  function iconHtml(name){ return ICONS[name] || ''; }
+
+  // ==================== STATE ====================
+  const TODAY = '2026-08-19';
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  const DEPARTMENTS = ['Developer','QA','Scrum Master','Product Owner','Designer','DevOps','Business Analyst','Human Resources','Sales','Marketing','Finance','Operations','Executive'];
+
+  const state = {
+    currentUserId: null,
+    leaveTypeList: ['Casual','Sick','Earned','Unpaid'],
+    nextEmpNum: 1201,
+    employees: [
+      { id:'EMP-1042', name:'Asha Rao',    dept:'Product Owner',   role:'Employee', color:'#2354E6', username:'ASHA',  password:'ASH1042', leaveUsed:{Casual:4, Sick:2, Earned:6, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} },
+      { id:'EMP-1088', name:'Rohan Mehta', dept:'Developer',       role:'Employee', color:'#15803D', username:'ROHAN', password:'ROH1088', leaveUsed:{Casual:2, Sick:0, Earned:3, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} },
+      { id:'EMP-1103', name:'Priya Nair',  dept:'Designer',        role:'Employee', color:'#C0392B', username:'PRIYA', password:'PRI1103', leaveUsed:{Casual:5, Sick:3, Earned:2, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} },
+      { id:'EMP-1120', name:'Divya Iyer',  dept:'QA',              role:'Employee', color:'#8791AC', username:'DIVYA', password:'DIV1120', leaveUsed:{Casual:1, Sick:1, Earned:4, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} },
+      { id:'EMP-1065', name:'Karan Shah',  dept:'Scrum Master',    role:'Manager',  color:'#B45F06', username:'KARAN', password:'KAR1065', leaveUsed:{Casual:3, Sick:0, Earned:5, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} },
+      { id:'EMP-1010', name:'Meera Kapoor',dept:'Human Resources', role:'HR',       color:'#7C4FE0', username:'MEERA', password:'MEE1010', leaveUsed:{Casual:1, Sick:0, Earned:2, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} },
+      { id:'EMP-1001', name:'Vikram Anand',dept:'Executive',       role:'CEO',      color:'#111827', username:'VIKRAM',password:'VIK1001', leaveUsed:{Casual:0, Sick:0, Earned:0, Unpaid:0}, bonusDays:{Casual:0, Sick:0, Earned:0, Unpaid:0} }
+    ],
+    policy: {
+      Casual: { total:12, carryForward:false, maxCarry:0,  proofAfter:0, requiresApproval:true },
+      Sick:   { total:10, carryForward:false, maxCarry:0,  proofAfter:2, requiresApproval:true },
+      Earned: { total:15, carryForward:true,  maxCarry:30, proofAfter:0, requiresApproval:true },
+      Unpaid: { total:0,  carryForward:false, maxCarry:0,  proofAfter:0, requiresApproval:true }
+    },
+    requests: [
+      { id:1, employeeId:'EMP-1042', type:'Casual', from:'2026-08-22', to:'2026-08-24', days:3, reason:'Family function', status:'Pending', managerId:'EMP-1065', hrId:null, ceoId:null, managerComment:'', hrComment:'', ceoComment:'' },
+      { id:2, employeeId:'EMP-1042', type:'Sick',   from:'2026-07-10', to:'2026-07-11', days:2, reason:'Fever', status:'Approved', managerId:'EMP-1065', hrId:'EMP-1010', ceoId:null, managerComment:'Get well soon.', hrComment:'Approved, feel better.', ceoComment:'' },
+      { id:3, employeeId:'EMP-1088', type:'Earned', from:'2026-09-02', to:'2026-09-06', days:5, reason:'Annual trip to Kerala', status:'Pending HR', managerId:'EMP-1065', hrId:'EMP-1010', ceoId:null, managerComment:'Enjoy the trip, please hand over your sprint tasks first.', hrComment:'', ceoComment:'' },
+      { id:4, employeeId:'EMP-1103', type:'Casual', from:'2026-08-18', to:'2026-08-18', days:1, reason:'Personal errand', status:'Rejected', managerId:'EMP-1065', hrId:null, ceoId:null, managerComment:'We have a client demo that day — please pick another date.', hrComment:'', ceoComment:'' },
+      { id:5, employeeId:'EMP-1120', type:'Sick',   from:'2026-08-05', to:'2026-08-05', days:1, reason:'Dental appointment', status:'Approved', managerId:'EMP-1065', hrId:'EMP-1010', ceoId:null, managerComment:'Approved.', hrComment:'Approved.', ceoComment:'' },
+      { id:6, employeeId:'EMP-1065', type:'Casual', from:'2026-08-20', to:'2026-08-21', days:2, reason:'Personal', status:'Pending HR', managerId:null, hrId:'EMP-1010', ceoId:null, managerComment:'', hrComment:'', ceoComment:'' }
+    ],
+    nextReqId: 7,
+    notifications: [
+      { id:1, forEmployeeId:'EMP-1042', forRole:null, type:'reminder', message:'Your Diwali leave falls in November — plan your handover early.', time:'2026-08-14 09:00', read:false },
+      { id:2, forEmployeeId:'EMP-1042', forRole:null, type:'approved', message:'Your Sick leave (10–11 Jul) was approved.', time:'2026-07-09 16:20', read:true },
+      { id:3, forEmployeeId:null, forRole:'HR', type:'info', message:'2 requests are waiting on final HR approval.', time:'2026-08-13 08:00', read:false },
+      { id:4, forEmployeeId:null, forRole:'Manager', type:'info', message:'1 request is waiting on your review.', time:'2026-08-13 08:15', read:false }
+    ],
+    nextNotifId: 5,
+    adjustments: [],
+    nextAdjId: 1,
+    nextHolidayId: 13,
+    holidays: [
+      { id:1, date:'2026-01-01', name:"New Year's Day", type:'Public' },
+      { id:2, date:'2026-01-26', name:'Republic Day', type:'Public' },
+      { id:3, date:'2026-03-04', name:'Holi', type:'Public' },
+      { id:4, date:'2026-04-10', name:'Good Friday', type:'Optional' },
+      { id:5, date:'2026-05-01', name:'Labour Day', type:'Public' },
+      { id:6, date:'2026-06-15', name:"Founders' Day", type:'Company' },
+      { id:7, date:'2026-08-15', name:'Independence Day', type:'Public' },
+      { id:8, date:'2026-08-28', name:'Ganesh Chaturthi', type:'Optional' },
+      { id:9, date:'2026-10-02', name:'Gandhi Jayanti', type:'Public' },
+      { id:10, date:'2026-11-08', name:'Diwali', type:'Public' },
+      { id:11, date:'2026-12-25', name:'Christmas Day', type:'Public' },
+      { id:12, date:'2026-12-31', name:'Company Wind-down Day', type:'Company' }
+    ],
+    holidayYear: 2026,
+    attendance: {},
+    selectedType:'Casual',
+    approvalFilter:'All',
+    historyFilter:'All',
+    reportType:'Employee',
+    reportEmployeeId:'EMP-1042',
+    calMonth:7, calYear:2026,
+    attMonth:7, attYear:2026,
+    persistEnabled:true,
+    lastSaved:null,
+    approverCandidates: []
+  };
+
+  // ==================== NAV ====================
+  const NAV_GROUPS = [
+    { label:'Overview', items:[ {key:'dashboard', label:'Dashboard', icon:'dashboard'} ] },
+    { label:'My Leave', items:[
+        {key:'apply', label:'Apply Leave', icon:'apply'},
+        {key:'balance', label:'Leave Balance', icon:'pie'},
+        {key:'history', label:'Leave History', icon:'clock'}
+    ]},
+    { label:'Team', items:[
+        {key:'calendar', label:'Team Calendar', icon:'calendar'},
+        {key:'approvals', label:'Approvals', icon:'check', roles:['Manager']},
+        {key:'manager', label:'Manager Dashboard', icon:'users', roles:['Manager','HR']}
+    ]},
+    { label:'HR Administration', items:[
+        {key:'hr', label:'HR Dashboard', icon:'shield', roles:['HR']},
+        {key:'policies', label:'Leave Policies', icon:'sliders', roles:['HR']}
+    ]},
+    { label:'Executive', items:[
+        {key:'ceo', label:'CEO Approvals', icon:'shield', roles:['CEO']}
+    ]},
+    { label:'Company', items:[
+        {key:'holidays', label:'Holiday Calendar', icon:'flag'},
+        {key:'notifications', label:'Notifications', icon:'bell'},
+        {key:'reports', label:'Reports', icon:'bar', roles:['Manager','HR','CEO']},
+        {key:'attendance', label:'Attendance', icon:'usercheck'}
+    ]},
+    { label:'System', items:[ {key:'integration', label:'Settings', icon:'settings'} ] }
+  ];
+  const PART_NUM = { dashboard:'02', apply:'03', approvals:'04', balance:'05', history:'06', calendar:'07', manager:'08', hr:'09', holidays:'10', notifications:'11', reports:'12', attendance:'13', policies:'14', integration:'15', ceo:'16' };
+  const PART_TITLE = { dashboard:'Dashboard', apply:'Apply Leave', approvals:'Approvals', balance:'Leave Balance', history:'Leave History', calendar:'Team Calendar', manager:'Manager Dashboard', hr:'HR Dashboard', holidays:'Holiday Calendar', notifications:'Notifications', reports:'Reports', attendance:'Attendance', policies:'Leave Policies', integration:'Settings & Site Map', ceo:'CEO Approvals' };
+  const GROUP_OF = {};
+  NAV_GROUPS.forEach(g => g.items.forEach(i => GROUP_OF[i.key] = g.label));
+
+  function itemAllowed(item, role){
+    if(role === 'CEO') return true; // CEO has access to everything
+    return !item.roles || item.roles.includes(role);
+  }
+
+  function currentEmployee(){ return state.employees.find(e => e.id === state.currentUserId) || null; }
+
+  function renderSidebar(){
+    const emp = currentEmployee();
+    if(!emp) return;
+    const nav = document.getElementById('sidebarNav');
+    let html = '';
+    NAV_GROUPS.forEach(group => {
+      const visible = group.items.filter(i => itemAllowed(i, emp.role));
+      if(!visible.length) return;
+      html += `<div class="nav-group-label">${group.label}</div>`;
+      visible.forEach(i => {
+        html += `<div class="nav-item" data-key="${i.key}" onclick="showView('${i.key}')">${iconHtml(i.icon)}<span>${i.label}</span></div>`;
+      });
+    });
+    nav.innerHTML = html;
+  }
+
+  function allowedKeys(role){
+    const keys = [];
+    NAV_GROUPS.forEach(g => g.items.forEach(i => { if(itemAllowed(i, role)) keys.push(i.key); }));
+    return keys;
+  }
+
+  function showView(key){
+    const emp = currentEmployee();
+    if(emp && !allowedKeys(emp.role).includes(key)){ toast("You don't have access to that section"); return; }
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + key).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.key === key));
+    document.getElementById('topbarEyebrow').textContent = GROUP_OF[key] || '';
+    document.getElementById('topbarTitle').textContent = PART_TITLE[key] || '';
+
+    if(key === 'dashboard') renderDashboard();
+    if(key === 'apply') renderApply();
+    if(key === 'approvals') renderApprovals();
+    if(key === 'balance') renderBalance();
+    if(key === 'history') renderHistory();
+    if(key === 'calendar') renderCalendar();
+    if(key === 'manager') renderManager();
+    if(key === 'hr') renderHR();
+    if(key === 'holidays') renderHolidays();
+    if(key === 'notifications') renderNotifications();
+    if(key === 'reports') renderReports();
+    if(key === 'attendance') renderAttendance();
+    if(key === 'policies') renderPolicies();
+    if(key === 'integration') renderIntegration();
+    if(key === 'ceo') renderCEO();
+
+    if(window.innerWidth <= 960) document.getElementById('sidebar').classList.remove('open');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+
+  // ==================== AUTH ====================
+  function renderDemoAccounts(){
+    const roles = ['Employee','Manager','HR','CEO'];
+    const picks = roles.map(r => state.employees.find(e => e.role === r)).filter(Boolean);
+    document.getElementById('demoAccountList').innerHTML = picks.map(e => `
+      <div class="role-card" onclick="quickFill('${e.username}','${e.password}')">
+        <div class="rc-left">
+          <span class="rc-role">${e.role}</span>
+          <span class="rc-name">${e.name}</span>
+        </div>
+        <div class="rc-creds">${e.username}<br>${e.password}</div>
+      </div>
+    `).join('');
+  }
+
+  function quickFill(username, password){
+    document.getElementById('loginUsername').value = username;
+    document.getElementById('loginPassword').value = password;
+    document.getElementById('loginError').classList.remove('show');
+  }
+
+  function handleLogin(){
+    const u = document.getElementById('loginUsername').value.trim().toUpperCase();
+    const p = document.getElementById('loginPassword').value;
+    const match = state.employees.find(e => e.username === u && e.password === p);
+    const errEl = document.getElementById('loginError');
+    if(!match){ errEl.classList.add('show'); return; }
+    errEl.classList.remove('show');
+    state.currentUserId = match.id;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('appShell').classList.remove('hidden');
+    renderSidebar();
+    updateTopUser();
+    updateBellBadge();
+    const landing = match.role === 'CEO' ? 'ceo' : match.role === 'HR' ? 'hr' : (match.role === 'Manager' ? 'manager' : 'dashboard');
+    showView(landing);
+    toast('Signed in as ' + match.name);
+  }
+
+  function handleLogout(){
+    state.currentUserId = null;
+    document.getElementById('appShell').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+  }
+
+  function updateTopUser(){
+    const emp = currentEmployee();
+    if(!emp) return;
+    document.getElementById('topUserAvatar').textContent = emp.name.split(' ').map(n=>n[0]).join('');
+    document.getElementById('topUserAvatar').style.background = emp.color;
+    document.getElementById('topUserName').textContent = emp.name;
+    document.getElementById('topUserRole').textContent = emp.role;
+  }
+
+  // ==================== TOAST ====================
+  function toast(msg){
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  // ==================== HELPERS ====================
+  function fmt(d){
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  }
+  function badgeClass(status){ return status.replace(/ /g, ''); }
+  function badgeLabel(status){
+    return { Pending:'Awaiting Manager', 'Pending HR':'Awaiting HR', 'Pending CEO':'Awaiting CEO', Approved:'Approved', Rejected:'Rejected', Cancelled:'Cancelled' }[status] || status;
+  }
+  function colorFor(str){
+    let hash = 0;
+    for(let i=0;i<str.length;i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return `hsl(${hash % 360}, 55%, 48%)`;
+  }
+  function typeColor(type){
+    const map = { Casual:'#2354E6', Sick:'#C0392B', Earned:'#15803D', Unpaid:'#8791AC' };
+    return map[type] || colorFor(type);
+  }
+  function empById(id){ return state.employees.find(e => e.id === id); }
+  function remainingDays(emp, type){
+    const total = state.policy[type] ? state.policy[type].total : 0;
+    const bonus = (emp.bonusDays && emp.bonusDays[type]) || 0;
+    const used = (emp.leaveUsed && emp.leaveUsed[type]) || 0;
+    return total + bonus - used;
+  }
+
+  // ==================== PART 2: DASHBOARD ====================
+  function renderDashboard(){
+    const emp = currentEmployee();
+    document.getElementById('dashGreeting').textContent = `Welcome back, ${emp.name.split(' ')[0]} — here's where your leave stands.`;
+
+    const gaugeGrid = document.getElementById('gaugeGrid');
+    const topTypes = state.leaveTypeList.filter(t => t !== 'Unpaid').slice(0,3);
+    gaugeGrid.innerHTML = topTypes.map(type => {
+      const total = state.policy[type].total + ((emp.bonusDays && emp.bonusDays[type]) || 0);
+      const used = emp.leaveUsed[type] || 0;
+      const remaining = Math.max(0, total - used);
+      const pct = total ? remaining / total : 0;
+      const r = 48, c = 2 * Math.PI * r;
+      const offset = c * (1 - pct);
+      return `
+        <div class="panel gauge-card">
+          <div class="gauge">
+            <svg class="ring" width="112" height="112" viewBox="0 0 112 112">
+              <circle cx="56" cy="56" r="${r}" fill="none" stroke="var(--slate-soft)" stroke-width="9"/>
+              <circle cx="56" cy="56" r="${r}" fill="none" stroke="${typeColor(type)}" stroke-width="9"
+                stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"/>
+            </svg>
+            <div class="gauge-num"><span class="n">${remaining}</span><span class="d">of ${total} left</span></div>
+          </div>
+          <div class="gauge-title">${type} Leave</div>
+          <div class="gauge-sub">${used} days used this cycle</div>
+        </div>`;
+    }).join('');
+
+    const upcoming = state.requests
+      .filter(r => r.employeeId === emp.id && r.status !== 'Rejected' && r.status !== 'Cancelled' && r.from >= TODAY)
+      .sort((a,b) => new Date(a.from) - new Date(b.from))[0];
+
+    const upEl = document.getElementById('upcomingLeave');
+    if(upcoming){
+      upEl.innerHTML = `
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:700; font-size:1.05rem;">${upcoming.type} Leave</div>
+              <div style="display:flex; gap:24px; margin-top:12px;">
+                <div><div class="col-label">From</div><div class="mono">${fmt(upcoming.from)}</div></div>
+                <div><div class="col-label">To</div><div class="mono">${fmt(upcoming.to)}</div></div>
+                <div><div class="col-label">Duration</div><div class="mono">${upcoming.days}d</div></div>
+              </div>
+              <div style="margin-top:12px; font-size:0.85rem; color:var(--ink-soft);">${upcoming.reason}</div>
+            </div>
+            <span class="badge ${badgeClass(upcoming.status)}">${badgeLabel(upcoming.status)}</span>
+          </div>
+        </div>`;
+    } else {
+      upEl.innerHTML = `<div class="panel empty-note">No upcoming leave booked. <a style="color:var(--primary); font-weight:700; cursor:pointer;" onclick="showView('apply')">Apply now →</a></div>`;
+    }
+
+    const mine = state.requests.filter(r => r.employeeId === emp.id).slice(-4).reverse();
+    document.getElementById('recentRequests').innerHTML = mine.map(listRowHTML).join('') || `<div class="panel empty-note">No requests yet.</div>`;
+  }
+
+  function listRowHTML(r){
+    return `
+      <div class="list-row">
+        <div class="lr-left">
+          <span class="lr-type-tag">${r.type}</span>
+          <div>
+            <div class="lr-dates">${fmt(r.from)} → ${fmt(r.to)} <span style="color:var(--ink-soft); font-weight:400;">(${r.days}d)</span></div>
+            <div class="lr-reason">${r.reason}</div>
+            ${commentsHTML(r)}
+          </div>
+        </div>
+        <span class="badge ${badgeClass(r.status)}">${badgeLabel(r.status)}</span>
+      </div>
+      ${orphanFixHTML(r)}`;
+  }
+
+  function commentsHTML(r){
+    const parts = [];
+    if(r.managerComment) parts.push(`<div class="lr-reason" style="margin-top:4px;">💬 Manager: "${r.managerComment}"</div>`);
+    if(r.hrComment) parts.push(`<div class="lr-reason" style="margin-top:4px;">💬 HR: "${r.hrComment}"</div>`);
+    if(r.ceoComment) parts.push(`<div class="lr-reason" style="margin-top:4px;">💬 CEO: "${r.ceoComment}"</div>`);
+    return parts.join('');
+  }
+
+  // ==================== PART 3: APPLY LEAVE ====================
+  function renderApply(){
+    const emp = currentEmployee();
+    const grid = document.getElementById('leaveTypeGrid');
+    grid.innerHTML = state.leaveTypeList.map(type => {
+      const left = remainingDays(emp, type);
+      const depleted = type !== 'Unpaid' && left <= 0;
+      return `<div class="lt-option ${type === state.selectedType ? 'selected':''}" onclick="selectLeaveType('${type}')">
+        <div class="lt-name">${type}</div>
+        <div class="lt-left" style="${depleted ? 'color:var(--danger); font-weight:700;' : ''}">${type === 'Unpaid' ? 'No cap' : (depleted ? '0 left' : left + ' left')}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('applyFrom').oninput = updatePreview;
+    document.getElementById('applyTo').oninput = updatePreview;
+    populateApproverField(emp);
+    updatePreview();
+  }
+
+  function populateApproverField(emp){
+    const label = document.getElementById('approverLabel');
+    const select = document.getElementById('approverSelect');
+    const note = document.getElementById('approverNote');
+    let candidates = [];
+    if(emp.role === 'Employee'){ label.textContent = 'Your Manager'; candidates = state.employees.filter(e => e.role === 'Manager'); }
+    else if(emp.role === 'Manager'){ label.textContent = 'Your HR'; candidates = state.employees.filter(e => e.role === 'HR'); }
+    else if(emp.role === 'HR'){ label.textContent = 'Your CEO (final approval)'; candidates = state.employees.filter(e => e.role === 'CEO'); }
+    else { label.textContent = 'Approver'; candidates = []; }
+
+    state.approverCandidates = candidates;
+
+    if(emp.role === 'CEO'){
+      select.style.display = 'none';
+      select.innerHTML = '';
+      note.textContent = 'You have no approver above you — this will be approved automatically.';
+    } else if(candidates.length > 1){
+      select.style.display = '';
+      select.innerHTML = candidates.map(c => `<option value="${c.id}">${c.name} — ${c.dept}</option>`).join('');
+      note.textContent = 'Multiple approvers available — pick one.';
+    } else if(candidates.length === 1){
+      select.style.display = 'none';
+      select.innerHTML = `<option value="${candidates[0].id}" selected>${candidates[0].name}</option>`;
+      note.textContent = 'Auto-assigned to ' + candidates[0].name + ' (only one available).';
+    } else {
+      select.style.display = 'none';
+      select.innerHTML = '';
+      note.textContent = emp.role === 'Employee' ? 'No manager configured — this will route straight to HR.'
+        : emp.role === 'Manager' ? 'No HR account configured yet — this will be auto-approved.'
+        : 'No CEO account configured yet — this will be auto-approved.';
+    }
+  }
+
+  function selectLeaveType(type){ state.selectedType = type; renderApply(); }
+
+  function handleFile(e){
+    const f = e.target.files[0];
+    document.getElementById('fileName').textContent = f ? '✓ ' + f.name : '';
+  }
+
+  function findOverlap(emp, type, from, to, excludeId){
+    return state.requests.find(r => r.employeeId === emp.id && r.id !== excludeId &&
+      ['Pending','Pending HR','Pending CEO','Approved'].includes(r.status) &&
+      from <= r.to && r.from <= to);
+  }
+
+  function updatePreview(){
+    const emp = currentEmployee();
+    document.getElementById('prevType').textContent = state.selectedType + ' Leave';
+    const from = document.getElementById('applyFrom').value;
+    const to = document.getElementById('applyTo').value;
+    document.getElementById('prevFrom').textContent = from ? fmt(from) : '—';
+    document.getElementById('prevTo').textContent = to ? fmt(to) : '—';
+    let days = 0;
+    if(from && to){ days = Math.max(0, Math.round((new Date(to) - new Date(from)) / 86400000) + 1); }
+    document.getElementById('prevDays').textContent = days;
+    const left = remainingDays(emp, state.selectedType);
+    document.getElementById('prevAfter').textContent = state.selectedType === 'Unpaid' ? 'No cap' : Math.max(0, left - days) + ' days remaining';
+    const routeText = emp.role === 'CEO' ? 'Auto-approved (no approver above you)'
+      : emp.role === 'Employee' ? (state.approverCandidates.length ? 'Routes to Manager first' : 'Routes directly to HR')
+      : emp.role === 'Manager' ? 'Routes directly to HR'
+      : (state.approverCandidates.length ? 'Routes to CEO for final approval' : 'Auto-approved (no CEO configured)');
+    document.getElementById('prevRoute').textContent = routeText;
+
+    const warnEl = document.getElementById('overlapWarning');
+    if(warnEl){
+      if(from && to){
+        const conflict = findOverlap(emp, state.selectedType, from, to, null);
+        if(conflict){
+          warnEl.style.display = '';
+          warnEl.textContent = `⚠ You already have a ${conflict.type} leave request for these dates (${badgeLabel(conflict.status)}).`;
+        } else {
+          warnEl.style.display = 'none';
+          warnEl.textContent = '';
+        }
+      } else {
+        warnEl.style.display = 'none';
+      }
+    }
+  }
+
+  function submitLeave(){
+    const emp = currentEmployee();
+    const from = document.getElementById('applyFrom').value;
+    const to = document.getElementById('applyTo').value;
+    const reason = document.getElementById('applyReason').value.trim();
+    if(!from || !to){ toast('Pick your start and end dates'); return; }
+    if(new Date(to) < new Date(from)){ toast('End date is before start date'); return; }
+    if(!reason){ toast('Add a reason for your approver'); return; }
+    if(state.approverCandidates.length > 1 && !document.getElementById('approverSelect').value){ toast('Choose an approver'); return; }
+
+    const days = Math.round((new Date(to) - new Date(from)) / 86400000) + 1;
+
+    // Duplicate-date check
+    const conflict = findOverlap(emp, state.selectedType, from, to, null);
+    if(conflict){
+      toast(`You already applied for leave on these dates (${badgeLabel(conflict.status)}). You can't apply again for the same date.`);
+      return;
+    }
+
+    // Balance check
+    if(state.selectedType !== 'Unpaid'){
+      const avail = remainingDays(emp, state.selectedType);
+      if(avail <= 0){ toast(`You have 0 ${state.selectedType} leave balance remaining. Choose a different leave type or contact HR.`); return; }
+      if(days > avail){ toast(`You only have ${avail} ${state.selectedType} day(s) left — this request needs ${days}.`); return; }
+    }
+
+    const approverId = state.approverCandidates.length ? document.getElementById('approverSelect').value : null;
+
+    let status, managerId = null, hrId = null, ceoId = null;
+    if(emp.role === 'Employee'){
+      if(approverId){ status = 'Pending'; managerId = approverId; }
+      else { status = 'Pending HR'; }
+    } else if(emp.role === 'Manager'){
+      status = 'Pending HR'; hrId = approverId || null;
+    } else if(emp.role === 'HR'){
+      if(approverId){ status = 'Pending CEO'; ceoId = approverId; }
+      else { status = 'Approved'; emp.leaveUsed[state.selectedType] = (emp.leaveUsed[state.selectedType] || 0) + days; }
+    } else {
+      status = 'Approved';
+      emp.leaveUsed[state.selectedType] = (emp.leaveUsed[state.selectedType] || 0) + days;
+    }
+
+    const req = { id: state.nextReqId++, employeeId: emp.id, type: state.selectedType, from, to, days, reason, status, managerId, hrId, ceoId, managerComment:'', hrComment:'', ceoComment:'' };
+    state.requests.push(req);
+
+    pushNotification({ employeeId: emp.id, type:'submitted', message:`Your ${state.selectedType} leave request (${fmt(from)} → ${fmt(to)}) was submitted.` });
+    if(status === 'Pending') pushNotification({ role:'Manager', type:'info', message:`${emp.name} requested ${state.selectedType} leave (${fmt(from)} → ${fmt(to)}).` });
+    else if(status === 'Pending HR') pushNotification({ role:'HR', type:'info', message:`${emp.name} requested ${state.selectedType} leave, awaiting HR sign-off.` });
+    else if(status === 'Pending CEO') pushNotification({ role:'CEO', type:'info', message:`${emp.name} (HR) requested ${state.selectedType} leave, awaiting your final approval.` });
+    else pushNotification({ employeeId: emp.id, type:'approved', message:`Your ${state.selectedType} leave (${fmt(from)} → ${fmt(to)}) was auto-approved.` });
+
+    const routeMsg = status === 'Pending' ? 'awaiting manager approval' : status === 'Pending HR' ? 'awaiting HR approval' : status === 'Pending CEO' ? 'awaiting CEO approval' : 'approved automatically';
+    toast('Request submitted — ' + routeMsg);
+    document.getElementById('applyReason').value = '';
+    document.getElementById('applyFrom').value = '';
+    document.getElementById('applyTo').value = '';
+    document.getElementById('fileName').textContent = '';
+    updatePreview();
+    showView('dashboard');
+    saveState();
+  }
+
+  // ==================== PART 4: APPROVALS (Manager stage) ====================
+  function reasonChainHTML(r){
+    const parts = [`<div class="lr-reason" style="margin:2px 0 8px;">💬 ${empById(r.employeeId).name.split(' ')[0]}: "${r.reason}"</div>`];
+    if(r.managerComment) parts.push(`<div class="lr-reason" style="margin:0 0 8px;">💬 Manager: "${r.managerComment}"</div>`);
+    if(r.hrComment) parts.push(`<div class="lr-reason" style="margin:0 0 8px;">💬 HR: "${r.hrComment}"</div>`);
+    return `<div style="grid-column:1 / -1; margin-top:-4px;">${parts.join('')}</div>`;
+  }
+
+  function approvalRowHTML(r, includeRenderCall){
+    const emp = empById(r.employeeId);
+    const hrCandidates = state.employees.filter(e => e.role === 'HR');
+    const hrPicker = hrCandidates.length > 1 ? `
+        <div style="grid-column:1 / -1; margin-top:-6px;">
+          <div class="col-label">Send to which HR?</div>
+          <select class="report-select" id="hrPick-${r.id}" style="margin-bottom:0; max-width:260px;">
+            ${hrCandidates.map(h => `<option value="${h.id}">${h.name} — ${h.dept}</option>`).join('')}
+          </select>
+        </div>` : '';
+    const approveCall = `managerDecision(${r.id}, 'approve', document.getElementById('hrPick-${r.id}') ? document.getElementById('hrPick-${r.id}').value : null)${includeRenderCall ? '; renderManager();' : ''}`;
+    const rejectCall = `managerDecision(${r.id}, 'reject', null)${includeRenderCall ? '; renderManager();' : ''}`;
+    return `
+      <div class="approval-row">
+        <div><div class="emp-name">${emp.name}</div><div class="emp-id mono">${emp.id} · REQ-${String(r.id).padStart(4,'0')}</div></div>
+        <div><div class="col-label">Type</div><div>${r.type}</div></div>
+        <div><div class="col-label">Dates</div><div class="mono" style="font-size:0.84rem;">${fmt(r.from)} → ${fmt(r.to)} (${r.days}d)</div></div>
+        <div class="row-actions">
+          <button class="btn btn-success btn-sm" onclick="${approveCall}">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="${rejectCall}">Reject</button>
+        </div>
+        ${reasonChainHTML(r)}
+        ${hrPicker}
+      </div>`;
+  }
+
+  function renderApprovals(){
+    const me = currentEmployee();
+    const pending = state.requests.filter(r => r.status === 'Pending' && (r.managerId === me.id || r.managerId == null) && empById(r.employeeId)).slice().reverse();
+    document.getElementById('approvalList').innerHTML = pending.length
+      ? pending.map(r => approvalRowHTML(r, false)).join('')
+      : `<div class="panel empty-note">Nothing waiting on you — you're all caught up.</div>`;
+  }
+
+  function managerDecision(reqId, decision, chosenHrId){
+    const req = state.requests.find(r => r.id === reqId);
+    if(!req || req.status !== 'Pending') return;
+    const emp = empById(req.employeeId);
+    if(decision === 'approve'){
+      const hrCandidates = state.employees.filter(e => e.role === 'HR');
+      let hrId = null;
+      if(hrCandidates.length > 1){
+        if(!chosenHrId){ toast('Choose which HR should review this request'); return; }
+        hrId = chosenHrId;
+      } else if(hrCandidates.length === 1){
+        hrId = hrCandidates[0].id;
+      }
+      const comment = window.prompt(`Add a comment for ${emp.name} (optional):`, '') || '';
+      req.status = 'Pending HR';
+      req.hrId = hrId;
+      req.managerComment = comment;
+      const hrEmp = hrId ? empById(hrId) : null;
+      pushNotification({ employeeId: emp.id, type:'approved', message:`Your ${req.type} leave (${fmt(req.from)} → ${fmt(req.to)}) was approved by your manager and sent to ${hrEmp ? hrEmp.name : 'HR'}.${comment ? ' Comment: "'+comment+'"' : ''}` });
+      if(hrId) pushNotification({ employeeId: hrId, type:'info', message:`${emp.name}'s ${req.type} leave was approved by manager — awaiting your final sign-off.` });
+      else pushNotification({ role:'HR', type:'info', message:`${emp.name}'s ${req.type} leave was approved by manager — awaiting your final sign-off.` });
+      toast('Approved — sent to ' + (hrEmp ? hrEmp.name : 'HR') + ' for final sign-off');
+    } else {
+      const comment = window.prompt(`Add a comment for ${emp.name} (optional):`, '') || '';
+      req.status = 'Rejected';
+      req.managerComment = comment;
+      pushNotification({ employeeId: emp.id, type:'rejected', message:`Your ${req.type} leave (${fmt(req.from)} → ${fmt(req.to)}) was rejected by your manager.${comment ? ' Reason: "'+comment+'"' : ''}` });
+      toast('Request rejected');
+    }
+    renderApprovals();
+    saveState();
+  }
+
+  // ==================== PART 5: BALANCE ====================
+  function renderBalance(){
+    const emp = currentEmployee();
+    document.getElementById('balanceGrid').innerHTML = state.leaveTypeList.map(type => {
+      const p = state.policy[type];
+      const bonus = (emp.bonusDays && emp.bonusDays[type]) || 0;
+      const total = p.total + bonus;
+      const used = emp.leaveUsed[type] || 0;
+      const pct = total ? Math.min(100, (used / total) * 100) : 0;
+      return `
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
+            <span style="font-weight:700; font-size:1.02rem;">${type}</span>
+            <span class="mono" style="font-size:0.82rem; color:var(--ink-soft);">${Math.max(0,total-used)}/${total}</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${total?pct:0}%; background:${typeColor(type)};"></div></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:var(--ink-soft); margin-top:9px;">
+            <span>${used} used</span><span>${total ? Math.max(0,total-used) + ' remaining' : 'Unpaid, no cap'}</span>
+          </div>
+          ${bonus ? `<div style="font-size:0.72rem; color:var(--success); margin-top:6px;">+${bonus}d granted by HR</div>` : ''}
+          <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border); font-size:0.74rem; color:var(--ink-soft); display:flex; flex-direction:column; gap:3px;">
+            <span>Carry forward: ${p.carryForward ? 'Yes, up to ' + p.maxCarry + 'd' : 'No'}</span>
+            <span>Proof required: ${p.proofAfter ? 'After ' + p.proofAfter + 'd' : 'Not required'}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ==================== PART 6: HISTORY ====================
+  document.getElementById('historyFilterRow').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip'); if(!chip) return;
+    document.querySelectorAll('#historyFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    state.historyFilter = chip.dataset.hfilter;
+    renderHistory();
+  });
+
+  function renderHistory(){
+    const emp = currentEmployee();
+    const rows = state.requests
+      .filter(r => r.employeeId === emp.id)
+      .filter(r => state.historyFilter === 'All' || r.status === state.historyFilter)
+      .slice().reverse();
+    const cancellable = ['Pending','Pending HR','Pending CEO','Approved'];
+    document.getElementById('historyList').innerHTML = rows.map(r => `
+      <div class="list-row">
+        <div class="lr-left">
+          <span class="lr-type-tag">${r.type}</span>
+          <div>
+            <div class="lr-dates">${fmt(r.from)} → ${fmt(r.to)} <span style="color:var(--ink-soft); font-weight:400;">(${r.days}d)</span></div>
+            <div class="lr-reason">${r.reason} · <span class="mono">REQ-${String(r.id).padStart(4,'0')}</span></div>
+            ${commentsHTML(r)}
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="badge ${badgeClass(r.status)}">${badgeLabel(r.status)}</span>
+          ${cancellable.includes(r.status) ? `<button class="btn-cancel" onclick="cancelRequest(${r.id})">Cancel</button>` : ''}
+        </div>
+      </div>
+      ${orphanFixHTML(r)}
+    `).join('') || `<div class="panel empty-note">Nothing here yet.</div>`;
+  }
+
+  function cancelRequest(id){
+    const req = state.requests.find(r => r.id === id);
+    if(!req || !['Pending','Pending HR','Pending CEO','Approved'].includes(req.status)) return;
+    if(!window.confirm('Cancel this leave request? This cannot be undone.')) return;
+    const emp = empById(req.employeeId);
+    const wasApproved = req.status === 'Approved';
+    req.status = 'Cancelled';
+    if(wasApproved && emp){
+      emp.leaveUsed[req.type] = Math.max(0, (emp.leaveUsed[req.type] || 0) - req.days);
+    }
+    toast('REQ-' + String(id).padStart(4,'0') + ' cancelled' + (wasApproved ? ' — balance restored' : ''));
+    renderHistory();
+    renderDashboard();
+    saveState();
+  }
+
+  // ==================== PART 7: TEAM CALENDAR ====================
+  function shiftMonth(delta){
+    state.calMonth += delta;
+    if(state.calMonth > 11){ state.calMonth = 0; state.calYear++; }
+    if(state.calMonth < 0){ state.calMonth = 11; state.calYear--; }
+    renderCalendar();
+  }
+
+  let calDayData = {};
+
+  let calHolidayData = {};
+
+  function renderCalendar(){
+    document.getElementById('calMonthLabel').textContent = MONTH_NAMES[state.calMonth] + ' ' + state.calYear;
+    document.getElementById('calDow').innerHTML = DOW_NAMES.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+    const firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+    const daysInMonth = new Date(state.calYear, state.calMonth + 1, 0).getDate();
+    const leaveByDay = {};
+    state.requests.filter(r => ['Approved','Pending HR','Pending CEO'].includes(r.status)).forEach(r => {
+      const emp = empById(r.employeeId); if(!emp) return;
+      let d = new Date(r.from + 'T00:00:00'); const end = new Date(r.to + 'T00:00:00');
+      while(d <= end){
+        if(d.getFullYear() === state.calYear && d.getMonth() === state.calMonth){
+          const key = d.getDate();
+          (leaveByDay[key] = leaveByDay[key] || []).push({ emp, type: r.type, status: r.status });
+        }
+        d.setDate(d.getDate() + 1);
+      }
+    });
+    calDayData = leaveByDay;
+
+    const holidayByDay = {};
+    state.holidays.forEach(h => {
+      const dt = new Date(h.date + 'T00:00:00');
+      if(dt.getFullYear() === state.calYear && dt.getMonth() === state.calMonth){
+        holidayByDay[dt.getDate()] = h;
+      }
+    });
+    calHolidayData = holidayByDay;
+
+    const holidayClass = { Public:'holiday-public', Company:'holiday-company', Optional:'holiday-optional' };
+
+    const cells = [];
+    for(let i=0;i<firstDay;i++) cells.push('<div class="cal-cell empty"></div>');
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${state.calYear}-${String(state.calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const isToday = dateStr === TODAY;
+      const away = leaveByDay[day] || [];
+      const holiday = holidayByDay[day];
+      const tags = away.slice(0,2).map(a => `<div class="cal-tag" style="background:${a.emp.color};">${a.emp.name.split(' ')[0]}</div>`).join('');
+      const more = away.length > 2 ? `<div class="cal-tag" style="background:var(--ink-faint);">+${away.length-2} more</div>` : '';
+      const holidayTag = holiday ? `<div class="cal-tag" style="background:transparent; color:inherit; padding:0; font-weight:700; font-size:0.62rem;">🎉 ${holiday.name}</div>` : '';
+      const clickable = away.length > 0 || !!holiday;
+      const hClass = holiday ? holidayClass[holiday.type] : '';
+      cells.push(`<div class="cal-cell ${isToday?'today':''} ${clickable?'has-away':''} ${hClass}" ${clickable ? `onclick="openDayDetail(${day})"` : ''}><div class="cal-daynum">${day}</div>${holidayTag}${tags}${more}</div>`);
+    }
+    document.getElementById('calGrid').innerHTML = cells.join('');
+    document.getElementById('calLegend').innerHTML = state.employees.map(e => `
+      <div class="legend-item"><span class="legend-dot" style="background:${e.color};"></span>
+        <div><div class="legend-name">${e.name}</div><div class="legend-dept">${e.dept} · ${e.role}</div></div>
+      </div>`).join('') + `
+      <div class="legend-item" style="border-top:2px solid var(--border); margin-top:8px; padding-top:12px;">
+        <span class="legend-dot" style="background:var(--success);"></span>
+        <div><div class="legend-name">Public holiday</div></div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--primary);"></span>
+        <div><div class="legend-name">Company holiday</div></div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--ink-faint);"></span>
+        <div><div class="legend-name">Optional holiday</div></div>
+      </div>`;
+  }
+
+  function openDayDetail(day){
+    const away = calDayData[day] || [];
+    const holiday = calHolidayData[day];
+    if(!away.length && !holiday) return;
+    const dateStr = `${state.calYear}-${String(state.calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    document.getElementById('dayDetailTitle').textContent = fmt(dateStr) + (away.length ? ` — ${away.length} away` : '');
+    const holidayHTML = holiday ? `
+      <div class="day-away-row">
+        <span class="day-away-dot" style="background:${{Public:'var(--success)',Company:'var(--primary)',Optional:'var(--ink-faint)'}[holiday.type]};"></span>
+        <div>
+          <div class="day-away-name">🎉 ${holiday.name}</div>
+          <div class="day-away-meta">${holiday.type} holiday</div>
+        </div>
+      </div>` : '';
+    const awayHTML = away.map(a => `
+      <div class="day-away-row">
+        <span class="day-away-dot" style="background:${a.emp.color};"></span>
+        <div>
+          <div class="day-away-name">${a.emp.name}</div>
+          <div class="day-away-meta">${a.type} leave · ${badgeLabel(a.status)}</div>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('dayDetailList').innerHTML = holidayHTML + awayHTML;
+    document.getElementById('dayDetailModal').classList.remove('hidden');
+  }
+
+  function closeDayDetail(){
+    document.getElementById('dayDetailModal').classList.add('hidden');
+  }
+
+  // ==================== PART 8: MANAGER DASHBOARD ====================
+  function renderManager(){
+    const me = currentEmployee();
+    const pending = state.requests.filter(r => r.status === 'Pending' && (r.managerId === me.id || r.managerId == null) && empById(r.employeeId));
+    const onLeaveToday = state.requests.filter(r => r.status === 'Approved' && r.from <= TODAY && r.to >= TODAY).length;
+
+    document.getElementById('managerStats').innerHTML = `
+      <div class="panel stat-card"><div class="stat-label">Team size</div><div class="stat-num">${state.employees.length}</div><div class="stat-note">Across ${new Set(state.employees.map(e=>e.dept)).size} departments</div></div>
+      <div class="panel stat-card"><div class="stat-label">On leave today</div><div class="stat-num">${onLeaveToday}</div><div class="stat-note">${fmt(TODAY)}, 2026</div></div>
+      <div class="panel stat-card"><div class="stat-label">Awaiting your review</div><div class="stat-num" style="color:var(--warning);">${pending.length}</div><div class="stat-note">First-stage approvals</div></div>
+    `;
+
+    document.getElementById('teamList').innerHTML = state.employees.map(e => {
+      const initials = e.name.split(' ').map(n=>n[0]).join('');
+      return `
+        <div class="team-row">
+          <div class="team-id">
+            <div class="avatar" style="background:${e.color};">${initials}</div>
+            <div><div class="team-name">${e.name}</div><div class="team-dept">${e.dept} · ${e.id} · ${e.role}</div></div>
+          </div>
+          <div class="team-bars">
+            ${state.leaveTypeList.filter(t => t !== 'Unpaid').map(t => `<div class="team-bar"><div class="tb-num">${remainingDays(e,t)}</div><div class="tb-label">${t}</div></div>`).join('')}
+          </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('managerPending').innerHTML = pending.length
+      ? pending.map(r => approvalRowHTML(r, true)).join('')
+      : `<div class="panel empty-note">Nothing pending — all caught up.</div>`;
+  }
+
+  // ==================== PART 9: HR DASHBOARD ====================
+  function renderHR(){
+    const me = currentEmployee();
+    const pendingHR = state.requests.filter(r => r.status === 'Pending HR' && (r.hrId === me.id || r.hrId == null) && empById(r.employeeId));
+    const totalDaysTaken = state.requests.filter(r => r.status === 'Approved').reduce((s,r) => s + r.days, 0);
+
+    document.getElementById('hrStats').innerHTML = `
+      <div class="panel stat-card"><div class="stat-label">Total employees</div><div class="stat-num">${state.employees.length}</div><div class="stat-note">${new Set(state.employees.map(e=>e.dept)).size} departments</div></div>
+      <div class="panel stat-card"><div class="stat-label">Awaiting HR sign-off</div><div class="stat-num" style="color:var(--primary);">${pendingHR.length}</div><div class="stat-note">Final approval stage</div></div>
+      <div class="panel stat-card"><div class="stat-label">Leave days taken (2026)</div><div class="stat-num">${totalDaysTaken}</div><div class="stat-note">Company-wide, approved</div></div>
+    `;
+
+    document.getElementById('hrApprovalList').innerHTML = pendingHR.length ? pendingHR.map(r => {
+      const emp = empById(r.employeeId);
+      return `
+      <div class="approval-row">
+        <div><div class="emp-name">${emp.name}</div><div class="emp-id mono">${emp.id} · REQ-${String(r.id).padStart(4,'0')}</div></div>
+        <div><div class="col-label">Type</div><div>${r.type}</div></div>
+        <div><div class="col-label">Dates</div><div class="mono" style="font-size:0.84rem;">${fmt(r.from)} → ${fmt(r.to)} (${r.days}d)</div></div>
+        <div class="row-actions">
+          <button class="btn btn-success btn-sm" onclick="hrDecision(${r.id},'approve')">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="hrDecision(${r.id},'reject')">Reject</button>
+        </div>
+        ${reasonChainHTML(r)}
+      </div>`;
+    }).join('') : `<div class="panel empty-note">No requests waiting on HR right now.</div>`;
+
+    document.getElementById('employeeTableBody').innerHTML = state.employees.map(e => `
+      <tr>
+        <td style="font-weight:700;">${e.name}</td>
+        <td class="mono">${e.id}</td>
+        <td>${e.dept}</td>
+        <td><span class="role-tag">${e.role}</span></td>
+        <td class="mono">${e.username}</td>
+        <td class="mono">${e.password}</td>
+        <td style="display:flex; gap:6px; white-space:nowrap;">
+          <button class="btn btn-outline btn-sm" onclick="openEditEmployee('${e.id}')">Edit</button>
+          <button class="type-remove" onclick="deleteEmployee('${e.id}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+
+    const deptSelect = document.getElementById('newEmpDept');
+    if(deptSelect) deptSelect.innerHTML = DEPARTMENTS.map(d => `<option>${d}</option>`).join('');
+
+    const empSelect = document.getElementById('adjEmployee');
+    empSelect.innerHTML = state.employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+    const typeSelect = document.getElementById('adjType');
+    typeSelect.innerHTML = state.leaveTypeList.map(t => `<option value="${t}">${t}</option>`).join('');
+
+    document.getElementById('adjustmentLog').innerHTML = state.adjustments.slice(0,8).map(a => {
+      const emp = empById(a.employeeId);
+      return `<div class="list-row">
+        <div class="lr-left">
+          <span class="lr-type-tag">${a.type}</span>
+          <div><div class="lr-dates">+${a.days}d for ${emp ? emp.name : 'a removed employee'}</div><div class="lr-reason">${a.reason} · by ${a.by}</div></div>
+        </div>
+      </div>`;
+    }).join('') || `<div class="empty-note">No adjustments yet.</div>`;
+  }
+
+  function hrDecision(reqId, decision){
+    const req = state.requests.find(r => r.id === reqId);
+    if(!req || req.status !== 'Pending HR') return;
+    const emp = empById(req.employeeId);
+    const comment = window.prompt(`Add a comment for ${emp.name} (optional):`, '') || '';
+    if(decision === 'approve'){
+      req.status = 'Approved';
+      req.hrComment = comment;
+      emp.leaveUsed[req.type] = (emp.leaveUsed[req.type] || 0) + req.days;
+      pushNotification({ employeeId: emp.id, type:'approved', message:`Your ${req.type} leave (${fmt(req.from)} → ${fmt(req.to)}) was approved by HR. Enjoy your time off.${comment ? ' Comment: "'+comment+'"' : ''}` });
+      toast('Approved — leave finalized');
+    } else {
+      req.status = 'Rejected';
+      req.hrComment = comment;
+      pushNotification({ employeeId: emp.id, type:'rejected', message:`Your ${req.type} leave (${fmt(req.from)} → ${fmt(req.to)}) was rejected by HR.${comment ? ' Reason: "'+comment+'"' : ''}` });
+      toast('Request rejected');
+    }
+    renderHR();
+    saveState();
+  }
+
+  // ==================== PART 16: CEO APPROVALS ====================
+  function renderCEO(){
+    const me = currentEmployee();
+    const pendingCEO = state.requests.filter(r => r.status === 'Pending CEO' && (r.ceoId === me.id || r.ceoId == null) && empById(r.employeeId));
+    document.getElementById('ceoApprovalList').innerHTML = pendingCEO.length ? pendingCEO.map(r => {
+      const emp = empById(r.employeeId);
+      return `
+      <div class="approval-row">
+        <div><div class="emp-name">${emp.name} <span class="badge role" style="margin-left:6px;">${emp.role}</span></div><div class="emp-id mono">${emp.id} · REQ-${String(r.id).padStart(4,'0')}</div></div>
+        <div><div class="col-label">Type</div><div>${r.type}</div></div>
+        <div><div class="col-label">Dates</div><div class="mono" style="font-size:0.84rem;">${fmt(r.from)} → ${fmt(r.to)} (${r.days}d)</div></div>
+        <div class="row-actions">
+          <button class="btn btn-success btn-sm" onclick="ceoDecision(${r.id},'approve')">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="ceoDecision(${r.id},'reject')">Reject</button>
+        </div>
+        ${reasonChainHTML(r)}
+      </div>`;
+    }).join('') : `<div class="panel empty-note">No HR leave requests waiting on you right now.</div>`;
+
+    document.getElementById('ceoStats').innerHTML = `
+      <div class="panel stat-card"><div class="stat-label">HR requests awaiting you</div><div class="stat-num" style="color:#7C4FE0;">${pendingCEO.length}</div><div class="stat-note">Final sign-off for HR leave</div></div>
+      <div class="panel stat-card"><div class="stat-label">Total employees</div><div class="stat-num">${state.employees.length}</div><div class="stat-note">Across ${new Set(state.employees.map(e=>e.dept)).size} departments</div></div>
+      <div class="panel stat-card"><div class="stat-label">Leave days taken (2026)</div><div class="stat-num">${state.requests.filter(r=>r.status==='Approved').reduce((s,r)=>s+r.days,0)}</div><div class="stat-note">Company-wide, approved</div></div>
+    `;
+  }
+
+  function ceoDecision(reqId, decision){
+    const req = state.requests.find(r => r.id === reqId);
+    if(!req || req.status !== 'Pending CEO') return;
+    const emp = empById(req.employeeId);
+    const comment = window.prompt(`Add a comment for ${emp.name} (optional):`, '') || '';
+    if(decision === 'approve'){
+      req.status = 'Approved';
+      req.ceoComment = comment;
+      emp.leaveUsed[req.type] = (emp.leaveUsed[req.type] || 0) + req.days;
+      pushNotification({ employeeId: emp.id, type:'approved', message:`Your ${req.type} leave (${fmt(req.from)} → ${fmt(req.to)}) was approved by the CEO.${comment ? ' Comment: "'+comment+'"' : ''}` });
+      toast('Approved — leave finalized');
+    } else {
+      req.status = 'Rejected';
+      req.ceoComment = comment;
+      pushNotification({ employeeId: emp.id, type:'rejected', message:`Your ${req.type} leave (${fmt(req.from)} → ${fmt(req.to)}) was rejected by the CEO.${comment ? ' Reason: "'+comment+'"' : ''}` });
+      toast('Request rejected');
+    }
+    renderCEO();
+    saveState();
+  }
+
+  function updateEmployeeRole(id, role){
+    const emp = empById(id);
+    emp.role = role;
+    toast(emp.name + "'s role changed to " + role);
+    renderHR();
+    saveState();
+  }
+
+  function openEditEmployee(id){
+    const emp = empById(id);
+    if(!emp) return;
+    const parts = emp.name.trim().split(' ');
+    document.getElementById('editEmpId').value = id;
+    document.getElementById('editEmpFirstName').value = parts[0] || '';
+    document.getElementById('editEmpLastName').value = parts.slice(1).join(' ');
+    document.getElementById('editEmpDept').innerHTML = DEPARTMENTS.map(d => `<option ${d===emp.dept?'selected':''}>${d}</option>`).join('')
+      + (DEPARTMENTS.includes(emp.dept) ? '' : `<option selected>${emp.dept}</option>`);
+    document.getElementById('editEmpRole').innerHTML = ['Employee','Manager','HR','CEO'].map(r => `<option ${r===emp.role?'selected':''}>${r}</option>`).join('');
+    document.getElementById('editEmpModalTitle').textContent = 'Edit ' + emp.name;
+    document.getElementById('editEmpModal').classList.remove('hidden');
+  }
+
+  function closeEditEmployee(){
+    document.getElementById('editEmpModal').classList.add('hidden');
+  }
+
+  function saveEditEmployee(){
+    const id = document.getElementById('editEmpId').value;
+    const emp = empById(id);
+    if(!emp) return;
+    const firstName = document.getElementById('editEmpFirstName').value.trim();
+    const lastName = document.getElementById('editEmpLastName').value.trim();
+    if(!firstName){ toast('First name cannot be empty'); return; }
+    const newName = lastName ? firstName + ' ' + lastName : firstName;
+    const newRole = document.getElementById('editEmpRole').value;
+    if(emp.role === 'HR' && newRole !== 'HR'){
+      const otherHR = state.employees.filter(e => e.role === 'HR' && e.id !== id);
+      if(otherHR.length === 0){ toast('This is the only HR account — promote someone else to HR first'); return; }
+    }
+    emp.name = newName;
+    emp.dept = document.getElementById('editEmpDept').value;
+    emp.role = newRole;
+    toast('Employee details updated');
+    closeEditEmployee();
+    renderHR();
+    saveState();
+  }
+
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase(); }
+
+  function addEmployee(){
+    const firstNameEl = document.getElementById('newEmpFirstName');
+    const lastNameEl = document.getElementById('newEmpLastName');
+    const deptEl = document.getElementById('newEmpDept');
+    const roleEl = document.getElementById('newEmpRole');
+    const firstName = firstNameEl.value.trim();
+    const lastName = lastNameEl.value.trim();
+    const dept = deptEl.value || DEPARTMENTS[0];
+    const role = roleEl.value;
+    if(!firstName){ toast('Enter a first name for the new employee'); return; }
+    const name = lastName ? firstName + ' ' + lastName : firstName;
+
+    const idNum = state.nextEmpNum++;
+    const id = 'EMP-' + idNum;
+    let username = firstName.toUpperCase();
+    if(state.employees.some(e => e.username === username)) username = username + idNum.toString().slice(-2);
+    const password = firstName.slice(0,3).toUpperCase() + idNum;
+    const leaveUsed = {}; const bonusDays = {};
+    state.leaveTypeList.forEach(t => { leaveUsed[t] = 0; bonusDays[t] = 0; });
+
+    state.employees.push({ id, name, dept, role, color: colorFor(name), username, password, leaveUsed, bonusDays });
+
+    document.getElementById('credCallout').classList.add('show');
+    document.getElementById('credCalloutBody').innerHTML = `${name} was added as <strong>${role}</strong> (${id}). Login: <span class="mono">${username}</span> / <span class="mono">${password}</span>`;
+
+    firstNameEl.value = '';
+    lastNameEl.value = '';
+    toast(name + ' added to the directory');
+    renderHR();
+    saveState();
+  }
+
+  function deleteEmployee(id){
+    const emp = empById(id);
+    if(!emp) return;
+    if(emp.id === state.currentUserId){ toast("You can't delete your own account while signed in"); return; }
+
+    if(emp.role === 'HR'){
+      const otherHR = state.employees.filter(e => e.role === 'HR' && e.id !== id);
+      if(otherHR.length === 0){
+        const name = window.prompt('This is the only HR account. Enter the name of the employee who should become the new HR before deleting ' + emp.name + ':');
+        if(!name){ toast('Deletion cancelled — a new HR is required'); return; }
+        const candidate = state.employees.find(e => e.id !== id && e.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if(!candidate){ toast('No employee found with that name — deletion cancelled'); return; }
+        candidate.role = 'HR';
+        toast(candidate.name + ' promoted to HR');
+      }
+    }
+
+    if(!window.confirm('Delete ' + emp.name + '? This cannot be undone.')) return;
+
+    // If a Manager is removed, unassign their pending requests and tell the affected employees
+    if(emp.role === 'Manager'){
+      const orphaned = state.requests.filter(r => r.status === 'Pending' && r.managerId === id);
+      orphaned.forEach(r => {
+        r.managerId = null;
+        r.orphanNote = `${emp.name} is no longer your manager — please choose a new manager.`;
+        const owner = empById(r.employeeId);
+        if(owner){
+          pushNotification({ employeeId: owner.id, type:'alert', message: `${emp.name} is no longer with the company. Your ${r.type} leave request (REQ-${String(r.id).padStart(4,'0')}) needs a new manager — please raise this from Leave History.` });
+        }
+      });
+    }
+
+    state.employees = state.employees.filter(e => e.id !== id);
+    delete state.attendance[id];
+    toast(emp.name + ' removed from the directory');
+    renderHR();
+    saveState();
+  }
+
+  function clearAllKeepHR(){
+    const me = currentEmployee();
+    if(!me || me.role !== 'HR'){ toast('Only an HR account can do this'); return; }
+    if(!window.confirm('This will permanently delete every other employee, all leave requests, notifications, attendance, and balance adjustments — keeping only your HR account. This cannot be undone. Continue?')) return;
+    if(!window.confirm('Are you absolutely sure? Type OK on the next prompt to confirm.')) return;
+    const check = window.prompt('Type CLEAR to confirm wiping all data:');
+    if(check !== 'CLEAR'){ toast('Cancelled — nothing was deleted'); return; }
+
+    const freshMe = {
+      id: me.id, name: me.name, dept: me.dept, role: 'HR', color: me.color,
+      username: me.username, password: me.password,
+      leaveUsed: {}, bonusDays: {}
+    };
+    state.leaveTypeList.forEach(t => { freshMe.leaveUsed[t] = 0; freshMe.bonusDays[t] = 0; });
+
+    state.employees = [freshMe];
+    state.requests = [];
+    state.notifications = [];
+    state.attendance = {};
+    state.adjustments = [];
+    state.nextReqId = 1;
+    state.nextNotifId = 1;
+    state.nextAdjId = 1;
+    state.nextEmpNum = 1201;
+    state.currentUserId = freshMe.id;
+
+    toast('All data cleared — only ' + freshMe.name + ' (HR) remains');
+    renderSidebar();
+    updateTopUser();
+    updateBellBadge();
+    renderHR();
+    saveState();
+  }
+
+  function reassignManager(reqId, newManagerId){
+    const req = state.requests.find(r => r.id === reqId);
+    if(!req) return;
+    if(newManagerId){
+      req.managerId = newManagerId;
+      req.orphanNote = null;
+      toast('New manager assigned to REQ-' + String(reqId).padStart(4,'0'));
+    } else {
+      req.status = 'Pending HR';
+      req.hrId = null;
+      req.orphanNote = null;
+      toast('Sent directly to HR');
+    }
+    renderHistory();
+    renderDashboard();
+    saveState();
+  }
+
+  function orphanFixHTML(r){
+    if(!r.orphanNote || r.status !== 'Pending') return '';
+    const managers = state.employees.filter(e => e.role === 'Manager');
+    const options = managers.map(m => `<option value="${m.id}">${m.name} — ${m.dept}</option>`).join('');
+    return `
+      <div class="flow-note" style="background:var(--danger-soft); color:var(--danger); margin:8px 0 0;">
+        ⚠ ${r.orphanNote}
+        ${managers.length ? `
+          <select class="report-select" id="reassign-${r.id}" style="margin:0 0 0 auto; max-width:220px;">${options}</select>
+          <button class="btn btn-primary btn-sm" onclick="reassignManager(${r.id}, document.getElementById('reassign-${r.id}').value)">Reassign</button>
+        ` : `<button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="reassignManager(${r.id}, null)">Send to HR instead</button>`}
+      </div>`;
+  }
+
+  function adjustBalance(){
+    const empId = document.getElementById('adjEmployee').value;
+    const type = document.getElementById('adjType').value;
+    const days = Math.max(1, parseInt(document.getElementById('adjDays').value) || 0);
+    const reason = document.getElementById('adjReason').value.trim();
+    if(!empId){ toast('Choose an employee'); return; }
+    if(!reason){ toast('Enter a reason for this adjustment'); return; }
+    const emp = empById(empId);
+    emp.bonusDays[type] = (emp.bonusDays[type] || 0) + days;
+    const hr = currentEmployee();
+    state.adjustments.unshift({ id: state.nextAdjId++, employeeId: empId, type, days, reason, date: TODAY, by: hr.name });
+    pushNotification({ employeeId: empId, type:'info', message: `HR added ${days} extra day(s) of ${type} leave: ${reason}` });
+    toast(`Added ${days} day(s) of ${type} leave to ${emp.name}`);
+    document.getElementById('adjReason').value = '';
+    renderHR();
+    saveState();
+  }
+
+  // ==================== PART 10: HOLIDAY CALENDAR ====================
+  function renderHolidays(){
+    const me = currentEmployee();
+    const isHR = me.role === 'HR' || me.role === 'CEO';
+
+    const years = Array.from(new Set(state.holidays.map(h => new Date(h.date+'T00:00:00').getFullYear())));
+    if(!years.includes(state.holidayYear)) years.push(state.holidayYear);
+    years.sort((a,b) => a-b);
+    const yearSelect = document.getElementById('holidayYearSelect');
+    yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y===state.holidayYear?'selected':''}>${y}</option>`).join('');
+
+    const filtered = state.holidays.filter(h => new Date(h.date+'T00:00:00').getFullYear() === state.holidayYear);
+    const sorted = filtered.slice().sort((a,b) => new Date(a.date) - new Date(b.date));
+    const byMonth = {};
+    sorted.forEach(h => { const m = MONTH_NAMES[new Date(h.date+'T00:00:00').getMonth()]; (byMonth[m]=byMonth[m]||[]).push(h); });
+
+    let html = '';
+    Object.keys(byMonth).forEach(month => {
+      html += `<div class="holiday-month-label">${month} ${state.holidayYear}</div>`;
+      html += byMonth[month].map(h => {
+        const dt = new Date(h.date + 'T00:00:00');
+        return `<div class="holiday-stub">
+          <div class="holiday-date"><div class="hd-day">${dt.getDate()}</div><div class="hd-dow">${DOW_NAMES[dt.getDay()].toUpperCase()}</div></div>
+          <div class="holiday-name">${h.name}</div>
+          <span class="holiday-tag ${h.type}">${h.type}</span>
+          ${isHR ? `<button class="type-remove" style="margin-left:10px;" onclick="deleteHoliday(${h.id})">Delete</button>` : ''}
+        </div>`;
+      }).join('');
+    });
+    document.getElementById('holidayList').innerHTML = html || `<div class="empty-note">No holidays added for ${state.holidayYear} yet.</div>`;
+
+    document.querySelectorAll('.hr-only-holiday').forEach(el => el.style.display = isHR ? '' : 'none');
+  }
+
+  function addHoliday(){
+    const dateEl = document.getElementById('newHolidayDate');
+    const nameEl = document.getElementById('newHolidayName');
+    const typeEl = document.getElementById('newHolidayType');
+    const date = dateEl.value;
+    const name = nameEl.value.trim();
+    const type = typeEl.value;
+    if(!date){ toast('Pick a date'); return; }
+    if(!name){ toast('Enter a holiday name'); return; }
+    if(state.holidays.some(h => h.date === date)){ toast('A holiday is already set for that date'); return; }
+    state.holidays.push({ id: state.nextHolidayId++, date, name, type });
+    state.holidayYear = new Date(date + 'T00:00:00').getFullYear();
+    nameEl.value = ''; dateEl.value = '';
+    toast(name + ' added to the holiday calendar');
+    renderHolidays();
+    saveState();
+  }
+
+  function deleteHoliday(id){
+    const h = state.holidays.find(x => x.id === id);
+    if(!h) return;
+    if(!window.confirm('Remove "' + h.name + '" from the holiday calendar?')) return;
+    state.holidays = state.holidays.filter(x => x.id !== id);
+    toast('Holiday removed');
+    renderHolidays();
+    saveState();
+  }
+
+  // ==================== PART 11: NOTIFICATIONS ====================
+  const NOTIF_ICON = { submitted:'apply', approved:'check', rejected:'shield', reminder:'bell', info:'bell' };
+
+  function pushNotification({ employeeId=null, role=null, type, message }){
+    state.notifications.unshift({ id: state.nextNotifId++, forEmployeeId: employeeId, forRole: role, type, message,
+      time: '2026-08-15 ' + String(9+Math.floor(Math.random()*8)).padStart(2,'0') + ':' + String(Math.floor(Math.random()*60)).padStart(2,'0'), read:false });
+    updateBellBadge();
+  }
+
+  function myNotifications(){
+    const emp = currentEmployee(); if(!emp) return [];
+    return state.notifications.filter(n => n.forEmployeeId === emp.id || n.forRole === emp.role);
+  }
+
+  function updateBellBadge(){
+    const unread = myNotifications().filter(n => !n.read).length;
+    const badge = document.getElementById('bellBadge');
+    badge.textContent = unread;
+    badge.classList.toggle('hidden', unread === 0);
+  }
+
+  function renderNotifications(){
+    const mine = myNotifications();
+    document.getElementById('notifList').innerHTML = mine.map(n => `
+      <div class="notif-item ${n.read?'':'unread'}">
+        <div class="notif-icon ${n.type}">${iconHtml(NOTIF_ICON[n.type] || 'bell')}</div>
+        <div style="flex:1;"><div class="notif-msg">${n.message}</div><div class="notif-time mono">${n.time}</div></div>
+        ${n.read?'':'<div class="notif-dot"></div>'}
+      </div>
+    `).join('') || `<div class="empty-note">You're all caught up.</div>`;
+    mine.forEach(n => n.read = true);
+    updateBellBadge();
+    saveState();
+  }
+
+  function markAllRead(){ myNotifications().forEach(n => n.read = true); renderNotifications(); toast('All notifications marked read'); }
+
+  // ==================== PART 12: REPORTS ====================
+  document.getElementById('reportFilterRow').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip'); if(!chip) return;
+    document.querySelectorAll('#reportFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    state.reportType = chip.dataset.rtype;
+    renderReports();
+  });
+
+  function renderReports(){
+    const panel = document.getElementById('reportPanel');
+    if(state.reportType === 'Employee'){
+      const options = state.employees.map(e => `<option value="${e.id}" ${e.id===state.reportEmployeeId?'selected':''}>${e.name}</option>`).join('');
+      const mine = state.requests.filter(r => r.employeeId === state.reportEmployeeId);
+      const counts = { Pending:0, 'Pending HR':0, Approved:0, Rejected:0, Cancelled:0 };
+      mine.forEach(r => counts[r.status] = (counts[r.status]||0) + 1);
+      const daysByType = {};
+      mine.filter(r => r.status === 'Approved').forEach(r => daysByType[r.type] = (daysByType[r.type]||0) + r.days);
+      const maxDays = Math.max(1, ...Object.values(daysByType));
+      panel.innerHTML = `
+        <select class="report-select" onchange="state.reportEmployeeId=this.value; renderReports();">${options}</select>
+        <div class="grid grid-3">
+          <div class="panel stat-card"><div class="stat-label">Awaiting manager</div><div class="stat-num" style="font-size:1.4rem;">${counts.Pending}</div></div>
+          <div class="panel stat-card"><div class="stat-label">Awaiting HR</div><div class="stat-num" style="font-size:1.4rem; color:var(--primary);">${counts['Pending HR']}</div></div>
+          <div class="panel stat-card"><div class="stat-label">Approved</div><div class="stat-num" style="font-size:1.4rem; color:var(--success);">${counts.Approved}</div></div>
+        </div>
+        <div class="section-label">Approved days by type</div>
+        ${Object.keys(daysByType).length ? Object.entries(daysByType).map(([type,days]) => `
+          <div class="hbar-row"><div class="hbar-label">${type}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(days/maxDays)*100}%; background:${typeColor(type)};"></div></div>
+            <div class="hbar-val">${days}d</div></div>`).join('') : `<div class="empty-note">No approved leave yet.</div>`}
+      `;
+    } else if(state.reportType === 'Team'){
+      const byDept = {};
+      state.requests.filter(r => r.status === 'Approved').forEach(r => {
+        const emp = empById(r.employeeId); const dept = emp ? emp.dept : 'Other';
+        byDept[dept] = (byDept[dept]||0) + r.days;
+      });
+      const maxDept = Math.max(1, ...Object.values(byDept));
+      panel.innerHTML = `<div class="section-label" style="margin-top:0;">Approved leave days by department</div>
+        ${Object.keys(byDept).length ? Object.entries(byDept).map(([dept,days]) => `
+          <div class="hbar-row"><div class="hbar-label">${dept}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(days/maxDept)*100}%; background:var(--primary);"></div></div>
+            <div class="hbar-val">${days}d</div></div>`).join('') : `<div class="empty-note">No approved leave recorded.</div>`}`;
+    } else if(state.reportType === 'Monthly'){
+      const byMonth = new Array(12).fill(0);
+      state.requests.filter(r => r.status === 'Approved').forEach(r => {
+        let d = new Date(r.from+'T00:00:00'); const end = new Date(r.to+'T00:00:00');
+        while(d <= end){ if(d.getFullYear()===2026) byMonth[d.getMonth()]++; d.setDate(d.getDate()+1); }
+      });
+      const maxMonth = Math.max(1, ...byMonth);
+      panel.innerHTML = `<div class="section-label" style="margin-top:0;">Approved leave days per month, 2026</div>
+        <div class="month-chart">${byMonth.map((v,i) => `
+          <div class="month-col"><div class="month-bar-track"><div class="month-fill" style="height:${(v/maxMonth)*100}%;"></div></div>
+          <div class="month-label">${MONTH_NAMES[i].slice(0,3)}</div></div>`).join('')}</div>`;
+    } else {
+      const approved = state.requests.filter(r => r.status === 'Approved');
+      const rejected = state.requests.filter(r => r.status === 'Rejected');
+      const totalDays = approved.reduce((s,r) => s+r.days, 0);
+      const rate = (approved.length+rejected.length) ? Math.round((approved.length/(approved.length+rejected.length))*100) : 0;
+      const typeCounts = {}; approved.forEach(r => typeCounts[r.type] = (typeCounts[r.type]||0)+1);
+      const topType = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1])[0];
+      panel.innerHTML = `<div class="grid grid-3">
+        <div class="stat-card"><div class="stat-label">Total leave days taken</div><div class="stat-num">${totalDays}</div><div class="stat-note">Across ${state.employees.length} employees, 2026</div></div>
+        <div class="stat-card"><div class="stat-label">Approval rate</div><div class="stat-num" style="color:var(--success);">${rate}%</div><div class="stat-note">${approved.length} approved · ${rejected.length} rejected</div></div>
+        <div class="stat-card"><div class="stat-label">Most-used type</div><div class="stat-num" style="font-size:1.3rem;">${topType?topType[0]:'—'}</div><div class="stat-note">${topType?topType[1]+' approved requests':''}</div></div>
+      </div>`;
+    }
+  }
+
+  // ==================== PART 13: ATTENDANCE ====================
+  function ensureAttendanceSeed(){
+    const emp = currentEmployee();
+    state.attendance[emp.id] = state.attendance[emp.id] || {};
+    const rec = state.attendance[emp.id];
+    const daysInMonth = new Date(state.attYear, state.attMonth+1, 0).getDate();
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${state.attYear}-${String(state.attMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      if(dateStr > TODAY || rec[dateStr]) continue;
+      const dow = new Date(state.attYear, state.attMonth, day).getDay();
+      if(dow===0 || dow===6) continue;
+      const onLeave = state.requests.some(r => r.employeeId === emp.id && r.status === 'Approved' && r.from <= dateStr && r.to >= dateStr);
+      rec[dateStr] = onLeave ? 'Absent' : 'Present';
+    }
+  }
+
+  const ATT_CYCLE = ['Present','WFH','Half-day','Absent'];
+  function cycleAttendance(dateStr){
+    if(dateStr > TODAY) return;
+    const emp = currentEmployee();
+    const rec = state.attendance[emp.id];
+    const cur = rec[dateStr] || 'Present';
+    rec[dateStr] = ATT_CYCLE[(ATT_CYCLE.indexOf(cur)+1) % ATT_CYCLE.length];
+    renderAttendance();
+    saveState();
+  }
+
+  function markToday(status){
+    const emp = currentEmployee();
+    state.attendance[emp.id] = state.attendance[emp.id] || {};
+    const dow = new Date(TODAY + 'T00:00:00').getDay();
+    if(dow === 0 || dow === 6){ toast("Today is a weekend — nothing to mark"); return; }
+    state.attendance[emp.id][TODAY] = status;
+    toast('Today marked as ' + status);
+    renderAttendance();
+    saveState();
+  }
+
+  function renderAttendance(){
+    ensureAttendanceSeed();
+    const emp = currentEmployee();
+    const rec = state.attendance[emp.id];
+    document.getElementById('attDow').innerHTML = DOW_NAMES.map(d => `<div class="cal-dow">${d}</div>`).join('');
+    const firstDay = new Date(state.attYear, state.attMonth, 1).getDay();
+    const daysInMonth = new Date(state.attYear, state.attMonth+1, 0).getDate();
+    const cells = []; for(let i=0;i<firstDay;i++) cells.push('<div class="cal-cell empty"></div>');
+    const counts = { Present:0, WFH:0, 'Half-day':0, Absent:0 };
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${state.attYear}-${String(state.attMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const dow = new Date(state.attYear, state.attMonth, day).getDay();
+      const status = rec[dateStr]; if(status) counts[status]++;
+      const future = dateStr > TODAY;
+      const colorMap = { Present:'var(--success)', WFH:'var(--primary)', 'Half-day':'#7C4FE0', Absent:'var(--danger)' };
+      cells.push(`<div class="cal-cell att-cell ${status||''}" ${(future||dow===0||dow===6)?'':`onclick="cycleAttendance('${dateStr}')"`}>
+        <div class="cal-daynum">${day}</div>${status?`<div class="att-tag" style="color:${colorMap[status]};">${status}</div>`:''}</div>`);
+    }
+    document.getElementById('attGrid').innerHTML = cells.join('');
+    document.getElementById('attendanceStats').innerHTML = `
+      <div class="panel stat-card"><div class="stat-label">Present days</div><div class="stat-num" style="color:var(--success);">${counts.Present}</div><div class="stat-note">This month</div></div>
+      <div class="panel stat-card"><div class="stat-label">WFH days</div><div class="stat-num" style="color:var(--primary);">${counts.WFH}</div><div class="stat-note">This month</div></div>
+      <div class="panel stat-card"><div class="stat-label">Absent / half-day</div><div class="stat-num" style="color:var(--danger);">${counts.Absent+counts['Half-day']}</div><div class="stat-note">${counts.Absent} absent · ${counts['Half-day']} half-day</div></div>
+    `;
+
+    const todayStatus = rec[TODAY];
+    document.querySelectorAll('#markTodayRow .filter-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.mt === todayStatus);
+    });
+    const statusNote = document.getElementById('markTodayStatus');
+    if(statusNote){
+      statusNote.textContent = todayStatus ? `marked as ${todayStatus} (${fmt(TODAY)})` : `not marked yet (${fmt(TODAY)})`;
+      statusNote.style.color = todayStatus ? 'var(--success)' : 'var(--ink-faint)';
+    }
+  }
+
+  // ==================== PART 14: LEAVE POLICIES ====================
+  function renderPolicies(){
+    document.getElementById('policiesGrid').innerHTML = state.leaveTypeList.map(type => {
+      const p = state.policy[type];
+      const removable = state.leaveTypeList.length > 1;
+      return `<div class="panel">
+        <div class="policy-head"><span class="policy-type" style="color:${typeColor(type)};">${type}</span>${removable?`<button class="type-remove" onclick="removeLeaveType('${type}')">Remove</button>`:''}</div>
+        <div class="policy-field"><label>Annual entitlement</label><input type="number" min="0" value="${p.total}" onchange="updatePolicyTotal('${type}', this.value)" /></div>
+        <div class="policy-field"><label>Carry forward</label><input type="checkbox" ${p.carryForward?'checked':''} onchange="updatePolicyCarry('${type}', this.checked)" /></div>
+        <div class="policy-field"><label>Max carry-forward days</label><input type="number" min="0" value="${p.maxCarry||0}" ${p.carryForward?'':'disabled'} onchange="updatePolicyMaxCarry('${type}', this.value)" /></div>
+        <div class="policy-field"><label>Requires approval</label><input type="checkbox" ${p.requiresApproval!==false?'checked':''} onchange="updatePolicyApproval('${type}', this.checked)" /></div>
+        <div class="policy-field"><label>Proof required after (days)</label><input type="number" min="0" value="${p.proofAfter||0}" onchange="updatePolicyProof('${type}', this.value)" /></div>
+      </div>`;
+    }).join('');
+  }
+  function updatePolicyTotal(type, v){ state.policy[type].total = Math.max(0, parseInt(v)||0); toast(type+' entitlement updated'); saveState(); }
+  function updatePolicyCarry(type, checked){ state.policy[type].carryForward = checked; renderPolicies(); saveState(); }
+  function updatePolicyMaxCarry(type, v){ state.policy[type].maxCarry = Math.max(0, parseInt(v)||0); saveState(); }
+  function updatePolicyApproval(type, checked){ state.policy[type].requiresApproval = checked; saveState(); }
+  function updatePolicyProof(type, v){ state.policy[type].proofAfter = Math.max(0, parseInt(v)||0); saveState(); }
+
+  function addLeaveType(){
+    const nameEl = document.getElementById('newTypeName'), daysEl = document.getElementById('newTypeDays');
+    const name = nameEl.value.trim(); const days = Math.max(0, parseInt(daysEl.value)||0);
+    if(!name){ toast('Give the new leave type a name'); return; }
+    if(state.leaveTypeList.includes(name)){ toast('That leave type already exists'); return; }
+    state.leaveTypeList.push(name);
+    state.policy[name] = { total:days, carryForward:false, maxCarry:0, proofAfter:0, requiresApproval:true };
+    state.employees.forEach(e => { e.leaveUsed[name] = 0; e.bonusDays[name] = 0; });
+    nameEl.value=''; daysEl.value=10;
+    toast(name + ' added as a leave type');
+    renderPolicies(); saveState();
+  }
+  function removeLeaveType(type){
+    if(state.leaveTypeList.length <= 1){ toast('At least one leave type must remain'); return; }
+    if(!window.confirm(`Remove "${type}" as a leave type? Existing history for it is kept, but it can no longer be applied for.`)) return;
+    state.leaveTypeList = state.leaveTypeList.filter(t => t !== type);
+    delete state.policy[type];
+    state.employees.forEach(e => { delete e.leaveUsed[type]; delete e.bonusDays[type]; });
+    if(state.selectedType === type) state.selectedType = state.leaveTypeList[0];
+    toast(type + ' removed');
+    renderPolicies(); saveState();
+  }
+
+  // ==================== PART 15: FINAL INTEGRATION ====================
+  function renderIntegration(){
+    document.getElementById('persistToggle').checked = state.persistEnabled;
+    updateViewportReadout();
+    const emp = currentEmployee();
+    const allKeys = allowedKeys(emp.role);
+    document.getElementById('sitemapGrid').innerHTML = Object.keys(PART_NUM).map(key => {
+      const locked = !allKeys.includes(key);
+      return `<div class="sitemap-card ${locked?'locked':''}" onclick="${locked?'':`showView('${key}')`}">
+        <div class="sm-num">PT.${PART_NUM[key]}</div>
+        <div class="sm-title">${PART_TITLE[key]}</div>
+        <div class="sm-role">${locked ? 'Not available for ' + emp.role : GROUP_OF[key]}</div>
+      </div>`;
+    }).join('');
+    refreshLastSavedNote();
+    refreshStorageStatus();
+  }
+  function updateViewportReadout(){ document.getElementById('viewportReadout').textContent = window.innerWidth + 'px × ' + window.innerHeight + 'px'; }
+  window.addEventListener('resize', updateViewportReadout);
+
+  function togglePersist(checked){ state.persistEnabled = checked; if(checked){ saveState(); toast('Local saving turned on'); } else toast('Local saving turned off'); }
+  function resetDemoData(){
+    try{
+      if(window.storage) window.storage.delete('lms-state', false).catch(()=>{});
+      else localStorage.removeItem('lms-state');
+    }catch(e){ /* ignore */ }
+    toast('Demo data reset — reloading');
+    setTimeout(() => location.reload(), 900);
+  }
+
+  function changePassword(){
+    const emp = currentEmployee();
+    const cur = document.getElementById('curPass').value;
+    const next = document.getElementById('newPass').value;
+    const confirmVal = document.getElementById('confirmPass').value;
+    if(cur !== emp.password){ toast('Current password is incorrect'); return; }
+    if(!next || next.length < 4){ toast('New password must be at least 4 characters'); return; }
+    if(next !== confirmVal){ toast('New passwords do not match'); return; }
+    emp.password = next;
+    document.getElementById('curPass').value = '';
+    document.getElementById('newPass').value = '';
+    document.getElementById('confirmPass').value = '';
+    toast('Password updated');
+    saveState();
+  }
+
+  function toggleForgot(show){
+    document.getElementById('forgotPanel').classList.toggle('hidden', !show);
+    const box = document.getElementById('forgotResultBox');
+    box.classList.remove('show'); box.innerHTML = '';
+    if(show) document.getElementById('forgotUsername').value = '';
+  }
+  function handleForgotPassword(){
+    const u = document.getElementById('forgotUsername').value.trim().toUpperCase();
+    const emp = state.employees.find(e => e.username === u);
+    const box = document.getElementById('forgotResultBox');
+    if(!emp){
+      box.classList.add('show');
+      box.innerHTML = `<div class="cc-title" style="color:var(--danger);">Not found</div>No account with that username.`;
+      return;
+    }
+    const idNum = emp.id.split('-')[1];
+    const newPassword = cap(emp.name.split(' ')[0]) + '@' + idNum;
+    emp.password = newPassword;
+    box.classList.add('show');
+    box.innerHTML = `<div class="cc-title">Password reset</div>Your new password is <span class="mono">${newPassword}</span>. Use it to sign in.`;
+    saveState();
+    renderDemoAccounts();
+  }
+
+  // ==================== LOCAL DATA PERSISTENCE ====================
+  function refreshLastSavedNote(){
+    const el = document.getElementById('lastSavedNote'); if(!el) return;
+    el.textContent = state.lastSaved ? ('Saved at ' + state.lastSaved) : 'Not saved yet';
+  }
+  function refreshStorageStatus(){
+    const el = document.getElementById('storageStatusNote'); if(!el) return;
+    if(window.storage){ el.textContent = 'Connected — synced to your Claude.ai account'; return; }
+    try{
+      localStorage.setItem('__lms_probe__','1'); localStorage.removeItem('__lms_probe__');
+      el.textContent = 'Connected — saved to this browser only (won\'t follow you to another device)';
+    }catch(e){
+      el.textContent = 'Unavailable in this environment — changes reset on refresh';
+    }
+  }
+  function snapshotState(){
+    return {
+      employees: state.employees, requests: state.requests, policy: state.policy,
+      notifications: state.notifications, nextReqId: state.nextReqId, nextNotifId: state.nextNotifId,
+      nextEmpNum: state.nextEmpNum, attendance: state.attendance, leaveTypeList: state.leaveTypeList,
+      adjustments: state.adjustments, nextAdjId: state.nextAdjId
+    };
+  }
+  async function saveState(){
+    if(!state.persistEnabled) return;
+    const payload = JSON.stringify(snapshotState());
+    try{
+      if(window.storage){
+        await window.storage.set('lms-state', payload, false);
+      } else {
+        localStorage.setItem('lms-state', payload);
+      }
+      state.lastSaved = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      refreshLastSavedNote();
+    }catch(e){ /* saving unavailable in this environment — app still works in-memory for this session */ }
+  }
+  async function loadState(){
+    let raw = null;
+    try{
+      if(window.storage){
+        const res = await window.storage.get('lms-state', false);
+        raw = res && res.value;
+      } else {
+        raw = localStorage.getItem('lms-state');
+      }
+    }catch(e){ raw = null; }
+    if(!raw) return;
+    try{
+      const saved = JSON.parse(raw);
+      Object.assign(state, {
+        employees: saved.employees || state.employees,
+        requests: saved.requests || state.requests,
+        policy: saved.policy || state.policy,
+        notifications: saved.notifications || state.notifications,
+        nextReqId: saved.nextReqId || state.nextReqId,
+        nextNotifId: saved.nextNotifId || state.nextNotifId,
+        nextEmpNum: saved.nextEmpNum || state.nextEmpNum,
+        attendance: saved.attendance || state.attendance,
+        leaveTypeList: saved.leaveTypeList || state.leaveTypeList,
+        adjustments: saved.adjustments || state.adjustments,
+        nextAdjId: saved.nextAdjId || state.nextAdjId
+      });
+      state.employees.forEach(e => { if(!e.bonusDays) e.bonusDays = {}; state.leaveTypeList.forEach(t => { if(e.bonusDays[t] === undefined) e.bonusDays[t] = 0; }); });
+      migrateSavedData();
+    }catch(e){ /* corrupted or no saved data yet */ }
+  }
+
+  // Repairs data saved by an older version of this app so nothing already added gets lost —
+  // fills in fields the current version expects, but never adds or removes employees.
+  function migrateSavedData(){
+    let changed = false;
+
+    // Older saves may be missing newer per-request fields — fill them in so nothing breaks.
+    state.requests.forEach(r => {
+      if(r.ceoId === undefined){ r.ceoId = null; changed = true; }
+      if(r.managerComment === undefined){ r.managerComment = ''; changed = true; }
+      if(r.hrComment === undefined){ r.hrComment = ''; changed = true; }
+      if(r.ceoComment === undefined){ r.ceoComment = ''; changed = true; }
+    });
+
+    if(state.holidayYear === undefined){ state.holidayYear = 2026; changed = true; }
+    if(!state.holidays.length || state.holidays[0].id === undefined){
+      state.holidays.forEach((h, i) => { if(h.id === undefined){ h.id = i + 1; changed = true; } });
+      if(state.nextHolidayId === undefined) state.nextHolidayId = state.holidays.length + 1;
+    }
+
+    // Make sure there is always at least one HR account to sign in with — but never add one back
+    // just because a CEO or other role happens to be missing; that's now a deliberate HR decision.
+    if(!state.employees.some(e => e.role === 'HR') && state.employees.length){
+      state.employees[0].role = 'HR';
+      changed = true;
+    }
+
+    if(changed){ saveState(); }
+  }
+
+  // ==================== INIT ====================
+  renderDemoAccounts();
+  loadState().then(() => { renderDemoAccounts(); });
+</script>
+
+</body>
+</html>

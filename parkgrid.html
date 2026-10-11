@@ -1,0 +1,2143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ParkGrid — Smart Parking Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* Core palette — cool slate / control-room with cyan accent (distinct from any restaurant identity) */
+  --ink:#0b1220; --surface:#111b2e; --surface-raised:#16233a; --surface-hover:#1c2c47;
+  --border:#25344f; --paper:#eaf1fb; --paper-dim:#a9b8d1; --muted:#7387a8;
+  --cyan:#22c3e6; --cyan-bright:#5fdcf5; --cyan-dim:rgba(34,195,230,.14);
+
+  /* Slot / booking status colors */
+  --available:#2fd67e; --available-bg:rgba(47,214,126,.14);
+  --reserved:#f2b23c; --reserved-bg:rgba(242,178,60,.14);
+  --occupied:#f2495c; --occupied-bg:rgba(242,73,92,.14);
+  --outofservice:#6c7891; --outofservice-bg:rgba(108,120,145,.16);
+  --active:#4a8fe0; --active-bg:rgba(74,143,224,.14);
+  --completed:#6c7891; --completed-bg:rgba(108,120,145,.16);
+  --cancelled:#f2495c; --cancelled-bg:rgba(242,73,92,.14);
+
+  --font-display:'Sora',-apple-system,sans-serif; --font-body:'Manrope',-apple-system,sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --radius:12px; --radius-sm:7px; --shadow:0 10px 28px rgba(0,0,0,.45); --sidebar-w:230px;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--font-body);font-size:15px;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;margin:0;letter-spacing:-.01em}
+.mono{font-family:var(--font-mono)}
+button{font-family:var(--font-body);cursor:pointer}
+input,select,textarea{font-family:var(--font-body)}
+::selection{background:var(--cyan);color:var(--ink)}
+:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:2px}
+.hidden{display:none !important}
+
+/* ---- Login ---- */
+.login-wrap{min-height:100vh;display:flex}
+@media (max-width:760px){.login-wrap{flex-direction:column}}
+.login-left{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:radial-gradient(circle at 25% 15%, rgba(34,195,230,.10), transparent 55%), var(--surface);border-right:1px solid var(--border)}
+@media (max-width:760px){.login-left{border-right:none;border-bottom:1px solid var(--border);padding:32px 24px}}
+.brand-hero{max-width:400px;text-align:center}
+.hero-emblem{width:108px;height:108px;margin-bottom:20px}
+.hero-title{font-family:var(--font-display);font-size:32px;font-weight:800;letter-spacing:-.01em}
+.hero-sub{color:var(--paper-dim);font-size:14.5px;margin-top:12px;line-height:1.55}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+.hero-pill{font-size:12px;padding:6px 12px;border-radius:999px;background:var(--surface-raised);border:1px solid var(--border);color:var(--paper-dim)}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px}
+.login-form{width:340px;padding:32px}
+.field-label{display:block;font-size:12.5px;font-weight:600;color:var(--paper-dim);margin-top:14px;margin-bottom:6px}
+.text-input{width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-raised);color:var(--paper);font-size:16px}
+@media (min-width:600px){.text-input{font-size:14px}}
+.login-error{margin-top:14px;font-size:13px;color:var(--occupied);background:var(--occupied-bg);padding:8px 12px;border-radius:var(--radius-sm)}
+.login-hint{margin-top:18px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
+.role-toggle{display:flex;gap:6px;margin-bottom:16px;background:var(--surface-raised);padding:4px;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.role-toggle button{flex:1;padding:8px;border:none;background:none;border-radius:5px;color:var(--paper-dim);font-size:12.5px;font-weight:600}
+.role-toggle button.active{background:var(--cyan);color:var(--ink)}
+
+/* ---- App shell ---- */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:22px 14px;display:flex;flex-direction:column;gap:4px}
+.sidebar-brand-row{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:20px}
+.brand-mark{width:36px;height:36px;flex-shrink:0}
+.sidebar-brand{font-family:var(--font-display);font-size:17px;font-weight:800;line-height:1.15}
+.sidebar-eyebrow{font-family:var(--font-mono);font-size:9.5px;color:var(--cyan);letter-spacing:.08em;margin-top:2px}
+.nav-group-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.08em;padding:14px 12px 6px}
+.nav-group-label:first-of-type{padding-top:0}
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);color:var(--paper-dim);text-decoration:none;font-size:13.5px;font-weight:600;transition:background .15s,color .15s;border:none;background:none;text-align:left;width:100%}
+.nav-link:hover{background:var(--surface-hover);color:var(--paper)}
+.nav-link.active{background:var(--cyan-dim);color:var(--cyan-bright)}
+.sidebar-footer{margin-top:auto;padding:14px 8px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--surface-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--cyan-bright);flex-shrink:0}
+.main-area{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{min-height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;flex-wrap:wrap;gap:8px}
+.topbar-user{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--paper-dim)}
+.role-chip{font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:999px;background:var(--surface-raised);color:var(--cyan-bright);letter-spacing:.05em;border:1px solid var(--border)}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--paper-dim);padding:6px 12px;border-radius:var(--radius-sm);font-size:13px}
+.logout-btn:hover{border-color:var(--cyan);color:var(--cyan-bright)}
+.page{flex:1;overflow-y:auto;padding:22px}
+@media (max-width:860px){
+  .sidebar{width:64px;padding:16px 8px}
+  .sidebar-brand,.sidebar-eyebrow,.nav-link span.label,.sidebar-footer{display:none}
+  .nav-link{justify-content:center}
+}
+
+/* ---- Shared components ---- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);border:1px solid transparent;font-size:13.5px;font-weight:700;transition:filter .15s,transform .05s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--cyan);color:var(--ink)}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-primary:disabled{background:var(--surface-raised);color:var(--muted);cursor:not-allowed}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--paper-dim)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan-bright)}
+.btn-danger{background:transparent;border-color:var(--occupied);color:var(--occupied)}
+.btn-danger:hover{background:var(--occupied-bg)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;font-family:var(--font-mono);letter-spacing:.02em;text-transform:uppercase}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.empty-state{text-align:center;padding:56px 20px;color:var(--muted)}
+.empty-state h3{color:var(--paper-dim);margin-bottom:6px}
+.toast-stack{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:1000;max-width:calc(100vw - 32px)}
+.toast{background:var(--surface-raised);border:1px solid var(--border);border-left:3px solid var(--cyan);padding:12px 18px;border-radius:var(--radius-sm);box-shadow:var(--shadow);font-size:13.5px;max-width:360px;animation:slide-in .2s ease-out}
+.toast.error{border-left-color:var(--occupied)}
+.toast.warn{border-left-color:var(--reserved)}
+@keyframes slide-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.center-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:60px;color:var(--muted);font-size:13px}
+.modal-overlay{position:fixed;inset:0;background:rgba(4,8,16,.65);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+.modal-card{background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:420px;width:100%;box-shadow:var(--shadow);max-height:88vh;overflow-y:auto}
+.modal-actions{display:flex;gap:10px;flex-direction:column}
+.modal-actions .btn{width:100%}
+select,input[type=text],input[type=number],input[type=password],input[type=tel],textarea{padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-raised);color:var(--paper);font-size:13.5px}
+label.small{font-size:12px;color:var(--paper-dim)}
+.dropdown{position:absolute;right:0;top:calc(100% + 4px);background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);min-width:170px;z-index:20;overflow:hidden}
+.dropdown button{display:block;width:100%;text-align:left;padding:9px 12px;background:none;border:none;color:var(--paper-dim);font-size:13px}
+.dropdown button:hover{background:var(--surface-hover)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.stat-card-v2{display:flex;align-items:center;gap:12px}
+.stat-icon{width:38px;height:38px;border-radius:10px;background:var(--surface-raised);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:3px}
+.stat-value{font-size:22px;font-weight:700}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:980px){.two-col{grid-template-columns:1fr}}
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.slot-tile{border-radius:var(--radius-sm);padding:12px;border:1px solid var(--border);position:relative;background:var(--surface)}
+.icon-btn-sm{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--occupied);display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;font-size:11px;line-height:1}
+.qr-box{background:#fff;padding:10px;border-radius:8px;display:inline-block}
+.receipt-paper{background:var(--paper);color:#12181f;padding:22px 20px;border-radius:6px;font-family:var(--font-mono);font-size:12.5px;line-height:1.6}
+.receipt-divider{border-top:1px dashed #8b93a3;margin:10px 0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+/* =========================================================
+   ParkGrid — standalone client-only Smart Parking Management System
+   No backend. All data lives in localStorage.
+   ========================================================= */
+
+const STORAGE_KEY = "parkgrid_state_v1";
+
+const VEHICLE_TYPES = {
+  CAR: { label: "Car", icon: "🚗", rate: 30, dailyRate: 240 },
+  BIKE: { label: "Bike", icon: "🏍️", rate: 15, dailyRate: 120 },
+  EV: { label: "EV", icon: "⚡", rate: 40, dailyRate: 320 },
+  VIP: { label: "VIP", icon: "⭐", rate: 80, dailyRate: 640 },
+};
+const FLOORS = ["Basement", "Ground Floor", "Floor 1", "Floor 2"];
+const SLOT_COUNTS_PER_FLOOR_TYPE = { CAR: 6, BIKE: 4, EV: 2, VIP: 2 };
+const SUBSCRIBER_SLOT_TYPES = ["CAR", "BIKE"]; // types that get a dedicated subscriber-only slot per floor
+
+function buildSlots() {
+  const slots = [];
+  let id = 1;
+  FLOORS.forEach((floor, fi) => {
+    Object.keys(VEHICLE_TYPES).forEach((vt) => {
+      const count = SLOT_COUNTS_PER_FLOOR_TYPE[vt];
+      for (let i = 1; i <= count; i++) {
+        const floorCode = floor === "Basement" ? "B" : floor === "Ground Floor" ? "G" : "F" + floor.slice(-1);
+        // Reserve the last slot of each Car/Bike group on every floor exclusively
+        // for vehicles with an active subscription — so they always have a spot.
+        const isSubscriberSlot = SUBSCRIBER_SLOT_TYPES.includes(vt) && i === count;
+        slots.push({
+          id: id++,
+          code: `${floorCode}-${vt[0]}${vt === "EV" ? "V" : ""}-${String(i).padStart(3, "0")}${isSubscriberSlot ? "-S" : ""}`,
+          floor,
+          vehicleType: vt,
+          status: "AVAILABLE",
+          reservationCode: null,
+          subscriberOnly: isSubscriberSlot,
+        });
+      }
+    });
+  });
+  return slots;
+}
+
+function seedState() {
+  return {
+    // No pre-seeded accounts anymore — Customer/Staff/Manager profiles are created
+    // automatically the first time someone signs in (see handleLoginSubmit).
+    users: [],
+    slots: buildSlots(),
+    bookings: [],
+    payments: [],
+    subscriptions: [],
+    notifications: [],
+    seq: { booking: 100001, payment: 1, subscription: 1, notification: 1 },
+    stateVersion: 1,
+  };
+}
+
+let state = loadState();
+let session = {
+  user: null,
+  page: "dashboard",
+  reserve: { floor: "", vehicleType: "CAR", slotId: null },
+  search: "",
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      const fresh = seedState();
+      const merged = Object.assign({}, fresh, loaded);
+      // Registered Customer/Staff/Manager profiles are created at sign-in time now
+      // (no fixed credential list), so keep whatever was actually saved.
+      merged.users = loaded.users || fresh.users;
+      merged.seq = Object.assign({}, fresh.seq, merged.seq);
+      reconcileSlotStatuses(merged);
+      return merged;
+    }
+  } catch (e) {}
+  return seedState();
+}
+// Self-healing cleanup: earlier versions of this app had a bug where a slot could get
+// stuck showing RESERVED/OCCUPIED with nothing actually behind it anymore (e.g. a
+// booking that was since cancelled/completed elsewhere, or a stale write from before
+// the double-booking fixes existed). Anything that isn't backed by a real live
+// booking or an active paid subscription covering today gets freed back up.
+function reconcileSlotStatuses(st) {
+  let changed = false;
+  const now = new Date();
+  st.slots.forEach((slot) => {
+    if (slot.status !== "RESERVED" && slot.status !== "OCCUPIED") return;
+    const liveBooking = st.bookings.find((b) => b.slotId === slot.id && ["RESERVED", "ACTIVE", "PENDING_PAYMENT"].includes(b.status));
+    if (liveBooking) return;
+    const liveSub = st.subscriptions.find((s) => s.slotId === slot.id && s.status === "ACTIVE" && new Date(s.startDate) <= now && new Date(s.endDate) >= now);
+    if (liveSub) return;
+    slot.status = "AVAILABLE";
+    changed = true;
+  });
+  return changed;
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function nextSeq(kind) {
+  const n = state.seq[kind]++;
+  saveState();
+  return n;
+}
+function genBookingId() {
+  return "SPM-" + String(nextSeq("booking"));
+}
+
+/* ---------- Toasts ---------- */
+let toasts = [];
+function showToast(message, type) {
+  const id = Date.now() + Math.random();
+  toasts.push({ id, message, type: type || "info" });
+  renderToasts();
+  setTimeout(() => {
+    toasts = toasts.filter((t) => t.id !== id);
+    renderToasts();
+  }, 4200);
+}
+function renderToasts() {
+  let stack = document.getElementById("toast-stack");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.id = "toast-stack";
+    stack.className = "toast-stack";
+    document.body.appendChild(stack);
+  }
+  stack.innerHTML = toasts.map((t) => `<div class="toast ${t.type}">${escapeHtml(t.message)}</div>`).join("");
+}
+
+/* ---------- Modal ---------- */
+function showModal({ title, bodyHtml, actions }) {
+  let host = document.getElementById("modal-root");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "modal-root";
+    document.body.appendChild(host);
+  }
+  host.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-card">
+        <h3 style="margin-bottom:12px">${escapeHtml(title)}</h3>
+        ${bodyHtml || ""}
+        <div class="modal-actions" style="margin-top:16px">
+          ${actions.map((a, i) => `<button class="btn ${a.primary ? "btn-primary" : "btn-ghost"}" data-modal-action="${i}">${escapeHtml(a.label)}</button>`).join("")}
+        </div>
+      </div>
+    </div>`;
+  host.querySelectorAll("[data-modal-action]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.getAttribute("data-modal-action"));
+      const action = actions[idx];
+      // Run the handler FIRST while its inputs are still in the DOM, then close
+      // (unless it wants to stay open, e.g. to show a validation error).
+      action.onClick?.();
+      if (!action.keepOpen) closeModal();
+    });
+  });
+}
+function closeModal() {
+  const host = document.getElementById("modal-root");
+  if (host) host.innerHTML = "";
+}
+
+/* ---------- Utilities ---------- */
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = String(str == null ? "" : str);
+  return div.innerHTML;
+}
+function money(n) {
+  return Number(n || 0).toFixed(2);
+}
+function findSlot(id) {
+  return state.slots.find((s) => s.id === Number(id));
+}
+function findBooking(id) {
+  return state.bookings.find((b) => b.id === Number(id));
+}
+function findBookingByBookingId(bookingId) {
+  return state.bookings.find((b) => b.bookingId === bookingId);
+}
+function fmtTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+function minutesBetween(a, b) {
+  return Math.max(0, Math.round((new Date(b) - new Date(a)) / 60000));
+}
+function calcCharge(vehicleType, minutes) {
+  const rate = VEHICLE_TYPES[vehicleType].rate;
+  const hours = Math.max(1, Math.ceil(minutes / 60));
+  return hours * rate;
+}
+function activeSubscriptionFor(vehicleNumber) {
+  const now = new Date();
+  return state.subscriptions.find(
+    (s) =>
+      s.status === "ACTIVE" &&
+      s.vehicleNumber.toUpperCase() === (vehicleNumber || "").toUpperCase() &&
+      new Date(s.startDate) <= now &&
+      new Date(s.endDate) >= now
+  );
+}
+function dateRangesOverlap(startA, endA, startB, endB) {
+  return new Date(startA) <= new Date(endB) && new Date(startB) <= new Date(endA);
+}
+function slotBookedForRange(slotId, startDate, endDate, excludeSubId) {
+  return state.subscriptions.find(
+    (s) =>
+      s.slotId === Number(slotId) &&
+      s.status !== "CANCELLED" &&
+      s.id !== excludeSubId &&
+      dateRangesOverlap(s.startDate, s.endDate, startDate, endDate)
+  );
+}
+// slotBookedForRange only ever checked OTHER SUBSCRIPTIONS — it never checked live
+// walk-in bookings. That gap let a subscription get approved/paid and silently
+// overwrite a slot that a walk-in customer was actively, physically parked in right
+// now, leaving two live claims (the walk-in booking AND the subscription) on the
+// same slot at once. This checks the other direction.
+function findLiveBookingOnSlot(slotId) {
+  return state.bookings.find((b) => b.slotId === Number(slotId) && ["RESERVED", "ACTIVE", "PENDING_PAYMENT"].includes(b.status));
+}
+// When a walk-in booking frees a slot, hand it back to a paid subscriber whose
+// coverage window includes today if one's waiting — otherwise it just goes AVAILABLE.
+function releaseSlot(slot) {
+  if (!slot) return;
+  const now = new Date();
+  const activeSub = state.subscriptions.find((s) => s.slotId === slot.id && s.status === "ACTIVE" && new Date(s.startDate) <= now && new Date(s.endDate) >= now);
+  slot.status = activeSub ? "RESERVED" : "AVAILABLE";
+}
+function daysBetweenInclusive(startDate, endDate) {
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+  return Math.round((end - start) / 86400000) + 1;
+}
+function logNotification(type, to, message) {
+  state.notifications.unshift({ id: nextSeq("notification"), type, to, message, at: new Date().toISOString() });
+  if (state.notifications.length > 200) state.notifications.length = 200;
+}
+function todayBounds() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+/* ---------- Root render ---------- */
+const root = document.getElementById("root");
+function render() {
+  if (!session.user) renderLogin();
+  else renderApp();
+}
+function navigate(page) {
+  session.page = page;
+  render();
+}
+function logout() {
+  session.user = null;
+  render();
+}
+
+/* ---------- Login ---------- */
+let loginRoleHint = "ADMIN";
+const STAFF_CODE = "BKC001";
+const MANAGER_CODE = "BKM001";
+const ROLE_LABELS = { ADMIN: "Manager", STAFF: "Staff", CUSTOMER: "Customer" };
+let loginRole = "CUSTOMER";
+
+function renderLogin() {
+  root.innerHTML = `
+    <div class="login-wrap">
+      <div class="login-left">
+        <div class="brand-hero">
+          <svg class="hero-emblem" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="70" cy="70" r="66" stroke="var(--cyan)" stroke-width="1" opacity="0.4"/>
+            <rect x="20" y="20" width="100" height="100" rx="16" stroke="var(--cyan)" stroke-width="1.5"/>
+            <rect x="30" y="30" width="80" height="80" rx="10" stroke="var(--cyan)" stroke-width="0.6" opacity="0.5"/>
+            <text x="70" y="92" text-anchor="middle" font-family="Sora, sans-serif" font-size="56" font-weight="800" fill="var(--paper)">P</text>
+            <circle cx="106" cy="34" r="7" fill="var(--available)"/>
+          </svg>
+          <h1 class="hero-title">ParkGrid</h1>
+          <p class="hero-sub">Smart Parking Management — reserve, track, and manage every slot from one screen.</p>
+          <div class="hero-pills">
+            <span class="hero-pill">🅿️ Live slot map</span>
+            <span class="hero-pill">📷 QR entry/exit</span>
+            <span class="hero-pill">📊 Revenue analytics</span>
+          </div>
+        </div>
+      </div>
+      <div class="login-right">
+        <form id="login-form" class="login-form card">
+          <h2 style="margin-bottom:4px">Welcome</h2>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 18px">Runs entirely in your browser — no server needed.</p>
+          <div class="role-toggle" id="role-toggle">
+            <button type="button" data-role="CUSTOMER" class="active">Customer</button>
+            <button type="button" data-role="STAFF">Staff</button>
+            <button type="button" data-role="ADMIN">Manager</button>
+          </div>
+          <div id="login-fields"></div>
+          <div id="login-error"></div>
+          <button type="submit" class="btn btn-primary" style="margin-top:16px;width:100%">Continue</button>
+          <p class="login-hint" id="login-hint"></p>
+        </form>
+      </div>
+    </div>`;
+
+  renderLoginFields();
+
+  document.querySelectorAll("#role-toggle button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#role-toggle button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      loginRole = btn.getAttribute("data-role");
+      renderLoginFields();
+    });
+  });
+
+  document.getElementById("login-form").addEventListener("submit", handleLoginSubmit);
+}
+
+function renderLoginFields() {
+  const host = document.getElementById("login-fields");
+  const hint = document.getElementById("login-hint");
+  document.getElementById("login-error").innerHTML = "";
+
+  if (loginRole === "CUSTOMER") {
+    host.innerHTML = `
+      <label class="field-label">Full name</label>
+      <input id="lf-name" class="text-input" required autofocus />
+      <label class="field-label">Vehicle number</label>
+      <input id="lf-vehicle" class="text-input" placeholder="e.g. KA-05-AB-1234" required autocapitalize="characters" />
+      <label class="field-label">Phone number</label>
+      <input id="lf-phone" class="text-input" placeholder="10-digit mobile" required inputmode="numeric" />`;
+    hint.innerHTML = "No password needed — your phone number identifies you next time too.";
+  } else {
+    const codeLabel = loginRole === "STAFF" ? "Staff code" : "Manager code";
+    host.innerHTML = `
+      <label class="field-label">Full name</label>
+      <input id="lf-name" class="text-input" required autofocus />
+      <label class="field-label">${codeLabel}</label>
+      <input id="lf-code" class="text-input" placeholder="Provided by your organization" autocapitalize="off" required />
+      <button type="button" id="forgot-code-link" class="btn btn-ghost btn-sm" style="margin-top:8px">Forgot the code?</button>`;
+    hint.innerHTML =
+      loginRole === "STAFF"
+        ? `Ask your manager for the shared staff code.`
+        : `Managers use the shared manager code — customers and staff can't self-assign this role.`;
+    document.getElementById("forgot-code-link").addEventListener("click", () => {
+      // There's no individual password in this app — Staff/Manager share one
+      // organization-wide code, so "resetting" it means showing whoever's allowed
+      // to see it what the current code is, not a per-person reset flow.
+      const code = loginRole === "STAFF" ? STAFF_CODE : MANAGER_CODE;
+      showModal({
+        title: `${codeLabel}`,
+        bodyHtml: `<p style="color:var(--paper-dim);font-size:13.5px">There's no individual password for this role — everyone on staff shares one organization code.</p>
+          <div class="mono" style="font-size:22px;font-weight:700;color:var(--cyan-bright);text-align:center;padding:14px;margin-top:10px;background:var(--surface-raised);border-radius:8px;letter-spacing:.05em">${code}</div>
+          <p style="color:var(--muted);font-size:12px;margin-top:10px">If this code may have leaked, ask an admin to change it in the app's source, since it's shared org-wide rather than per-person.</p>`,
+        actions: [{ label: "Close", primary: true }],
+      });
+    });
+  }
+}
+
+function handleLoginSubmit(e) {
+  e.preventDefault();
+  const errorEl = document.getElementById("login-error");
+  const name = document.getElementById("lf-name").value.trim();
+
+  if (!name) {
+    errorEl.innerHTML = `<div class="login-error">Please fill in every field</div>`;
+    return;
+  }
+
+  let vehicleNumber = null;
+  let phone = null;
+  let existingUser = null;
+
+  if (loginRole === "CUSTOMER") {
+    phone = document.getElementById("lf-phone").value.trim();
+    if (!phone) {
+      errorEl.innerHTML = `<div class="login-error">Please fill in every field</div>`;
+      return;
+    }
+    if (!/^[0-9]{10}$/.test(phone)) {
+      errorEl.innerHTML = `<div class="login-error">Enter a valid 10-digit phone number</div>`;
+      return;
+    }
+    existingUser = state.users.find((u) => u.mobile === phone && u.role === loginRole);
+    vehicleNumber = document.getElementById("lf-vehicle").value.trim();
+    if (!vehicleNumber) {
+      errorEl.innerHTML = `<div class="login-error">Enter your vehicle number</div>`;
+      return;
+    }
+  } else {
+    // Staff/Manager log in with just their name and the shared role code each time —
+    // no phone number is collected or stored for these roles.
+    const code = document.getElementById("lf-code").value.trim();
+    const expected = loginRole === "STAFF" ? STAFF_CODE : MANAGER_CODE;
+    if (code !== expected) {
+      errorEl.innerHTML = `<div class="login-error">Incorrect ${loginRole === "STAFF" ? "staff" : "manager"} code</div>`;
+      return;
+    }
+    existingUser = state.users.find((u) => u.fullName.toLowerCase() === name.toLowerCase() && u.role === loginRole);
+  }
+
+  let user = existingUser;
+  if (user) {
+    user.fullName = name; // keep name up to date
+  } else {
+    user = { username: `${loginRole}-${phone || name.replace(/\s+/g, "").toLowerCase()}-${Date.now()}`, fullName: name, role: loginRole, mobile: phone };
+    state.users.push(user);
+  }
+  if (vehicleNumber) user.lastVehicleNumber = vehicleNumber;
+  saveState();
+
+  session.user = user;
+  session.page = "dashboard";
+  if (vehicleNumber) session.reserve.lastVehicleNumber = vehicleNumber;
+  render();
+}
+
+/* ---------- App shell ---------- */
+const NAV_GROUPS = [
+  {
+    label: "OPERATIONS",
+    items: [
+      { page: "dashboard", label: "Dashboard", icon: "◈", roles: ["ADMIN", "STAFF", "CUSTOMER"] },
+      { page: "slots", label: "Slot Map", icon: "▦", roles: ["ADMIN", "STAFF"] },
+      { page: "reserve", label: "Reserve a Slot", icon: "＋", roles: ["CUSTOMER"] },
+      { page: "my-bookings", label: "My Bookings", icon: "🎫", roles: ["CUSTOMER"] },
+      { page: "gate", label: "Entry / Exit", icon: "🚧", roles: ["ADMIN", "STAFF"] },
+      { page: "search", label: "Search", icon: "🔎", roles: ["ADMIN", "STAFF"] },
+      { page: "subscriptions", label: "Subscriptions", icon: "📅", roles: ["ADMIN", "STAFF", "CUSTOMER"] },
+    ],
+  },
+  {
+    label: "MANAGEMENT",
+    items: [
+      { page: "reports", label: "Reports & Revenue", icon: "📊", roles: ["ADMIN"] },
+      { page: "notifications", label: "Notification Log", icon: "🔔", roles: ["ADMIN", "STAFF"] },
+    ],
+  },
+];
+const PAGE_TITLES = {
+  dashboard: "Dashboard",
+  slots: "Slot Map",
+  reserve: "Reserve a Slot",
+  "my-bookings": "My Bookings",
+  gate: "Vehicle Entry / Exit",
+  search: "Search",
+  subscriptions: "Subscriptions",
+  reports: "Reports & Revenue",
+  notifications: "Notification Log",
+};
+
+function initialsOf(name) {
+  return (name || "").split(" ").map((p) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+}
+
+function renderApp() {
+  const role = session.user.role;
+  const allAllowed = NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.roles.includes(role)).map((i) => i.page);
+  if (!allAllowed.includes(session.page)) session.page = allAllowed[0] || "dashboard";
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand-row">
+          <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="34" height="34" rx="9" fill="var(--surface-raised)" stroke="var(--cyan)" stroke-width="1.2"/>
+            <text x="20" y="27" text-anchor="middle" font-family="Sora, sans-serif" font-size="17" font-weight="800" fill="var(--paper)">P</text>
+          </svg>
+          <div>
+            <div class="sidebar-brand">ParkGrid</div>
+            <div class="sidebar-eyebrow">SMART PARKING</div>
+          </div>
+        </div>
+        ${NAV_GROUPS.map((group) => {
+          const visible = group.items.filter((i) => i.roles.includes(role));
+          if (visible.length === 0) return "";
+          return `<div class="nav-group-label">${group.label}</div>
+          ${visible.map((n) => `<button class="nav-link ${session.page === n.page ? "active" : ""}" data-nav="${n.page}"><span aria-hidden="true">${n.icon}</span><span class="label">${n.label}</span></button>`).join("")}`;
+        }).join("")}
+        <div class="sidebar-footer">
+          <div class="user-avatar">${initialsOf(session.user.fullName)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12.5px;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(session.user.fullName)}</div>
+            <div class="role-chip" style="margin-top:2px">${ROLE_LABELS[role] || role}</div>
+          </div>
+        </div>
+      </aside>
+      <div class="main-area">
+        <header class="topbar">
+          <h1>${PAGE_TITLES[session.page] || "ParkGrid"}</h1>
+          <div class="topbar-user">
+            <span class="badge" style="color:var(--available);background:var(--available-bg)"><span class="badge-dot"></span>LIVE</span>
+            <button class="logout-btn" id="logout-btn">Log out</button>
+          </div>
+        </header>
+        <main class="page" id="page-content"></main>
+      </div>
+    </div>`;
+
+  document.querySelectorAll("[data-nav]").forEach((btn) => btn.addEventListener("click", () => navigate(btn.getAttribute("data-nav"))));
+  document.getElementById("logout-btn").addEventListener("click", logout);
+
+  const pageEl = document.getElementById("page-content");
+  const renderers = {
+    dashboard: renderDashboardPage,
+    slots: renderSlotsPage,
+    reserve: renderReservePage,
+    "my-bookings": renderMyBookingsPage,
+    gate: renderGatePage,
+    search: renderSearchPage,
+    subscriptions: renderSubscriptionsPage,
+    reports: renderReportsPage,
+    notifications: renderNotificationsPage,
+  };
+  (renderers[session.page] || renderDashboardPage)(pageEl);
+  renderToasts();
+}
+
+/* ---------- Slot Map page ---------- */
+const SLOT_STATUS_VAR = { AVAILABLE: "available", RESERVED: "reserved", OCCUPIED: "occupied", OUT_OF_SERVICE: "outofservice" };
+let slotFilter = { floor: "", vehicleType: "" };
+
+function renderSlotsPage(el) {
+  const isAdmin = session.user.role === "ADMIN";
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:end">
+      <div><label class="small">Floor</label><br/>
+        <select id="slot-filter-floor"><option value="">All floors</option>${FLOORS.map((f) => `<option value="${f}">${f}</option>`).join("")}</select>
+      </div>
+      <div><label class="small">Vehicle type</label><br/>
+        <select id="slot-filter-type"><option value="">All types</option>${Object.entries(VEHICLE_TYPES).map(([k, v]) => `<option value="${k}">${v.icon} ${v.label}</option>`).join("")}</select>
+      </div>
+      <div style="display:flex;gap:14px;margin-left:auto;flex-wrap:wrap">
+        ${["AVAILABLE", "RESERVED", "OCCUPIED", "OUT_OF_SERVICE"].map((s) => {
+          const count = state.slots.filter((sl) => sl.status === s).length;
+          const v = SLOT_STATUS_VAR[s];
+          return `<div style="font-size:12px;color:var(--muted)"><span class="badge-dot" style="color:var(--${v});display:inline-block;margin-right:5px"></span><span class="mono" style="color:var(--paper);font-weight:600">${count}</span> ${s.replace("_", " ").toLowerCase()}</div>`;
+        }).join("")}
+      </div>
+    </div>
+    <div id="slots-grid-host"></div>
+  `;
+  document.getElementById("slot-filter-floor").addEventListener("change", (e) => { slotFilter.floor = e.target.value; renderSlotsGrid(); });
+  document.getElementById("slot-filter-type").addEventListener("change", (e) => { slotFilter.vehicleType = e.target.value; renderSlotsGrid(); });
+  renderSlotsGrid();
+}
+
+function findSlotHold(slotId) {
+  // Whatever is currently claiming this slot's RESERVED (or OCCUPIED) status — a
+  // regular booking or a date-range subscription — and whether it's actually paid.
+  const booking = state.bookings.find((b) => b.slotId === slotId && ["RESERVED", "ACTIVE", "PENDING_PAYMENT"].includes(b.status));
+  if (booking) {
+    return { type: "booking", record: booking, paid: booking.paymentStatus === "PAID" || booking.paymentStatus === "SUBSCRIPTION", amountDue: booking.charges || 0 };
+  }
+  const now = new Date();
+  const sub = state.subscriptions.find(
+    (s) => s.slotId === slotId && ["PENDING_APPROVAL", "PENDING_PAYMENT", "ACTIVE"].includes(s.status) && new Date(s.startDate) <= now && new Date(s.endDate) >= now
+  );
+  if (sub) {
+    return { type: "subscription", record: sub, paid: sub.status === "ACTIVE", amountDue: sub.price || 0 };
+  }
+  return null;
+}
+
+function renderSlotsGrid() {
+  const host = document.getElementById("slots-grid-host");
+  if (!host) return;
+  if (reconcileSlotStatuses(state)) saveState();
+  const canManage = session.user.role === "ADMIN" || session.user.role === "STAFF";
+  let slots = state.slots;
+  if (slotFilter.floor) slots = slots.filter((s) => s.floor === slotFilter.floor);
+  if (slotFilter.vehicleType) slots = slots.filter((s) => s.vehicleType === slotFilter.vehicleType);
+
+  const byFloor = {};
+  slots.forEach((s) => { (byFloor[s.floor] = byFloor[s.floor] || []).push(s); });
+
+  host.innerHTML = Object.keys(byFloor).length === 0
+    ? `<div class="empty-state card"><h3>No slots match</h3></div>`
+    : Object.entries(byFloor)
+        .map(
+          ([floor, floorSlots]) => `
+      <div style="margin-bottom:22px">
+        <div class="mono" style="font-size:11px;color:var(--cyan);letter-spacing:.06em;margin-bottom:10px">${floor.toUpperCase()}</div>
+        <div class="slots-grid">
+          ${floorSlots
+            .map((s) => {
+              const v = SLOT_STATUS_VAR[s.status];
+              const vt = VEHICLE_TYPES[s.vehicleType];
+              const hold = s.status === "RESERVED" ? findSlotHold(s.id) : null;
+              const overdue = hold && hold.type === "booking" ? reservationOverdueInfo(hold.record) : { isWarning: false };
+              return `
+            <div class="slot-tile" style="border-color:${overdue.isWarning ? "var(--occupied)" : `var(--${v})`};${overdue.isWarning ? "background:var(--occupied-bg)" : ""}">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <span class="mono" style="font-weight:700;font-size:13px">${s.code}</span>
+                <span style="font-size:15px">${overdue.isWarning ? "⚠" : vt.icon}</span>
+              </div>
+              ${s.subscriberOnly ? `<div style="font-size:10px;color:var(--cyan-bright);margin-top:3px">🔒 Subscriber slot</div>` : ""}
+              <span class="badge" style="color:var(--${overdue.isWarning ? "occupied" : v});background:var(--${overdue.isWarning ? "occupied" : v}-bg);margin-top:8px">${overdue.isWarning ? "NO-SHOW RISK" : s.status.replace("_", " ")}</span>
+              ${canManage ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" data-manage-slot="${s.id}">Manage</button>` : ""}
+            </div>`;
+            })
+            .join("")}
+        </div>
+      </div>`
+        )
+        .join("");
+
+  host.querySelectorAll("[data-manage-slot]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const slot = findSlot(btn.getAttribute("data-manage-slot"));
+      const hold = slot.status === "RESERVED" || slot.status === "OCCUPIED" ? findSlotHold(slot.id) : null;
+      const unpaidWarning =
+        hold && !hold.paid
+          ? `<div class="login-error" style="margin-top:10px">⚠ This slot is linked to ${hold.type === "booking" ? `booking <strong>${hold.record.bookingId}</strong>` : `a slot reservation for <strong>${hold.record.vehicleNumber}</strong>`}, and payment is <strong>not completed</strong> (₹${hold.amountDue} due). Freeing or disabling this slot will NOT cancel that charge — check with billing first.</div>`
+          : "";
+      showModal({
+        title: `Manage ${slot.code}`,
+        bodyHtml: `<p style="color:var(--paper-dim);font-size:13px;margin:0 0 4px">Current status: <strong style="color:var(--paper)">${slot.status.replace("_", " ")}</strong></p>
+          <p style="color:var(--muted);font-size:12px">Changing status here overrides any active booking link for this slot — use with care.</p>${unpaidWarning}`,
+        actions: [
+          { label: "Mark Available", primary: true, onClick: () => setSlotStatus(slot, "AVAILABLE", hold) },
+          { label: "Mark Out of Service / Maintenance", onClick: () => setSlotStatus(slot, "OUT_OF_SERVICE", hold) },
+          { label: "Cancel" },
+        ],
+      });
+    })
+  );
+}
+
+function setSlotStatus(slot, status, hold) {
+  if (hold && !hold.paid) {
+    const ok = confirm(`Payment for this slot's reservation is NOT completed yet (₹${hold.amountDue} due). Are you sure you want to change slot ${slot.code} to ${status.replace("_", " ")} anyway?`);
+    if (!ok) return;
+  }
+  slot.status = status;
+  saveState();
+  showToast(`${slot.code} → ${status.replace("_", " ")}`);
+  if (session.page === "slots") renderSlotsGrid();
+}
+
+/* ---------- Reserve a Slot page (Customer) ---------- */
+function renderReservePage(el) {
+  const r = session.reserve;
+  const myVehicle = session.user.lastVehicleNumber || "";
+  const mySub = myVehicle ? activeSubscriptionFor(myVehicle) : null;
+
+  el.innerHTML = `
+    ${
+      mySub
+        ? `<div class="card" style="margin-bottom:16px;border-color:var(--available);background:var(--available-bg)">
+            <strong style="color:var(--available)">✓ Subscriber</strong> — ${escapeHtml(myVehicle)} has slot <strong>${mySub.slotCode}</strong> reserved (till ${fmtTime(mySub.endDate)}). Parking is free, and slots marked <span class="mono">-S</span> are also open to you.
+          </div>`
+        : ""
+    }
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap">
+          <div><label class="small">Floor</label><br/>
+            <select id="rs-floor"><option value="">All floors</option>${FLOORS.map((f) => `<option value="${f}" ${f === r.floor ? "selected" : ""}>${f}</option>`).join("")}</select>
+          </div>
+          <div><label class="small">Vehicle type</label><br/>
+            <select id="rs-type">${Object.entries(VEHICLE_TYPES).map(([k, v]) => `<option value="${k}" ${k === r.vehicleType ? "selected" : ""}>${v.icon} ${v.label} — ₹${v.rate}/hr</option>`).join("")}</select>
+          </div>
+        </div>
+        <div id="rs-slots-grid" class="slots-grid"></div>
+      </div>
+      <div>
+        <div class="card" id="rs-booking-form">
+          <h3 style="font-size:15px;margin-bottom:12px">Booking details</h3>
+          <p id="rs-selected-slot" style="color:var(--muted);font-size:13px;margin-bottom:14px">Pick an available slot on the left.</p>
+          <label class="field-label" style="margin-top:0">Vehicle number</label>
+          <input id="rs-vehicle-number" class="text-input" placeholder="e.g. KA-05-AB-1234" value="${escapeHtml(myVehicle)}" />
+          <label class="field-label">Mobile number</label>
+          <input id="rs-mobile" class="text-input" value="${escapeHtml(session.user.mobile || "")}" />
+          <label class="field-label">Expected duration</label>
+          <select id="rs-duration" class="text-input">
+            <option value="1">1 hour</option>
+            <option value="2" selected>2 hours</option>
+            <option value="4">4 hours</option>
+            <option value="8">8 hours</option>
+            <option value="24">Full day (24 hours)</option>
+          </select>
+          <button class="btn btn-primary" id="rs-confirm-btn" style="width:100%;margin-top:16px" disabled>Confirm Reservation</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("rs-floor").addEventListener("change", (e) => { r.floor = e.target.value; renderReserveSlotsGrid(); });
+  document.getElementById("rs-type").addEventListener("change", (e) => { r.vehicleType = e.target.value; r.slotId = null; renderReserveSlotsGrid(); });
+  document.getElementById("rs-vehicle-number").addEventListener("input", () => renderReserveSlotsGrid());
+  document.getElementById("rs-confirm-btn").addEventListener("click", handleConfirmReservation);
+  renderReserveSlotsGrid();
+}
+
+function slotHasSubscriptionNow(slotId) {
+  // slot.status only gets physically flipped to RESERVED when a subscription's date
+  // range happens to cover "today" at the moment it's approved — that's not a
+  // reliable enough signal on its own. A walk-in booking must also be checked
+  // directly against any subscription (pending or active) that covers right now,
+  // or a slot can end up double-committed to both a subscriber and a walk-in.
+  return !!slotBookedForRange(slotId, new Date().toISOString(), new Date().toISOString());
+}
+
+function renderReserveSlotsGrid() {
+  const host = document.getElementById("rs-slots-grid");
+  if (!host) return;
+  if (reconcileSlotStatuses(state)) saveState();
+  const r = session.reserve;
+  const typedVehicle = document.getElementById("rs-vehicle-number")?.value.trim() || session.user.lastVehicleNumber || "";
+  const isSubscriber = typedVehicle ? !!activeSubscriptionFor(typedVehicle) : false;
+
+  let slots = state.slots.filter((s) => s.vehicleType === r.vehicleType);
+  if (r.floor) slots = slots.filter((s) => s.floor === r.floor);
+
+  host.innerHTML = slots
+    .map((s) => {
+      const v = SLOT_STATUS_VAR[s.status];
+      const subHold = s.status === "AVAILABLE" && slotHasSubscriptionNow(s.id);
+      const locked = s.subscriberOnly && !isSubscriber;
+      const selectable = s.status === "AVAILABLE" && !locked && !subHold;
+      const isSelected = r.slotId === s.id;
+      return `
+      <div class="slot-tile" style="border-color:${isSelected ? "var(--cyan)" : s.subscriberOnly ? "var(--cyan)" : `var(--${v})`};${selectable ? "cursor:pointer" : "opacity:.6"};${s.subscriberOnly ? "background-image:linear-gradient(160deg, rgba(34,195,230,.08), transparent 60%)" : ""}" ${selectable ? `data-pick-slot="${s.id}"` : ""}>
+        <span class="mono" style="font-weight:700;font-size:13px">${s.code}</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.floor}</div>
+        ${s.subscriberOnly ? `<div style="font-size:10.5px;color:var(--cyan-bright);margin-top:4px">🔒 ${locked ? "Subscribers only" : "Reserved for you"}</div>` : ""}
+        <span class="badge" style="color:var(--${subHold ? "reserved" : v});background:var(--${subHold ? "reserved" : v}-bg);margin-top:8px">${subHold ? "RESERVED (subscriber)" : s.status.replace("_", " ")}</span>
+      </div>`;
+    })
+    .join("");
+
+  host.querySelectorAll("[data-pick-slot]").forEach((tile) =>
+    tile.addEventListener("click", () => {
+      const slot = findSlot(tile.getAttribute("data-pick-slot"));
+      if (slot.status !== "AVAILABLE") {
+        showToast("This parking slot is already reserved.", "error");
+        renderReserveSlotsGrid();
+        return;
+      }
+      if (slotHasSubscriptionNow(slot.id)) {
+        showToast("This slot is held by a subscriber right now.", "error");
+        renderReserveSlotsGrid();
+        return;
+      }
+      if (slot.subscriberOnly && !isSubscriber) {
+        showToast("This slot is reserved for active subscribers only.", "error");
+        return;
+      }
+      r.slotId = slot.id;
+      document.getElementById("rs-selected-slot").innerHTML = `Selected: <strong style="color:var(--cyan-bright)">${slot.code}</strong> (${slot.floor})`;
+      document.getElementById("rs-confirm-btn").disabled = false;
+      renderReserveSlotsGrid();
+    })
+  );
+}
+
+function handleConfirmReservation() {
+  const r = session.reserve;
+  const slot = findSlot(r.slotId);
+  if (!slot || slot.status !== "AVAILABLE") {
+    showToast("This parking slot is already reserved.", "error");
+    r.slotId = null;
+    renderReserveSlotsGrid();
+    return;
+  }
+  const duration = Number(document.getElementById("rs-duration").value);
+  const now = new Date();
+  const expectedExit = new Date(now.getTime() + duration * 3600 * 1000);
+  // Check the WHOLE booking window against subscriptions, not just this instant —
+  // otherwise a long walk-in booking made today can still collide with a
+  // subscription that starts tomorrow, recreating the same double-booking bug.
+  if (slotBookedForRange(slot.id, now.toISOString(), expectedExit.toISOString())) {
+    showToast("This slot has a subscriber reservation starting during your booking window — pick another slot or a shorter duration.", "error");
+    r.slotId = null;
+    renderReserveSlotsGrid();
+    return;
+  }
+  const vehicleNumber = document.getElementById("rs-vehicle-number").value.trim();
+  const mobile = document.getElementById("rs-mobile").value.trim();
+  if (!vehicleNumber || !mobile) {
+    showToast("Enter vehicle number and mobile number", "error");
+    return;
+  }
+
+  const bookingId = genBookingId();
+  const booking = {
+    id: Date.now(),
+    bookingId,
+    slotId: slot.id,
+    slotCode: slot.code,
+    floor: slot.floor,
+    vehicleType: slot.vehicleType,
+    vehicleNumber,
+    mobile,
+    customerName: session.user.fullName,
+    plannedDurationHours: duration,
+    status: "RESERVED",
+    reservedAt: new Date().toISOString(),
+    entryTime: null,
+    exitTime: null,
+    expectedExit: null,
+    extendedBy: 0,
+    charges: 0,
+    paymentStatus: "UNPAID",
+    paymentMethod: null,
+    expiryWarned: false,
+  };
+  state.bookings.push(booking);
+  slot.status = "RESERVED";
+  saveState();
+
+  logNotification("SMS", mobile, `Booking confirmed! ${bookingId} for slot ${slot.code}. Show your QR at the gate.`);
+  logNotification("EMAIL", mobile, `Your ParkGrid reservation ${bookingId} is confirmed.`);
+
+  showModal({
+    title: "Reservation confirmed",
+    bodyHtml: `
+      <div style="text-align:center">
+        <div class="qr-box">${qrImg(bookingId, 160)}</div>
+        <div class="mono" style="margin-top:12px;font-size:16px;font-weight:700;color:var(--cyan-bright)">${bookingId}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Slot ${slot.code} · ${slot.floor}</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:12px">Show this QR code at the gate for entry. A confirmation SMS/email has been sent (simulated).</p>
+      </div>`,
+    actions: [{ label: "Done", primary: true, onClick: () => navigate("my-bookings") }],
+  });
+
+  r.slotId = null;
+}
+
+function qrImg(data, size) {
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}`;
+  return `<img src="${url}" width="${size}" height="${size}" alt="QR code for ${escapeHtml(data)}" style="display:block" onerror="this.outerHTML='<div class=mono style=padding:20px;font-size:11px;color:#555>QR unavailable offline<br/>Code: ${escapeHtml(data)}</div>'" />`;
+}
+
+/* ---------- My Bookings page (Customer) ---------- */
+const BOOKING_STATUS_VAR = { RESERVED: "reserved", ACTIVE: "active", PENDING_PAYMENT: "reserved", COMPLETED: "completed", CANCELLED: "cancelled" };
+
+function renderMyBookingsPage(el) {
+  const mine = state.bookings
+    .filter((b) => b.mobile === session.user.mobile || b.customerName === session.user.fullName)
+    .sort((a, b) => new Date(b.reservedAt) - new Date(a.reservedAt));
+
+  if (mine.length === 0) {
+    el.innerHTML = `<div class="empty-state card"><h3>No bookings yet</h3><p>Reserve a slot to see it here.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">
+    ${mine.map((b) => bookingCardHtml(b)).join("")}
+  </div>`;
+
+  wireBookingCardActions(el);
+}
+
+const RESERVATION_WARN_MINUTES = 15; // no-show warning threshold
+const RESERVATION_AUTO_RELEASE_MINUTES = 30; // auto-free the slot threshold
+
+function reservationOverdueInfo(b) {
+  if (b.status !== "RESERVED" || b.entryTime) return { minutesWaiting: 0, isWarning: false };
+  const minutesWaiting = (Date.now() - new Date(b.reservedAt).getTime()) / 60000;
+  return { minutesWaiting, isWarning: minutesWaiting >= RESERVATION_WARN_MINUTES };
+}
+
+function bookingCardHtml(b) {
+  const v = BOOKING_STATUS_VAR[b.status];
+  const vt = VEHICLE_TYPES[b.vehicleType];
+  const overdue = reservationOverdueInfo(b);
+  return `
+    <div class="card" data-booking-card="${b.id}" style="${overdue.isWarning ? "border-color:var(--occupied);background:var(--occupied-bg)" : ""}">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div class="mono" style="font-size:11px;color:var(--muted)">${b.bookingId}</div>
+          <div style="font-weight:700;font-family:var(--font-display);font-size:17px">${vt.icon} ${escapeHtml(b.vehicleNumber)}</div>
+          <div style="font-size:12.5px;color:var(--muted)">${b.slotCode} · ${b.floor}</div>
+        </div>
+        ${
+          overdue.isWarning
+            ? `<span class="badge" style="color:var(--occupied);background:var(--occupied-bg);height:fit-content">⚠ NO-SHOW RISK · ${Math.floor(overdue.minutesWaiting)}m</span>`
+            : `<span class="badge" style="color:var(--${v});background:var(--${v}-bg);height:fit-content">${b.status.replace("_", " ")}</span>`
+        }
+      </div>
+      ${overdue.isWarning ? `<div style="font-size:12px;color:var(--occupied);margin-top:6px">Reserved but nobody has entered yet — this slot auto-releases at ${RESERVATION_AUTO_RELEASE_MINUTES} minutes if unclaimed.</div>` : ""}
+      <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--paper-dim)">
+        <div>Reserved: <span class="mono">${fmtTime(b.reservedAt)}</span></div>
+        ${b.entryTime ? `<div>Entry: <span class="mono">${fmtTime(b.entryTime)}</span></div>` : ""}
+        ${b.exitTime ? `<div>Exit: <span class="mono">${fmtTime(b.exitTime)}</span></div>` : ""}
+        ${b.expectedExit && b.status === "ACTIVE" ? `<div>Expected out: <span class="mono">${fmtTime(b.expectedExit)}</span></div>` : ""}
+      </div>
+      ${b.charges > 0 ? `<div style="margin-top:8px;font-size:13.5px;font-weight:700">Charges: <span class="mono">₹${money(b.charges)}</span> <span style="font-weight:400;color:var(--muted);font-size:12px">(${b.paymentStatus})</span></div>` : ""}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        ${b.status === "RESERVED" ? `<button class="btn btn-ghost btn-sm" data-view-qr="${b.id}">View QR</button>` : ""}
+        ${b.status === "RESERVED" ? `<button class="btn btn-danger btn-sm" data-cancel-booking="${b.id}">Cancel booking</button>` : ""}
+        ${b.status === "ACTIVE" ? `<button class="btn btn-ghost btn-sm" data-extend-booking="${b.id}">Extend duration</button>` : ""}
+        ${b.status === "PENDING_PAYMENT" ? `<button class="btn btn-primary btn-sm" data-pay-booking="${b.id}">Pay ₹${money(b.charges)}</button>` : ""}
+        ${b.status === "COMPLETED" ? `<button class="btn btn-ghost btn-sm" data-download-receipt="${b.id}">Download receipt</button>` : ""}
+      </div>
+    </div>`;
+}
+
+function wireBookingCardActions(el) {
+  el.querySelectorAll("[data-view-qr]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const b = findBooking(btn.getAttribute("data-view-qr"));
+      showModal({
+        title: b.bookingId,
+        bodyHtml: `<div style="text-align:center"><div class="qr-box">${qrImg(b.bookingId, 180)}</div><div style="font-size:12px;color:var(--muted);margin-top:10px">Show this at the gate for entry</div></div>`,
+        actions: [{ label: "Close", primary: true }],
+      });
+    })
+  );
+
+  el.querySelectorAll("[data-cancel-booking]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const b = findBooking(btn.getAttribute("data-cancel-booking"));
+      if (!confirm(`Cancel booking ${b.bookingId}?`)) return;
+      b.status = "CANCELLED";
+      const slot = findSlot(b.slotId);
+      if (slot && slot.status === "RESERVED") releaseSlot(slot);
+      saveState();
+      showToast(`Booking ${b.bookingId} cancelled`);
+      logNotification("SMS", b.mobile, `Your booking ${b.bookingId} has been cancelled.`);
+      render();
+    })
+  );
+
+  el.querySelectorAll("[data-extend-booking]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const b = findBooking(btn.getAttribute("data-extend-booking"));
+      showModal({
+        title: `Extend ${b.bookingId}`,
+        bodyHtml: `<label class="field-label" style="margin-top:0">Add how many hours?</label>
+          <select id="extend-hours" class="text-input"><option value="1">1 hour</option><option value="2">2 hours</option><option value="4">4 hours</option></select>`,
+        actions: [
+          {
+            label: "Extend",
+            primary: true,
+            onClick: () => {
+              const hrs = Number(document.getElementById("extend-hours")?.value || 1);
+              b.expectedExit = new Date(new Date(b.expectedExit).getTime() + hrs * 3600000).toISOString();
+              b.extendedBy += hrs;
+              b.expiryWarned = false;
+              saveState();
+              showToast(`${b.bookingId} extended by ${hrs}h — new expected exit ${fmtTime(b.expectedExit)}`);
+              render();
+            },
+          },
+          { label: "Cancel" },
+        ],
+      });
+    })
+  );
+
+  el.querySelectorAll("[data-pay-booking]").forEach((btn) => btn.addEventListener("click", () => openPaymentModal(findBooking(btn.getAttribute("data-pay-booking")))));
+  el.querySelectorAll("[data-download-receipt]").forEach((btn) => btn.addEventListener("click", () => downloadReceipt(findBooking(btn.getAttribute("data-download-receipt")))));
+}
+
+/* ---------- Payment ---------- */
+const PAYMENT_METHODS = ["CASH", "UPI", "CREDIT_CARD", "DEBIT_CARD"];
+
+function openPaymentModal(booking) {
+  showModal({
+    title: `Pay for ${booking.bookingId}`,
+    bodyHtml: `
+      <div style="font-size:13.5px;color:var(--paper-dim);margin-bottom:14px">
+        Vehicle <strong style="color:var(--paper)">${escapeHtml(booking.vehicleNumber)}</strong> · ${booking.slotCode}<br/>
+        Duration: ${minutesBetween(booking.entryTime, booking.exitTime)} min
+      </div>
+      <div style="font-size:24px;font-weight:800;font-family:var(--font-mono);color:var(--cyan-bright);margin-bottom:14px">₹${money(booking.charges)}</div>
+      <label class="field-label" style="margin-top:0">Payment method</label>
+      <select id="pay-method" class="text-input">${PAYMENT_METHODS.map((m) => `<option value="${m}">${m.replace("_", " ")}</option>`).join("")}</select>`,
+    actions: [
+      {
+        label: "Confirm payment",
+        primary: true,
+        onClick: () => {
+          const method = document.getElementById("pay-method")?.value || "CASH";
+          state.payments.push({ id: nextSeq("payment"), bookingId: booking.bookingId, amount: booking.charges, method, paidAt: new Date().toISOString() });
+          booking.status = "COMPLETED";
+          booking.paymentStatus = "PAID";
+          booking.paymentMethod = method;
+          const slot = findSlot(booking.slotId);
+          if (slot) releaseSlot(slot);
+          saveState();
+          logNotification("SMS", booking.mobile, `Payment of ₹${money(booking.charges)} received for ${booking.bookingId}. Thank you!`);
+          showToast(`Payment received — ${booking.bookingId} complete`);
+          render();
+        },
+      },
+      { label: "Cancel" },
+    ],
+  });
+}
+
+function downloadReceipt(booking) {
+  const vt = VEHICLE_TYPES[booking.vehicleType];
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Receipt ${booking.bookingId}</title>
+    <style>body{font-family:'JetBrains Mono',monospace;max-width:380px;margin:30px auto;color:#12181f}
+    .divider{border-top:1px dashed #8b93a3;margin:10px 0}
+    .row{display:flex;justify-content:space-between;font-size:13px;margin:4px 0}
+    h2{margin-bottom:2px}</style></head><body>
+    <h2>ParkGrid</h2>
+    <div style="font-size:11px;color:#666">Smart Parking Management — Payment Receipt</div>
+    <div class="divider"></div>
+    <div class="row"><span>Booking ID</span><strong>${booking.bookingId}</strong></div>
+    <div class="row"><span>Vehicle</span><span>${vt.icon} ${escapeHtml(booking.vehicleNumber)}</span></div>
+    <div class="row"><span>Slot</span><span>${booking.slotCode} (${booking.floor})</span></div>
+    <div class="row"><span>Entry</span><span>${fmtTime(booking.entryTime)}</span></div>
+    <div class="row"><span>Exit</span><span>${fmtTime(booking.exitTime)}</span></div>
+    <div class="row"><span>Duration</span><span>${minutesBetween(booking.entryTime, booking.exitTime)} min</span></div>
+    <div class="divider"></div>
+    <div class="row" style="font-size:16px;font-weight:700"><span>TOTAL PAID</span><span>₹${money(booking.charges)}</span></div>
+    <div class="row"><span>Method</span><span>${(booking.paymentMethod || "").replace("_", " ")}</span></div>
+    <div class="divider"></div>
+    <div style="text-align:center;font-size:11px;color:#888;margin-top:16px">Thank you for parking with us.</div>
+    <script>window.print && setTimeout(()=>{},100)<\/script>
+    </body></html>`;
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Receipt-${booking.bookingId}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Receipt downloaded — open it and print to PDF if needed");
+}
+
+/* ---------- Gate: Entry / Exit page (Staff/Admin) ---------- */
+function renderGatePage(el) {
+  el.innerHTML = `
+    <div class="two-col">
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:12px">Find a booking</h3>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Scan the customer's QR (enter the Booking ID it encodes) or search by vehicle number / mobile.</p>
+        <input id="gate-search" class="text-input" placeholder="Booking ID, vehicle number, or mobile" style="width:100%" />
+        <button class="btn btn-primary" id="gate-search-btn" style="width:100%;margin-top:10px">Find</button>
+        <div id="gate-result" style="margin-top:16px"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:12px">Currently on-site</h3>
+        <div id="gate-active-list"></div>
+      </div>
+    </div>
+  `;
+  document.getElementById("gate-search-btn").addEventListener("click", handleGateSearch);
+  document.getElementById("gate-search").addEventListener("keydown", (e) => { if (e.key === "Enter") handleGateSearch(); });
+  renderGateActiveList();
+}
+
+function handleGateSearch() {
+  const q = document.getElementById("gate-search").value.trim().toLowerCase();
+  const resultHost = document.getElementById("gate-result");
+  if (!q) {
+    resultHost.innerHTML = "";
+    return;
+  }
+  const matches = state.bookings.filter(
+    (b) => b.bookingId.toLowerCase().includes(q) || b.vehicleNumber.toLowerCase().includes(q) || b.mobile.includes(q)
+  ).filter((b) => !["COMPLETED", "CANCELLED"].includes(b.status));
+
+  if (matches.length === 0) {
+    resultHost.innerHTML = `<div style="font-size:13px;color:var(--muted)">No active/reserved booking found.</div>`;
+    return;
+  }
+  resultHost.innerHTML = matches.map((b) => gateBookingCard(b)).join("");
+  wireGateActions(resultHost);
+}
+
+function gateBookingCard(b) {
+  const v = BOOKING_STATUS_VAR[b.status];
+  const vt = VEHICLE_TYPES[b.vehicleType];
+  return `
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between">
+        <div>
+          <div class="mono" style="font-size:11px;color:var(--muted)">${b.bookingId}</div>
+          <div style="font-weight:700">${vt.icon} ${escapeHtml(b.vehicleNumber)} · ${b.slotCode}</div>
+        </div>
+        <span class="badge" style="color:var(--${v});background:var(--${v}-bg)">${b.status.replace("_", " ")}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        ${b.status === "RESERVED" ? `<button class="btn btn-primary btn-sm" data-process-entry="${b.id}">Process Entry</button>` : ""}
+        ${b.status === "ACTIVE" ? `<button class="btn btn-primary btn-sm" data-process-exit="${b.id}">Process Exit</button>` : ""}
+        ${b.status === "PENDING_PAYMENT" ? `<button class="btn btn-primary btn-sm" data-collect-pay="${b.id}">Collect ₹${money(b.charges)}</button>` : ""}
+      </div>
+    </div>`;
+}
+
+function wireGateActions(host) {
+  host.querySelectorAll("[data-process-entry]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const b = findBooking(btn.getAttribute("data-process-entry"));
+      const slot = findSlot(b.slotId);
+      // The reservation should have left this slot RESERVED for this booking. If it's
+      // now OCCUPIED (another car already parked there) or OUT_OF_SERVICE (taken
+      // offline since the reservation was made), don't silently overwrite that —
+      // make staff pick a different slot for this booking instead.
+      if (!slot || slot.status === "OCCUPIED" || slot.status === "OUT_OF_SERVICE") {
+        openReassignSlotModal(b);
+        return;
+      }
+      completeEntry(b, slot);
+      handleGateSearch();
+      renderGateActiveList();
+    })
+  );
+  host.querySelectorAll("[data-process-exit]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const b = findBooking(btn.getAttribute("data-process-exit"));
+      b.exitTime = new Date().toISOString();
+      const sub = activeSubscriptionFor(b.vehicleNumber);
+
+      if (sub) {
+        // Covered by an active subscription — no per-visit charge, settle immediately.
+        b.charges = 0;
+        b.status = "COMPLETED";
+        b.paymentStatus = "SUBSCRIPTION";
+        b.paymentMethod = "SUBSCRIPTION";
+        const slot = findSlot(b.slotId);
+        if (slot) releaseSlot(slot);
+        saveState();
+        showToast(`${b.bookingId} — covered by your slot reservation (${sub.slotCode}), no charge`);
+        logNotification("SMS", b.mobile, `${b.bookingId} exit recorded — covered by your reserved slot ${sub.slotCode} (valid till ${fmtTime(sub.endDate)}). No charge.`);
+      } else {
+        b.charges = calcCharge(b.vehicleType, minutesBetween(b.entryTime, b.exitTime));
+        b.status = "PENDING_PAYMENT";
+        saveState();
+        showToast(`${b.bookingId} — exit recorded, ₹${money(b.charges)} due`);
+      }
+      handleGateSearch();
+      renderGateActiveList();
+    })
+  );
+  host.querySelectorAll("[data-collect-pay]").forEach((btn) =>
+    btn.addEventListener("click", () => openPaymentModal(findBooking(btn.getAttribute("data-collect-pay"))))
+  );
+}
+
+function completeEntry(b, slot) {
+  b.status = "ACTIVE";
+  b.entryTime = new Date().toISOString();
+  b.expectedExit = new Date(Date.now() + b.plannedDurationHours * 3600000).toISOString();
+  slot.status = "OCCUPIED";
+  b.slotId = slot.id;
+  b.slotCode = slot.code;
+  b.floor = slot.floor;
+  saveState();
+  showToast(`${b.bookingId} — vehicle entered, slot ${b.slotCode} occupied`);
+  logNotification("SMS", b.mobile, `Vehicle entry confirmed for ${b.bookingId} at ${fmtTime(b.entryTime)}, slot ${b.slotCode}.`);
+}
+
+function openReassignSlotModal(b) {
+  const oldSlot = findSlot(b.slotId);
+  const candidates = state.slots.filter((s) => s.status === "AVAILABLE" && s.vehicleType === b.vehicleType && !(s.subscriberOnly && !activeSubscriptionFor(b.vehicleNumber)));
+  if (candidates.length === 0) {
+    showModal({
+      title: "No slots free right now",
+      bodyHtml: `<p style="color:var(--paper-dim);font-size:13.5px">Slot <strong>${oldSlot ? oldSlot.code : b.slotCode}</strong> reserved for ${escapeHtml(b.bookingId)} is ${oldSlot ? oldSlot.status.replace("_", " ").toLowerCase() : "unavailable"}, and there's no other free ${VEHICLE_TYPES[b.vehicleType].label} slot right now. Try again once one frees up, or cancel this booking.</p>`,
+      actions: [{ label: "Close", primary: true }],
+    });
+    return;
+  }
+  showModal({
+    title: `Slot ${oldSlot ? oldSlot.code : b.slotCode} isn't free`,
+    bodyHtml: `<p style="color:var(--paper-dim);font-size:13.5px;margin-bottom:12px">
+        ${oldSlot ? `<strong>${oldSlot.code}</strong> is currently <strong style="color:var(--occupied)">${oldSlot.status.replace("_", " ")}</strong>` : "The originally reserved slot is unavailable"} — pick a different slot for ${escapeHtml(b.bookingId)} (${escapeHtml(b.vehicleNumber)}) to complete entry.
+      </p>
+      <select id="reassign-slot-select" class="text-input" style="width:100%">
+        ${candidates.map((s) => `<option value="${s.id}">${s.code} — ${s.floor}</option>`).join("")}
+      </select>`,
+    actions: [
+      {
+        label: "Assign & process entry",
+        primary: true,
+        onClick: () => {
+          const newSlot = findSlot(document.getElementById("reassign-slot-select").value);
+          if (!newSlot || newSlot.status !== "AVAILABLE") {
+            showToast("That slot was just taken — try again.", "error");
+            return;
+          }
+          // Free the old slot only if it was still holding this booking's reservation.
+          if (oldSlot && oldSlot.status === "RESERVED") oldSlot.status = "AVAILABLE";
+          completeEntry(b, newSlot);
+          showToast(`Reassigned to ${newSlot.code} and entry processed`);
+          handleGateSearch();
+          renderGateActiveList();
+        },
+      },
+      { label: "Cancel" },
+    ],
+  });
+}
+
+function renderGateActiveList() {
+  const host = document.getElementById("gate-active-list");
+  if (!host) return;
+  const active = state.bookings.filter((b) => b.status === "ACTIVE" || b.status === "PENDING_PAYMENT");
+  if (active.length === 0) {
+    host.innerHTML = `<div style="font-size:13px;color:var(--muted)">No vehicles currently on-site.</div>`;
+    return;
+  }
+  host.innerHTML = active.map((b) => gateBookingCard(b)).join("");
+  wireGateActions(host);
+}
+
+/* ---------- Search page ---------- */
+function renderSearchPage(el) {
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <label class="field-label" style="margin-top:0">Vehicle number, Booking ID, or mobile number</label>
+      <input id="search-input" class="text-input" style="width:100%" placeholder="Search vehicle history…" />
+    </div>
+    <div id="search-results"></div>
+  `;
+  document.getElementById("search-input").addEventListener("input", (e) => {
+    session.search = e.target.value;
+    renderSearchResults();
+  });
+  document.getElementById("search-input").value = session.search || "";
+  renderSearchResults();
+}
+
+function renderSearchResults() {
+  const host = document.getElementById("search-results");
+  if (!host) return;
+  const q = (session.search || "").trim().toLowerCase();
+  if (!q) {
+    host.innerHTML = `<div class="empty-state card"><h3>Search vehicle history</h3><p>Enter a vehicle number, Booking ID, or mobile number above.</p></div>`;
+    return;
+  }
+  const results = state.bookings
+    .filter((b) => b.bookingId.toLowerCase().includes(q) || b.vehicleNumber.toLowerCase().includes(q) || b.mobile.includes(q))
+    .sort((a, b) => new Date(b.reservedAt) - new Date(a.reservedAt));
+
+  if (results.length === 0) {
+    host.innerHTML = `<div class="empty-state card"><h3>No matches</h3></div>`;
+    return;
+  }
+  host.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">
+    ${results
+      .map((b) => {
+        const v = BOOKING_STATUS_VAR[b.status];
+        const vt = VEHICLE_TYPES[b.vehicleType];
+        return `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="mono" style="font-size:11px;color:var(--muted)">${b.bookingId} · ${escapeHtml(b.mobile)}</div>
+            <div style="font-weight:700">${vt.icon} ${escapeHtml(b.vehicleNumber)} · ${b.slotCode}</div>
+          </div>
+          <span class="badge" style="color:var(--${v});background:var(--${v}-bg)">${b.status.replace("_", " ")}</span>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--paper-dim)">
+          <div>Entry: <span class="mono">${fmtTime(b.entryTime)}</span></div>
+          <div>Exit: <span class="mono">${fmtTime(b.exitTime)}</span></div>
+          <div>Duration: <span class="mono">${b.entryTime && b.exitTime ? minutesBetween(b.entryTime, b.exitTime) + " min" : "—"}</span></div>
+          <div>Payment: <span class="mono">${b.paymentStatus}</span></div>
+        </div>
+      </div>`;
+      })
+      .join("")}
+  </div>`;
+}
+
+/* ---------- Subscriptions page ---------- */
+let subForm = { floor: FLOORS[0], vehicleType: "CAR", slotId: null, startDate: "", endDate: "" };
+
+function renderSubscriptionsPage(el) {
+  const isCustomer = session.user.role === "CUSTOMER";
+  const isStaffOrAdmin = !isCustomer;
+  const mine = state.subscriptions.filter((s) => s.mobile === session.user.mobile);
+  const all = state.subscriptions;
+  const pendingApproval = state.subscriptions.filter((s) => s.status === "PENDING_APPROVAL");
+  const today = new Date().toISOString().slice(0, 10);
+
+  el.innerHTML = `
+    ${isCustomer ? `
+    <div class="card" style="margin-bottom:20px">
+      <h3 style="font-size:15px;margin-bottom:4px">Request a slot for a date range</h3>
+      <p style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Pick an exact slot and dates. Your request goes to staff for approval first — once accepted, you'll pay for the full period. <strong style="color:var(--reserved)">Payment is non-refundable</strong>, even if you finish early.</p>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <input id="sub-vehicle" class="text-input" placeholder="Vehicle number" value="${escapeHtml(session.user.lastVehicleNumber || "")}" />
+        <select id="sub-floor">${FLOORS.map((f) => `<option value="${f}" ${f === subForm.floor ? "selected" : ""}>${f}</option>`).join("")}</select>
+        <select id="sub-vtype">${Object.entries(VEHICLE_TYPES).map(([k, v]) => `<option value="${k}" ${k === subForm.vehicleType ? "selected" : ""}>${v.icon} ${v.label} — ₹${v.dailyRate}/day</option>`).join("")}</select>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <div><label class="small">From</label><br/><input type="date" id="sub-start" class="text-input" min="${today}" value="${subForm.startDate}" /></div>
+        <div><label class="small">To</label><br/><input type="date" id="sub-end" class="text-input" min="${today}" value="${subForm.endDate}" /></div>
+      </div>
+
+      <div id="sub-slot-picker" class="slots-grid" style="margin-bottom:12px"></div>
+      <div id="sub-price-summary"></div>
+      <button class="btn btn-primary" id="sub-buy-btn" style="width:100%;margin-top:12px" disabled>Request reservation</button>
+    </div>` : ""}
+    ${isStaffOrAdmin && pendingApproval.length > 0 ? `
+    <div class="card" style="margin-bottom:20px;border-color:var(--reserved)">
+      <h3 style="font-size:15px;margin-bottom:12px;color:var(--reserved)">⏳ Pending approval (${pendingApproval.length})</h3>
+      <div id="sub-pending-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>` : ""}
+    <h3 style="font-size:15px;margin-bottom:12px;color:var(--paper-dim)">${isCustomer ? "My reservations" : "All slot reservations"}</h3>
+    <div id="sub-list"></div>
+  `;
+
+  if (isCustomer) {
+    document.getElementById("sub-floor").addEventListener("change", (e) => { subForm.floor = e.target.value; subForm.slotId = null; renderSubSlotPicker(); });
+    document.getElementById("sub-vtype").addEventListener("change", (e) => { subForm.vehicleType = e.target.value; subForm.slotId = null; renderSubSlotPicker(); });
+    document.getElementById("sub-start").addEventListener("change", (e) => { subForm.startDate = e.target.value; renderSubSlotPicker(); });
+    document.getElementById("sub-end").addEventListener("change", (e) => { subForm.endDate = e.target.value; renderSubSlotPicker(); });
+    document.getElementById("sub-buy-btn").addEventListener("click", handleSubscriptionRequest);
+    renderSubSlotPicker();
+  }
+
+  if (isStaffOrAdmin && pendingApproval.length > 0) {
+    renderSubPendingList(pendingApproval);
+  }
+
+  renderSubList(el, isCustomer, isCustomer ? mine : all);
+}
+
+function renderSubPendingList(pendingApproval) {
+  const host = document.getElementById("sub-pending-list");
+  if (!host) return;
+  host.innerHTML = pendingApproval
+    .map(
+      (s) => `
+    <div class="card" style="background:var(--surface-hover)">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:700">${escapeHtml(s.vehicleNumber)} · Slot ${s.slotCode} · ${escapeHtml(s.customerName)}</div>
+          <div style="font-size:12.5px;color:var(--muted)">${s.floor} · ${new Date(s.startDate).toLocaleDateString("en-IN")} → ${new Date(s.endDate).toLocaleDateString("en-IN")} · ₹${money(s.price)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-primary btn-sm" data-accept-sub="${s.id}">Accept</button>
+        <button class="btn btn-danger btn-sm" data-reject-sub="${s.id}">Reject</button>
+      </div>
+    </div>`
+    )
+    .join("");
+
+  host.querySelectorAll("[data-accept-sub]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const sub = state.subscriptions.find((s) => s.id === Number(btn.getAttribute("data-accept-sub")));
+      const conflict = slotBookedForRange(sub.slotId, sub.startDate, sub.endDate, sub.id);
+      if (conflict) {
+        showToast("That slot has since been taken for an overlapping period — reject or ask the customer to re-request.", "error");
+        return;
+      }
+      const liveBooking = findLiveBookingOnSlot(sub.slotId);
+      if (liveBooking && (new Date(sub.startDate) <= new Date() && new Date(sub.endDate) >= new Date())) {
+        showToast(`Slot ${sub.slotCode} currently has an active walk-in booking (${liveBooking.bookingId}) — it needs to be freed before you can accept a subscription covering today.`, "error");
+        return;
+      }
+      sub.status = "PENDING_PAYMENT";
+      saveState();
+      showToast(`Accepted ${sub.vehicleNumber}'s request — awaiting payment of ₹${money(sub.price)}`);
+      logNotification("SMS", sub.mobile, `Your slot reservation request for ${sub.slotCode} was accepted. Please complete payment of ₹${money(sub.price)} to confirm.`);
+      render();
+    })
+  );
+  host.querySelectorAll("[data-reject-sub]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const sub = state.subscriptions.find((s) => s.id === Number(btn.getAttribute("data-reject-sub")));
+      if (!confirm(`Reject ${sub.vehicleNumber}'s request for slot ${sub.slotCode}?`)) return;
+      sub.status = "CANCELLED";
+      saveState();
+      showToast(`Request rejected — ${sub.vehicleNumber} notified`);
+      logNotification("SMS", sub.mobile, `Your slot reservation request for ${sub.slotCode} was declined by staff. No charge was made.`);
+      render();
+    })
+  );
+}
+
+function renderSubSlotPicker() {
+  const host = document.getElementById("sub-slot-picker");
+  const summaryHost = document.getElementById("sub-price-summary");
+  const buyBtn = document.getElementById("sub-buy-btn");
+  if (!host) return;
+
+  if (!subForm.startDate || !subForm.endDate) {
+    host.innerHTML = `<div style="font-size:12.5px;color:var(--muted)">Pick a date range above to see available slots.</div>`;
+    summaryHost.innerHTML = "";
+    buyBtn.disabled = true;
+    return;
+  }
+  if (new Date(subForm.endDate) < new Date(subForm.startDate)) {
+    host.innerHTML = `<div style="font-size:12.5px;color:var(--occupied)">"To" date must be on or after "From" date.</div>`;
+    summaryHost.innerHTML = "";
+    buyBtn.disabled = true;
+    return;
+  }
+
+  const slots = state.slots.filter((s) => s.floor === subForm.floor && s.vehicleType === subForm.vehicleType);
+  host.innerHTML = slots
+    .map((s) => {
+      const conflict = slotBookedForRange(s.id, subForm.startDate, subForm.endDate);
+      const outOfService = s.status === "OUT_OF_SERVICE";
+      const blocked = !!conflict || outOfService;
+      const isSelected = subForm.slotId === s.id;
+      return `
+      <div class="slot-tile" style="border-color:${isSelected ? "var(--cyan)" : blocked ? "var(--occupied)" : "var(--available)"};${blocked ? "opacity:.55" : "cursor:pointer"}" ${!blocked ? `data-pick-sub-slot="${s.id}"` : ""}>
+        <span class="mono" style="font-weight:700;font-size:13px">${s.code}</span>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:4px">${blocked ? (outOfService ? "Out of service" : `Booked ${fmtTime(conflict.startDate).split(",")[0]}–${fmtTime(conflict.endDate).split(",")[0]}`) : "Free for these dates"}</div>
+      </div>`;
+    })
+    .join("");
+
+  host.querySelectorAll("[data-pick-sub-slot]").forEach((tile) =>
+    tile.addEventListener("click", () => {
+      subForm.slotId = Number(tile.getAttribute("data-pick-sub-slot"));
+      renderSubSlotPicker();
+    })
+  );
+
+  const days = daysBetweenInclusive(subForm.startDate, subForm.endDate);
+  const rate = VEHICLE_TYPES[subForm.vehicleType].dailyRate;
+  const total = days * rate;
+  const slot = subForm.slotId ? findSlot(subForm.slotId) : null;
+  summaryHost.innerHTML = `
+    <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:10px 0;border-top:1px solid var(--border);margin-top:4px">
+      <span>${slot ? `Slot ${slot.code}` : "No slot selected"} · ${days} day${days > 1 ? "s" : ""} × ₹${rate}</span>
+      <strong class="mono" style="color:var(--cyan-bright)">₹${money(total)}</strong>
+    </div>`;
+  buyBtn.disabled = !slot;
+}
+
+function handleSubscriptionRequest() {
+  const vehicleNumber = document.getElementById("sub-vehicle").value.trim();
+  if (!vehicleNumber) { showToast("Enter a vehicle number", "error"); return; }
+  if (!subForm.slotId) { showToast("Pick a slot", "error"); return; }
+
+  const conflict = slotBookedForRange(subForm.slotId, subForm.startDate, subForm.endDate);
+  if (conflict) {
+    showToast("This parking slot is already reserved for those dates.", "error");
+    renderSubSlotPicker();
+    return;
+  }
+
+  const slot = findSlot(subForm.slotId);
+  const days = daysBetweenInclusive(subForm.startDate, subForm.endDate);
+  const price = days * VEHICLE_TYPES[slot.vehicleType].dailyRate;
+  const subId = nextSeq("subscription");
+  const startIso = new Date(subForm.startDate + "T00:00:00").toISOString();
+  const endIso = new Date(subForm.endDate + "T23:59:59").toISOString();
+
+  // No payment is taken yet, and the slot isn't locked yet — staff must accept the
+  // request first (Part 2), and payment happens as its own explicit step (Part 1 & 4)
+  // once accepted, exactly like the pay-at-exit flow for regular bookings.
+  state.subscriptions.push({
+    id: subId, customerName: session.user.fullName, mobile: session.user.mobile,
+    vehicleNumber, slotId: slot.id, slotCode: slot.code, floor: slot.floor, vehicleType: slot.vehicleType,
+    startDate: startIso, endDate: endIso, price, paymentMethod: null, status: "PENDING_APPROVAL",
+  });
+  saveState();
+
+  showToast(`Request sent for slot ${slot.code}, ${subForm.startDate} → ${subForm.endDate} — awaiting staff approval`);
+  logNotification("EMAIL", session.user.mobile, `Your request for slot ${slot.code} (${vehicleNumber}), ${subForm.startDate} to ${subForm.endDate}, is awaiting staff approval.`);
+
+  subForm = { floor: subForm.floor, vehicleType: subForm.vehicleType, slotId: null, startDate: "", endDate: "" };
+  render();
+}
+
+function openSubscriptionPaymentModal(sub) {
+  showModal({
+    title: `Pay for slot ${sub.slotCode}`,
+    bodyHtml: `
+      <div style="font-size:13.5px;color:var(--paper-dim);margin-bottom:14px">
+        Vehicle <strong style="color:var(--paper)">${escapeHtml(sub.vehicleNumber)}</strong> · ${sub.slotCode} · ${sub.floor}<br/>
+        ${new Date(sub.startDate).toLocaleDateString("en-IN")} → ${new Date(sub.endDate).toLocaleDateString("en-IN")}
+      </div>
+      <div style="font-size:24px;font-weight:800;font-family:var(--font-mono);color:var(--cyan-bright);margin-bottom:14px">₹${money(sub.price)}</div>
+      <p style="font-size:11.5px;color:var(--muted);margin-bottom:10px">Payment is for the full period and is non-refundable.</p>
+      <label class="field-label" style="margin-top:0">Payment method</label>
+      <select id="sub-pay-method" class="text-input">${PAYMENT_METHODS.map((m) => `<option value="${m}">${m.replace("_", " ")}</option>`).join("")}</select>`,
+    actions: [
+      {
+        label: "Confirm payment",
+        primary: true,
+        onClick: () => {
+          const method = document.getElementById("sub-pay-method")?.value || "CASH";
+          const conflict = slotBookedForRange(sub.slotId, sub.startDate, sub.endDate, sub.id);
+          if (conflict) {
+            showToast("That slot is no longer free for these dates — payment cancelled.", "error");
+            return;
+          }
+          state.payments.push({ id: nextSeq("payment"), bookingId: `SUBSCRIPTION-${sub.id}`, amount: sub.price, method, paidAt: new Date().toISOString(), isSubscription: true });
+          sub.status = "ACTIVE";
+          sub.paymentMethod = method;
+          const slot = findSlot(sub.slotId);
+          const now = new Date();
+          const coversToday = slot && new Date(sub.startDate) <= now && new Date(sub.endDate) >= now;
+          const liveBooking = coversToday ? findLiveBookingOnSlot(sub.slotId) : null;
+          if (coversToday && !liveBooking) {
+            slot.status = "RESERVED";
+          } else if (liveBooking) {
+            // Don't silently overwrite a slot a walk-in customer is actively using —
+            // the subscription is still paid and ACTIVE, it just won't physically
+            // claim the slot until that booking's vehicle actually leaves.
+            showToast(`Payment received, but slot ${sub.slotCode} currently has an active walk-in booking (${liveBooking.bookingId}) — it'll take effect once that vehicle exits.`, "warn");
+          }
+          saveState();
+          showToast(`Payment received — slot ${sub.slotCode} reservation is now active`);
+          logNotification("SMS", sub.mobile, `Payment of ₹${money(sub.price)} received for slot ${sub.slotCode}. Your reservation is confirmed.`);
+          render();
+        },
+      },
+      { label: "Cancel" },
+    ],
+  });
+}
+
+function renderSubList(el, isCustomer, list) {
+  const host = document.getElementById("sub-list");
+  const now = new Date();
+  const isAdmin = session.user.role === "ADMIN";
+  host.innerHTML = list.length === 0
+    ? `<div class="empty-state card"><h3>No reservations yet</h3></div>`
+    : `<div style="display:flex;flex-direction:column;gap:10px">
+        ${list
+          .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+          .map((s) => {
+            const isCancelled = s.status === "CANCELLED";
+            const isPendingApproval = s.status === "PENDING_APPROVAL";
+            const isPendingPayment = s.status === "PENDING_PAYMENT";
+            const isExpired = s.status === "ACTIVE" && new Date(s.endDate) < now;
+            const isUpcoming = s.status === "ACTIVE" && new Date(s.startDate) > now;
+            const isLive = s.status === "ACTIVE" && !isExpired && !isUpcoming;
+            const statusLabel = isCancelled ? "CANCELLED" : isPendingApproval ? "AWAITING APPROVAL" : isPendingPayment ? "AWAITING PAYMENT" : isExpired ? "EXPIRED" : isUpcoming ? "UPCOMING" : "ACTIVE";
+            const colorVar = isCancelled ? "cancelled" : isPendingApproval || isPendingPayment ? "reserved" : isExpired ? "outofservice" : isUpcoming ? "reserved" : "available";
+            const canCancel = isCustomer && (isPendingApproval || isPendingPayment || isLive || isUpcoming);
+            const alreadyPaid = s.status === "ACTIVE";
+            return `
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+              <div>
+                <div style="font-weight:700">${escapeHtml(s.vehicleNumber)} · Slot ${s.slotCode} ${!isCustomer ? `· ${escapeHtml(s.customerName)}` : ""}</div>
+                <div style="font-size:12.5px;color:var(--muted)">${s.floor} · ₹${money(s.price)} total (non-refundable)</div>
+              </div>
+              <span class="badge" style="color:var(--${colorVar});background:var(--${colorVar}-bg)">${statusLabel}</span>
+            </div>
+            <div style="font-size:12px;color:var(--paper-dim);margin-top:8px">${new Date(s.startDate).toLocaleDateString("en-IN")} → ${new Date(s.endDate).toLocaleDateString("en-IN")}</div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              ${isPendingPayment ? `<button class="btn btn-primary btn-sm" data-pay-sub="${s.id}">Pay ₹${money(s.price)}</button>` : ""}
+              ${canCancel ? `<button class="btn btn-danger btn-sm" data-cancel-sub="${s.id}">Cancel${alreadyPaid ? " (no refund)" : ""}</button>` : ""}
+              ${isAdmin ? `<button class="btn btn-danger btn-sm" data-delete-sub="${s.id}">Delete</button>` : ""}
+            </div>
+          </div>`;
+          })
+          .join("")}
+      </div>`;
+
+  host.querySelectorAll("[data-pay-sub]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const sub = state.subscriptions.find((s) => s.id === Number(btn.getAttribute("data-pay-sub")));
+      openSubscriptionPaymentModal(sub);
+    })
+  );
+
+  host.querySelectorAll("[data-cancel-sub]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const sub = state.subscriptions.find((s) => s.id === Number(btn.getAttribute("data-cancel-sub")));
+      const paid = sub.status === "ACTIVE";
+      const msg = paid
+        ? `Cancel this reservation for slot ${sub.slotCode}? You already paid ₹${money(sub.price)} for the full period and this will NOT be refunded.`
+        : `Cancel this request for slot ${sub.slotCode}? No payment has been made yet.`;
+      if (!confirm(msg)) return;
+      sub.status = "CANCELLED";
+      const slot = findSlot(sub.slotId);
+      // Only free the slot if nothing else currently claims it.
+      if (slot && slot.status === "RESERVED" && !slotBookedForRange(slot.id, new Date().toISOString(), new Date().toISOString())) {
+        slot.status = "AVAILABLE";
+      }
+      saveState();
+      showToast(paid ? `Reservation cancelled — ₹${money(sub.price)} already paid is not refunded` : "Request cancelled — no charge was made");
+      render();
+    })
+  );
+
+  if (isAdmin) {
+    host.querySelectorAll("[data-delete-sub]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const sub = state.subscriptions.find((s) => s.id === Number(btn.getAttribute("data-delete-sub")));
+        if (!confirm(`Permanently delete this subscription record for slot ${sub.slotCode} (${sub.vehicleNumber})? This cannot be undone.`)) return;
+        const slot = findSlot(sub.slotId);
+        state.subscriptions = state.subscriptions.filter((s) => s.id !== sub.id);
+        // If the slot was held occupied/reserved on account of this subscription, and
+        // nothing else (booking or another subscription) still claims it, free it back
+        // to available now that the record is gone.
+        if (slot && (slot.status === "RESERVED" || slot.status === "OCCUPIED")) {
+          const heldByBooking = state.bookings.some((b) => b.slotId === slot.id && ["RESERVED", "ACTIVE", "PENDING_PAYMENT"].includes(b.status));
+          const heldBySubscription = !!slotBookedForRange(slot.id, new Date().toISOString(), new Date().toISOString());
+          if (!heldByBooking && !heldBySubscription) {
+            slot.status = "AVAILABLE";
+          }
+        }
+        saveState();
+        showToast(`Subscription for ${sub.slotCode} deleted${slot && slot.status === "AVAILABLE" ? " — slot freed up" : ""}`);
+        render();
+      })
+    );
+  }
+}
+
+/* ---------- Notification log page ---------- */
+function renderNotificationsPage(el) {
+  const isAdmin = session.user.role === "ADMIN";
+  if (state.notifications.length === 0) {
+    el.innerHTML = `<div class="empty-state card"><h3>No notifications yet</h3><p>SMS/Email confirmations are logged here (simulated — this static app has no real SMS/Email provider connected).</p></div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+      <p style="font-size:12px;color:var(--muted);margin:0">These are simulated — sending real SMS/Email requires connecting a backend provider (e.g. Twilio, SendGrid).</p>
+      ${isAdmin ? `<button class="btn btn-danger btn-sm" id="notif-delete-all" style="flex-shrink:0">Delete all</button>` : ""}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+    ${state.notifications
+      .map(
+        (n) => `
+      <div class="card" style="padding:12px 16px">
+        <div style="display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted)">
+          <span class="mono">${n.type} → ${escapeHtml(n.to)}</span>
+          <span style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <span class="mono">${fmtTime(n.at)}</span>
+            ${isAdmin ? `<button class="btn btn-danger btn-sm" style="padding:2px 8px" data-delete-notification="${n.id}">Delete</button>` : ""}
+          </span>
+        </div>
+        <div style="font-size:13px;margin-top:4px">${escapeHtml(n.message)}</div>
+      </div>`
+      )
+      .join("")}
+    </div>`;
+
+  if (isAdmin) {
+    el.querySelectorAll("[data-delete-notification]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const id = Number(btn.getAttribute("data-delete-notification"));
+        if (!confirm("Delete this notification log entry? This cannot be undone.")) return;
+        state.notifications = state.notifications.filter((n) => n.id !== id);
+        saveState();
+        showToast("Notification deleted");
+        render();
+      })
+    );
+
+    document.getElementById("notif-delete-all").addEventListener("click", () => {
+      if (!confirm(`Delete all ${state.notifications.length} notification log entries? This cannot be undone.`)) return;
+      state.notifications = [];
+      saveState();
+      showToast("All notifications deleted");
+      render();
+    });
+  }
+}
+
+/* ---------- Reports & Revenue page (Admin only) ---------- */
+function revenueInRange(start, end) {
+  const parkingRevenue = state.bookings
+    .filter((b) => b.status === "COMPLETED" && b.exitTime && new Date(b.exitTime) >= start && new Date(b.exitTime) <= end)
+    .reduce((sum, b) => sum + b.charges, 0);
+  const subscriptionRevenue = state.payments
+    .filter((p) => p.isSubscription && new Date(p.paidAt) >= start && new Date(p.paidAt) <= end)
+    .reduce((sum, p) => sum + p.amount, 0);
+  return parkingRevenue + subscriptionRevenue;
+}
+
+function renderReportsPage(el) {
+  const now = new Date();
+  const { start: todayStart, end: todayEnd } = todayBounds();
+  const yestStart = new Date(todayStart); yestStart.setDate(yestStart.getDate() - 1);
+  const yestEnd = new Date(todayEnd); yestEnd.setDate(yestEnd.getDate() - 1);
+  const weekStart = new Date(todayStart); weekStart.setDate(weekStart.getDate() - 6);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+
+  const revToday = revenueInRange(todayStart, todayEnd);
+  const revYesterday = revenueInRange(yestStart, yestEnd);
+  const revWeek = revenueInRange(weekStart, todayEnd);
+  const revMonth = revenueInRange(monthStart, todayEnd);
+  const revYear = revenueInRange(yearStart, todayEnd);
+
+  const totalVehicles = state.bookings.length;
+  const occupiedSlots = state.slots.filter((s) => s.status === "OCCUPIED").length;
+  const availableSlots = state.slots.filter((s) => s.status === "AVAILABLE").length;
+  const cancelledBookings = state.bookings.filter((b) => b.status === "CANCELLED").length;
+  const completedBookings = state.bookings.filter((b) => b.status === "COMPLETED").length;
+
+  el.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:20px">
+      ${reportStat("💰", "Today", revToday, "available")}
+      ${reportStat("📅", "Yesterday", revYesterday)}
+      ${reportStat("🗓", "Last 7 days", revWeek)}
+      ${reportStat("📆", "This month", revMonth)}
+      ${reportStat("📈", "This year", revYear)}
+    </div>
+
+    <div class="stat-grid" style="margin-bottom:20px">
+      ${analyticsStat("🚗", "Total bookings", totalVehicles)}
+      ${analyticsStat("🅿️", "Occupied now", occupiedSlots, "occupied")}
+      ${analyticsStat("✅", "Available now", availableSlots, "available")}
+      ${analyticsStat("❌", "Cancelled", cancelledBookings, "cancelled")}
+      ${analyticsStat("🏁", "Completed", completedBookings, "completed")}
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <h3 style="font-size:15px">Export</h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" id="export-csv-btn">⬇ Export CSV (Excel)</button>
+          <button class="btn btn-ghost btn-sm" id="export-pdf-btn">🖨 Print / Save as PDF</button>
+        </div>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin-top:8px">CSV opens directly in Excel/Sheets. "Print / Save as PDF" uses your browser's print dialog — choose "Save as PDF" as the destination.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h3 style="font-size:14.5px;margin-bottom:14px;color:var(--paper-dim)">Occupancy by status</h3>
+        ${occupancyDonut()}
+      </div>
+      <div class="card">
+        <h3 style="font-size:14.5px;margin-bottom:14px;color:var(--paper-dim)">Revenue trend (last 7 days)</h3>
+        ${revenueBarChart()}
+      </div>
+    </div>
+  `;
+
+  document.getElementById("export-csv-btn").addEventListener("click", exportBookingsCsv);
+  document.getElementById("export-pdf-btn").addEventListener("click", () => window.print());
+}
+
+function reportStat(icon, label, value, colorVar) {
+  return `<div class="card stat-card-v2"><div class="stat-icon">${icon}</div><div><div class="stat-label">${label}</div><div class="mono stat-value" style="color:${colorVar ? `var(--${colorVar})` : "var(--paper)"}">₹${Math.round(value).toLocaleString("en-IN")}</div></div></div>`;
+}
+function analyticsStat(icon, label, value, colorVar) {
+  return `<div class="card stat-card-v2"><div class="stat-icon">${icon}</div><div><div class="stat-label">${label}</div><div class="mono stat-value" style="color:${colorVar ? `var(--${colorVar})` : "var(--paper)"}">${value}</div></div></div>`;
+}
+
+function occupancyDonut() {
+  const counts = { AVAILABLE: 0, RESERVED: 0, OCCUPIED: 0, OUT_OF_SERVICE: 0 };
+  state.slots.forEach((s) => counts[s.status]++);
+  const total = state.slots.length || 1;
+  const colors = { AVAILABLE: "#2fd67e", RESERVED: "#f2b23c", OCCUPIED: "#f2495c", OUT_OF_SERVICE: "#6c7891" };
+  let offset = 0;
+  const circumference = 2 * Math.PI * 46;
+  const segments = Object.entries(counts)
+    .filter(([, v]) => v > 0)
+    .map(([k, v]) => {
+      const frac = v / total;
+      const dash = frac * circumference;
+      const seg = `<circle cx="60" cy="60" r="46" fill="none" stroke="${colors[k]}" stroke-width="16" stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 60 60)"/>`;
+      offset += dash;
+      return seg;
+    })
+    .join("");
+  return `
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <svg width="120" height="120" viewBox="0 0 120 120">${segments}<text x="60" y="65" text-anchor="middle" font-family="JetBrains Mono" font-size="18" font-weight="700" fill="var(--paper)">${total}</text></svg>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${Object.entries(counts)
+          .map(([k, v]) => `<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--paper-dim)"><span style="width:9px;height:9px;border-radius:2px;background:${colors[k]}"></span>${k.replace("_", " ")} (${v})</div>`)
+          .join("")}
+      </div>
+    </div>`;
+}
+
+function revenueBarChart() {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const e = new Date(d);
+    e.setHours(23, 59, 59, 999);
+    days.push({ label: d.toLocaleDateString("en-IN", { weekday: "short" }), value: revenueInRange(d, e) });
+  }
+  const max = Math.max(1, ...days.map((d) => d.value));
+  return `<div style="display:flex;align-items:end;gap:10px;height:140px">
+    ${days
+      .map(
+        (d) => `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="mono" style="font-size:10px;color:var(--muted)">₹${Math.round(d.value)}</div>
+        <div style="width:100%;background:var(--cyan);border-radius:4px 4px 0 0;height:${Math.max(3, (d.value / max) * 90)}px"></div>
+        <div style="font-size:10.5px;color:var(--muted)">${d.label}</div>
+      </div>`
+      )
+      .join("")}
+  </div>`;
+}
+
+function exportBookingsCsv() {
+  const headers = ["Booking ID", "Vehicle Number", "Vehicle Type", "Slot", "Floor", "Status", "Mobile", "Entry", "Exit", "Charges", "Payment Status", "Payment Method"];
+  const rows = state.bookings.map((b) => [
+    b.bookingId, b.vehicleNumber, b.vehicleType, b.slotCode, b.floor, b.status, b.mobile,
+    b.entryTime || "", b.exitTime || "", b.charges, b.paymentStatus, b.paymentMethod || "",
+  ]);
+  const csv = [headers, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `parkgrid-bookings-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("CSV exported");
+}
+
+/* ---------- Dashboard page (role-aware) ---------- */
+function renderDashboardPage(el) {
+  const role = session.user.role;
+  if (role === "ADMIN") renderAdminDashboard(el);
+  else if (role === "STAFF") renderStaffDashboard(el);
+  else renderCustomerDashboard(el);
+}
+
+function renderAdminDashboard(el) {
+  const { start: todayStart, end: todayEnd } = todayBounds();
+  const revToday = revenueInRange(todayStart, todayEnd);
+  const totalSlots = state.slots.length;
+  const occupied = state.slots.filter((s) => s.status === "OCCUPIED").length;
+  const available = state.slots.filter((s) => s.status === "AVAILABLE").length;
+  const reserved = state.slots.filter((s) => s.status === "RESERVED").length;
+  const activeBookings = state.bookings.filter((b) => b.status === "ACTIVE").length;
+  const pendingPayment = state.bookings.filter((b) => b.status === "PENDING_PAYMENT").length;
+
+  el.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:20px">
+      ${reportStat("💰", "Revenue today", revToday, "available")}
+      ${analyticsStat("🅿️", "Total slots", totalSlots)}
+      ${analyticsStat("✅", "Available", available, "available")}
+      ${analyticsStat("🚗", "Occupied", occupied, "occupied")}
+      ${analyticsStat("🕓", "Reserved", reserved, "reserved")}
+      ${analyticsStat("💳", "Awaiting payment", pendingPayment, "reserved")}
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3 style="font-size:14.5px;margin-bottom:14px;color:var(--paper-dim)">Occupancy by status</h3>
+        ${occupancyDonut()}
+      </div>
+      <div class="card">
+        <h3 style="font-size:14.5px;margin-bottom:14px;color:var(--paper-dim)">Revenue trend (last 7 days)</h3>
+        ${revenueBarChart()}
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="font-size:14.5px;color:var(--paper-dim)">On-site right now</h3>
+        <button class="btn btn-ghost btn-sm" data-nav="gate">Go to Entry/Exit →</button>
+      </div>
+      <div style="margin-top:12px" id="dash-active-list"></div>
+    </div>
+  `;
+  const activeHost = document.getElementById("dash-active-list");
+  const active = state.bookings.filter((b) => b.status === "ACTIVE" || b.status === "PENDING_PAYMENT");
+  activeHost.innerHTML = active.length === 0
+    ? `<div style="font-size:13px;color:var(--muted)">Nothing on-site right now.</div>`
+    : active.map((b) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span class="mono">${b.bookingId}</span><span>${VEHICLE_TYPES[b.vehicleType].icon} ${escapeHtml(b.vehicleNumber)} · ${b.slotCode}</span><span class="badge" style="color:var(--${BOOKING_STATUS_VAR[b.status]});background:var(--${BOOKING_STATUS_VAR[b.status]}-bg)">${b.status.replace("_", " ")}</span></div>`).join("");
+  el.querySelectorAll("[data-nav]").forEach((btn) => btn.addEventListener("click", () => navigate(btn.getAttribute("data-nav"))));
+}
+
+function renderStaffDashboard(el) {
+  const totalSlots = state.slots.length;
+  const occupied = state.slots.filter((s) => s.status === "OCCUPIED").length;
+  const available = state.slots.filter((s) => s.status === "AVAILABLE").length;
+  const reserved = state.slots.filter((s) => s.status === "RESERVED").length;
+  const pendingPayment = state.bookings.filter((b) => b.status === "PENDING_PAYMENT").length;
+
+  el.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:20px">
+      ${analyticsStat("🅿️", "Total slots", totalSlots)}
+      ${analyticsStat("✅", "Available", available, "available")}
+      ${analyticsStat("🚗", "Occupied", occupied, "occupied")}
+      ${analyticsStat("🕓", "Reserved", reserved, "reserved")}
+      ${analyticsStat("💳", "Awaiting payment", pendingPayment, "reserved")}
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3 style="font-size:14.5px;color:var(--paper-dim)">On-site right now</h3>
+        <button class="btn btn-primary btn-sm" data-nav="gate">Process entry/exit →</button>
+      </div>
+      <div id="dash-active-list-staff"></div>
+    </div>
+  `;
+  const host = document.getElementById("dash-active-list-staff");
+  const active = state.bookings.filter((b) => b.status === "ACTIVE" || b.status === "PENDING_PAYMENT" || b.status === "RESERVED");
+  host.innerHTML = active.length === 0
+    ? `<div style="font-size:13px;color:var(--muted)">No bookings need attention right now.</div>`
+    : active.map((b) => gateBookingCard(b)).join("");
+  wireGateActions(host);
+  el.querySelectorAll("[data-nav]").forEach((btn) => btn.addEventListener("click", () => navigate(btn.getAttribute("data-nav"))));
+}
+
+function renderCustomerDashboard(el) {
+  const mine = state.bookings.filter((b) => b.mobile === session.user.mobile);
+  const activeOrReserved = mine.filter((b) => ["RESERVED", "ACTIVE", "PENDING_PAYMENT"].includes(b.status));
+  const availableNow = state.slots.filter((s) => s.status === "AVAILABLE").length;
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:20px;background:radial-gradient(circle at 90% -10%, rgba(34,195,230,.12), transparent 60%)">
+      <h3 style="font-size:17px;margin-bottom:6px">Welcome, ${escapeHtml(session.user.fullName)} 👋</h3>
+      <p style="color:var(--paper-dim);font-size:13.5px;margin:0 0 16px">${availableNow} slots available right now across all floors.</p>
+      <button class="btn btn-primary" data-nav="reserve">＋ Reserve a slot</button>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <label class="field-label" style="margin-top:0">Quick search — vehicle number, Booking ID, or mobile</label>
+      <input id="cust-quick-search" class="text-input" style="width:100%" placeholder="Search your bookings…" />
+      <div id="cust-quick-results" style="margin-top:12px"></div>
+    </div>
+
+    <h3 style="font-size:15px;margin-bottom:12px;color:var(--paper-dim)">Active / upcoming bookings</h3>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${activeOrReserved.length === 0 ? `<div class="empty-state card"><h3>No active bookings</h3><p>Reserve a slot to get started.</p></div>` : activeOrReserved.map((b) => bookingCardHtml(b)).join("")}
+    </div>
+  `;
+
+  el.querySelectorAll("[data-nav]").forEach((btn) => btn.addEventListener("click", () => navigate(btn.getAttribute("data-nav"))));
+  wireBookingCardActions(el);
+
+  document.getElementById("cust-quick-search").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    const host = document.getElementById("cust-quick-results");
+    if (!q) { host.innerHTML = ""; return; }
+    const matches = mine.filter((b) => b.bookingId.toLowerCase().includes(q) || b.vehicleNumber.toLowerCase().includes(q));
+    host.innerHTML = matches.length === 0
+      ? `<div style="font-size:12.5px;color:var(--muted)">No matches.</div>`
+      : matches.map((b) => `<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)"><span class="mono">${b.bookingId}</span> — ${escapeHtml(b.vehicleNumber)} <span class="badge" style="color:var(--${BOOKING_STATUS_VAR[b.status]});background:var(--${BOOKING_STATUS_VAR[b.status]}-bg);margin-left:6px">${b.status.replace("_", " ")}</span></div>`).join("");
+  });
+}
+
+/* ---------- Boot ---------- */
+
+// Live status auto-refresh — re-renders the current page every few seconds so slot/
+// booking state stays fresh without a manual reload (feature: live status refresh).
+setInterval(() => {
+  if (session.user && ["dashboard", "slots"].includes(session.page)) render();
+  else if (session.user && session.page === "gate") renderGateActiveList();
+}, 8000);
+
+// Expiry warning — checks every active booking against its expected exit time and
+// warns (once per booking) when it's within 10 minutes of expiring.
+function checkExpiryWarnings() {
+  const soon = Date.now() + 10 * 60000;
+  let changed = false;
+  state.bookings.forEach((b) => {
+    if (b.status === "ACTIVE" && b.expectedExit && !b.expiryWarned && new Date(b.expectedExit).getTime() <= soon) {
+      b.expiryWarned = true;
+      changed = true;
+      logNotification("SMS", b.mobile, `Heads up — your parking for ${b.bookingId} (${b.slotCode}) expires soon at ${fmtTime(b.expectedExit)}. Extend if needed.`);
+      if (session.user && (session.user.mobile === b.mobile || session.user.role !== "CUSTOMER")) {
+        showToast(`${b.bookingId} — parking time expiring soon (${b.slotCode})`, "warn");
+      }
+    }
+  });
+  if (changed) saveState();
+}
+setInterval(checkExpiryWarnings, 15000);
+
+// No-show auto-release — a RESERVED booking nobody ever entered for eventually frees
+// the slot back up, instead of holding it hostage indefinitely.
+function checkReservationNoShows() {
+  let changed = false;
+  state.bookings.forEach((b) => {
+    if (b.status !== "RESERVED" || b.entryTime) return;
+    const minutesWaiting = (Date.now() - new Date(b.reservedAt).getTime()) / 60000;
+    if (minutesWaiting >= RESERVATION_AUTO_RELEASE_MINUTES) {
+      b.status = "CANCELLED";
+      b.cancelReason = "No-show — auto-released";
+      const slot = findSlot(b.slotId);
+      if (slot && slot.status === "RESERVED") releaseSlot(slot);
+      changed = true;
+      logNotification("SMS", b.mobile, `Your reservation ${b.bookingId} (${b.slotCode}) was released after ${RESERVATION_AUTO_RELEASE_MINUTES} minutes with no entry recorded.`);
+      if (session.user && session.user.role !== "CUSTOMER") {
+        showToast(`${b.bookingId} auto-released — no entry recorded (${b.slotCode})`, "warn");
+      }
+    }
+  });
+  if (changed) {
+    saveState();
+    render();
+  }
+}
+setInterval(checkReservationNoShows, 30000);
+
+render();
+</script>
+</body>
+</html>

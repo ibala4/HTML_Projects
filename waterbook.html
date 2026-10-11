@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaterBook — Tanker Delivery Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A2233;
+  --bg-elevated:#0E2C42;
+  --surface:#123551;
+  --surface-2:#17415F;
+  --border:#1F4D6C;
+  --aqua:#22C3D6;
+  --aqua-bright:#66E3EE;
+  --aqua-deep:#1591A6;
+  --amber:#FFB020;
+  --amber-bright:#FFC94D;
+  --leaf:#3DD68C;
+  --danger:#FF6B6B;
+  --text:#EAF6FB;
+  --text-dim:#87ABC0;
+  --paper:#F4FBFD;
+  --text-on-paper:#0A2233;
+  --radius:18px;
+  --radius-sm:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  background:
+    radial-gradient(1100px 550px at 100% -10%, rgba(34,195,214,.16), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(255,176,32,.08), transparent 55%),
+    var(--bg);
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:60px;
+}
+::selection{background:var(--aqua);color:#04222c;}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,select,textarea{font-family:inherit;color:inherit;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+
+/* ---------- Header ---------- */
+.header{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:22px 5vw 18px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{
+  width:46px;height:46px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(155deg,var(--aqua-bright),var(--aqua-deep));
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 6px 18px rgba(34,195,214,.35);
+}
+.brand-text h1{font-size:21px;font-weight:700;letter-spacing:-.01em;}
+.brand-text p{font-size:12px;color:var(--text-dim);margin-top:1px;}
+
+.role-switch{
+  display:flex;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:4px;gap:2px;
+}
+.role-btn{
+  padding:9px 18px;border-radius:24px;font-size:13px;font-weight:600;color:var(--text-dim);
+  display:flex;align-items:center;gap:7px;transition:.18s ease;white-space:nowrap;
+}
+.role-btn.active{background:linear-gradient(155deg,var(--aqua-bright),var(--aqua-deep));color:#04222c;}
+.role-btn:not(.active):hover{color:var(--text);}
+
+.wrap{padding:0 5vw;max-width:1180px;margin:0 auto;}
+.view{display:none;}
+.view.active{display:block;animation:fadein .3s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.page-head{margin:6px 0 24px;}
+.page-head h2{font-size:26px;font-weight:700;}
+.page-head p{color:var(--text-dim);font-size:13.5px;margin-top:4px;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;
+}
+.card-title{font-family:'Baloo 2',sans-serif;font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+.field{margin-bottom:15px;}
+.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);margin-bottom:7px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 14px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:11px;
+  font-size:13.5px;color:var(--text);
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--aqua);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.toggle-group{display:flex;gap:8px;}
+.toggle-opt{
+  flex:1;padding:10px;border-radius:11px;border:1px solid var(--border);background:var(--bg-elevated);
+  text-align:center;font-size:13px;font-weight:600;color:var(--text-dim);
+}
+.toggle-opt.active{background:rgba(34,195,214,.16);border-color:var(--aqua);color:var(--aqua-bright);}
+
+.urgent-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 15px;border-radius:11px;background:rgba(255,176,32,.09);border:1px solid rgba(255,176,32,.35);
+  margin-bottom:15px;
+}
+.urgent-toggle .lbl{font-size:13px;font-weight:600;color:var(--amber-bright);display:flex;align-items:center;gap:8px;}
+.switch{width:42px;height:24px;border-radius:20px;background:var(--border);position:relative;transition:.2s;flex-shrink:0;}
+.switch.on{background:var(--amber);}
+.switch::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.2s;}
+.switch.on::after{left:21px;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:700;width:100%;transition:.15s ease;
+}
+.btn-primary{background:linear-gradient(155deg,var(--aqua-bright),var(--aqua-deep));color:#04222c;}
+.btn-primary:hover{filter:brightness(1.07);transform:translateY(-1px);}
+.btn-amber{background:linear-gradient(155deg,var(--amber-bright),var(--amber));color:#3A2400;}
+.btn-amber:hover{filter:brightness(1.07);}
+.btn-ghost{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:8px 14px;font-size:12.5px;width:auto;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none !important;filter:none !important;}
+
+/* ---------- Code card ---------- */
+.code-card{
+  background:linear-gradient(155deg,var(--paper),#E4F2F6);color:var(--text-on-paper);
+  border-radius:16px;padding:20px;text-align:center;margin-top:10px;
+  border:2px dashed var(--aqua-deep);
+}
+.code-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#3F6A78;margin-bottom:6px;}
+.code-card .code{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;letter-spacing:.06em;color:var(--aqua-deep);}
+.code-card .sub{font-size:11.5px;color:#5A7B86;margin-top:6px;}
+
+/* ---------- Status badges ---------- */
+.badge{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:4px 11px;border-radius:20px;font-weight:700;white-space:nowrap;}
+.badge-pending{background:rgba(255,176,32,.16);color:var(--amber-bright);}
+.badge-progress{background:rgba(34,195,214,.16);color:var(--aqua-bright);}
+.badge-done{background:rgba(61,214,140,.16);color:var(--leaf);}
+.badge-urgent{background:rgba(255,107,107,.18);color:var(--danger);animation:pulse 1.6s infinite;}
+.badge-rejected{background:rgba(255,107,107,.16);color:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+/* ---------- Wizard steps ---------- */
+.wizard-steps{display:flex;align-items:center;gap:10px;margin-bottom:24px;max-width:480px;}
+.wizard-step{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--text-dim);white-space:nowrap;}
+.wizard-step .num{
+  width:24px;height:24px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:11.5px;flex-shrink:0;
+}
+.wizard-step.active{color:var(--text);}
+.wizard-step.active .num{background:var(--aqua);border-color:var(--aqua-bright);color:#04222c;}
+.wizard-step.done .num{background:var(--leaf);border-color:var(--leaf);color:#04220f;}
+.wizard-step-line{flex:1;height:2px;background:var(--border);}
+
+input[type=range]{accent-color:var(--aqua);height:6px;cursor:pointer;}
+
+/* ---------- Request list rows ---------- */
+.req-row{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:13px;background:var(--bg-elevated);
+  border:1px solid var(--border);margin-bottom:10px;flex-wrap:wrap;
+}
+.req-row .code-mini{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--aqua-bright);font-weight:700;min-width:88px;}
+.req-row .info{flex:1;min-width:160px;}
+.req-row .info .name{font-size:13.5px;font-weight:600;}
+.req-row .info .addr{font-size:11.5px;color:var(--text-dim);margin-top:2px;}
+.req-row .meta{font-size:11.5px;color:var(--text-dim);text-align:right;}
+
+/* ---------- Stat cards ---------- */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--stat-c,var(--aqua));}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--text-dim);margin-bottom:8px;}
+.stat-value{font-family:'Baloo 2',sans-serif;font-size:27px;font-weight:700;}
+
+/* ---------- Fleet ---------- */
+.fleet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.lorry-card{
+  background:var(--bg-elevated);border:1px solid var(--border);border-radius:14px;padding:16px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.lorry-card.busy{border-color:var(--amber);}
+.lorry-top{display:flex;align-items:center;justify-content:space-between;}
+.lorry-icon{font-size:22px;}
+.lorry-plate{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);}
+.lorry-driver{font-size:13.5px;font-weight:600;}
+.lorry-cap{font-size:11.5px;color:var(--text-dim);}
+
+/* ---------- Leaderboard ---------- */
+.lb-row{
+  display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:13px;background:var(--bg-elevated);
+  border:1px solid var(--border);margin-bottom:9px;
+}
+.lb-rank{width:26px;text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:var(--text-dim);flex-shrink:0;}
+.lb-row.top .lb-rank{font-size:18px;}
+.lb-name{flex:1;min-width:120px;}
+.lb-name .n{font-size:13.5px;font-weight:600;}
+.lb-name .p{font-size:11.5px;color:var(--text-dim);}
+.lb-points{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--amber-bright);font-size:14px;}
+.stat-mini{
+  display:inline-flex;align-items:center;gap:6px;background:var(--bg-elevated);border:1px solid var(--border);
+  padding:6px 12px;border-radius:20px;font-size:12px;color:var(--text-dim);
+}
+.stat-mini b{color:var(--amber-bright);}
+
+/* ---------- Assign picker ---------- */
+.assign-picker{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);display:flex;gap:8px;flex-wrap:wrap;}
+.assign-pick-btn{
+  padding:8px 13px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);font-size:12px;font-weight:600;
+}
+.assign-pick-btn:hover{border-color:var(--aqua);color:var(--aqua-bright);}
+
+/* ---------- Tracker: road + truck ---------- */
+.tracker{margin-top:8px;}
+.road-wrap{
+  position:relative;height:96px;border-radius:16px;background:var(--bg-elevated);border:1px solid var(--border);
+  overflow:hidden;margin-bottom:18px;
+}
+.road-line{
+  position:absolute;top:50%;left:8%;right:8%;height:3px;transform:translateY(-50%);
+  background-image:repeating-linear-gradient(90deg, var(--border) 0 10px, transparent 10px 20px);
+}
+.road-fill{
+  position:absolute;top:50%;left:8%;height:3px;transform:translateY(-50%);
+  background:linear-gradient(90deg,var(--aqua-deep),var(--aqua-bright));
+  transition:width .8s cubic-bezier(.4,0,.2,1);border-radius:4px;
+}
+.road-node{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:22px;z-index:2;}
+.road-node.depot{left:8%;}
+.road-node.home{left:92%;}
+.road-truck{
+  position:absolute;top:50%;font-size:26px;transform:translate(-50%,-62%);
+  transition:left .8s cubic-bezier(.4,0,.2,1);z-index:3;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));
+}
+.road-truck.moving{animation:bob .5s ease-in-out infinite alternate;}
+@keyframes bob{from{transform:translate(-50%,-62%) translateY(0);}to{transform:translate(-50%,-62%) translateY(-4px);}}
+.road-drops{position:absolute;top:66%;font-size:11px;opacity:.7;transition:left .8s cubic-bezier(.4,0,.2,1);}
+
+.tracker-body{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;}
+.stage-list{display:flex;flex-direction:column;gap:0;}
+.stage-item{display:flex;align-items:center;gap:12px;padding:8px 0;position:relative;}
+.stage-item:not(:last-child)::after{
+  content:'';position:absolute;left:15px;top:34px;width:2px;height:calc(100% - 6px);background:var(--border);
+}
+.stage-dot{
+  width:31px;height:31px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;
+  background:var(--bg-elevated);border:2px solid var(--border);flex-shrink:0;z-index:1;color:var(--text-dim);
+}
+.stage-item.done .stage-dot{background:var(--leaf);border-color:var(--leaf);color:#04220f;}
+.stage-item.current .stage-dot{background:var(--aqua);border-color:var(--aqua-bright);color:#04222c;box-shadow:0 0 0 5px rgba(34,195,214,.18);}
+.stage-item.done:not(:last-child)::after{background:var(--leaf);}
+.stage-label{font-size:13px;font-weight:600;color:var(--text-dim);}
+.stage-item.done .stage-label,.stage-item.current .stage-label{color:var(--text);}
+.stage-time{font-size:10.5px;color:var(--text-dim);margin-left:auto;font-family:'JetBrains Mono',monospace;}
+
+/* ---------- Gauge ---------- */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.gauge{
+  width:128px;height:128px;border-radius:50%;position:relative;overflow:hidden;
+  background:var(--bg-elevated);border:3px solid var(--border);
+}
+.gauge-water{position:absolute;left:-25%;width:150%;height:150%;transition:top .8s cubic-bezier(.4,0,.2,1);top:100%;}
+.gauge-water .w1,.gauge-water .w2{
+  position:absolute;left:0;top:0;width:200%;height:200%;background:var(--aqua);border-radius:44%;opacity:.9;
+}
+.gauge-water .w1{animation:spin 7s linear infinite;background:var(--aqua-deep);opacity:.8;}
+.gauge-water .w2{animation:spin 5s linear infinite reverse;background:var(--aqua);opacity:.7;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.gauge-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:22px;z-index:2;text-shadow:0 2px 8px rgba(0,0,0,.4);}
+.gauge-caption{font-size:11px;color:var(--text-dim);text-align:center;}
+
+.order-summary{
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);
+}
+.order-summary .item .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);}
+.order-summary .item .v{font-size:13.5px;font-weight:600;margin-top:2px;}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;top:20px;right:20px;z-index:80;
+  background:linear-gradient(155deg,var(--paper),#E4F2F6);color:var(--text-on-paper);
+  padding:14px 18px;border-radius:13px;box-shadow:0 12px 30px rgba(0,0,0,.35);
+  display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;
+  transform:translateX(140%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:320px;
+}
+.toast.show{transform:translateX(0);}
+
+.empty{
+  border:1.5px dashed var(--border);border-radius:14px;padding:26px;text-align:center;color:var(--text-dim);font-size:13px;
+}
+
+.driver-select{margin-bottom:20px;}
+.driver-order-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;}
+
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+
+@media (max-width:860px){
+  .grid-2{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .tracker-body{grid-template-columns:1fr;justify-items:center;}
+}
+@media (max-width:520px){
+  .stats-row{grid-template-columns:1fr;}
+  .field-row{grid-template-columns:1fr;}
+  .header{flex-direction:column;align-items:flex-start;}
+  .role-switch{width:100%;overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"><span id="toast-icon">💧</span><span id="toast-msg"></span></div>
+
+<header class="header">
+  <div class="brand">
+    <div class="brand-mark">💧</div>
+    <div class="brand-text">
+      <h1>WaterBook</h1>
+      <p>Tanker booking &amp; live delivery tracking</p>
+    </div>
+  </div>
+  <div class="role-switch">
+    <button class="role-btn active" data-role="customer">🏠 Book Water</button>
+    <button class="role-btn" data-role="track">📍 Track Order</button>
+    <button class="role-btn" data-role="manager">🧭 Dispatch</button>
+    <button class="role-btn" data-role="driver">🚚 Driver Cab</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ CUSTOMER VIEW (booking wizard) ============ -->
+  <section class="view active" id="view-customer">
+    <div class="page-head">
+      <h2>Book a Water Tanker</h2>
+      <p>Two quick steps — enter details, then pick a time slot.</p>
+    </div>
+
+    <div class="wizard-steps">
+      <div class="wizard-step active" id="wz-dot-1"><span class="num">1</span> Name &amp; Address</div>
+      <div class="wizard-step-line"></div>
+      <div class="wizard-step" id="wz-dot-2"><span class="num">2</span> Time Slot</div>
+    </div>
+
+    <!-- STEP 1: Name & Address -->
+    <div id="wz-step-1">
+      <div class="card" style="max-width:480px;">
+        <div class="card-title">👤 Name &amp; Address</div>
+        <div class="field"><label>Full Name</label><input id="c-name" placeholder="e.g. Priya Sharma"></div>
+        <div class="field"><label>Mobile Number</label><input id="c-mobile" placeholder="98765 43210" maxlength="10"></div>
+        <div class="field">
+          <label>Address Type</label>
+          <div class="toggle-group">
+            <button class="toggle-opt active" data-addrtype="PG">PG / Hostel</button>
+            <button class="toggle-opt" data-addrtype="Home">Home</button>
+          </div>
+        </div>
+        <div class="field"><label id="c-addrname-label">PG Name</label><input id="c-addrname" placeholder="e.g. Sunrise Boys PG"></div>
+        <div class="field"><label>Full Address</label><textarea id="c-address" rows="2" placeholder="House / Building, Street, Area, City"></textarea></div>
+        <button class="btn btn-primary" id="c-next-step">Next: Time Slot →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Time Slot -->
+    <div id="wz-step-2" style="display:none;">
+      <div class="card" style="max-width:480px;">
+        <div class="card-title">🚰 Choose a Time Slot</div>
+        <div class="urgent-toggle">
+          <span class="lbl">⚡ Need it urgently?</span>
+          <div class="switch" id="urgent-switch"></div>
+        </div>
+        <div id="schedule-fields">
+          <div class="field-row">
+            <div class="field"><label>Date</label><input type="date" id="c-date"></div>
+            <div class="field"><label>Time</label><input type="time" id="c-time" value="10:00"></div>
+          </div>
+        </div>
+        <div class="field"><label>Notes (optional)</label><textarea id="c-notes" rows="2" placeholder="Gate code, landmark, tank size…"></textarea></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" id="c-back-step" style="flex:0 0 auto;width:auto;padding:12px 18px;">← Back</button>
+          <button class="btn btn-amber" id="c-submit-request">Submit Request</button>
+        </div>
+        <div id="c-code-result"></div>
+      </div>
+    </div>
+
+    <div class="page-head" style="margin-top:30px;">
+      <h2 style="font-size:19px;">Recent Requests</h2>
+      <p>Every booking made on this device today.</p>
+    </div>
+    <div id="c-my-requests"></div>
+  </section>
+
+  <!-- ============ TRACK VIEW (separate from booking) ============ -->
+  <section class="view" id="view-track">
+    <div class="page-head">
+      <h2>Track Your Delivery</h2>
+      <p>Enter the booking code you received to see live status.</p>
+    </div>
+    <div class="card" style="max-width:480px;">
+      <div class="field"><label>Booking Code</label><input id="c-track-code" placeholder="e.g. WB-4821" style="font-family:'JetBrains Mono',monospace;"></div>
+      <button class="btn btn-ghost" id="c-track-btn">Check Status</button>
+    </div>
+    <div id="c-track-result" style="margin-top:22px;"></div>
+  </section>
+
+  <!-- ============ MANAGER / DISPATCH VIEW ============ -->
+  <section class="view" id="view-manager">
+    <div class="page-head">
+      <h2>Dispatch Control</h2>
+      <p>Assign incoming requests to an available tanker.</p>
+    </div>
+
+    <div class="card" style="max-width:520px;margin-bottom:24px;">
+      <div class="card-title">⏱️ Auto-Delivery Speed</div>
+      <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:14px;">
+        Total time a run takes to move itself from <b style="color:var(--text)">Driver Accepted</b> to <b style="color:var(--text)">Filling Your Tank</b> — the driver only ever taps Accept and Complete.
+      </p>
+      <div class="field" style="margin-bottom:4px;">
+        <label>Duration: <span id="m-duration-val" style="color:var(--aqua-bright);">5</span> min <span style="color:var(--text-dim);text-transform:none;font-size:11px;">(min 1, max 15)</span></label>
+        <input type="range" id="m-duration-slider" min="1" max="15" step="1" value="5" style="width:100%;">
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card" style="--stat-c:var(--amber)"><div class="stat-label">Pending Requests</div><div class="stat-value" id="m-stat-pending">0</div></div>
+      <div class="stat-card" style="--stat-c:var(--aqua)"><div class="stat-label">Active Deliveries</div><div class="stat-value" id="m-stat-active">0</div></div>
+      <div class="stat-card" style="--stat-c:var(--leaf)"><div class="stat-label">Lorries Free</div><div class="stat-value" id="m-stat-free">0 / 0</div></div>
+      <div class="stat-card" style="--stat-c:var(--aqua-bright)"><div class="stat-label">Completed Today</div><div class="stat-value" id="m-stat-done">0</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📥 Incoming Requests</div>
+        <div id="m-pending-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between;">
+          <span>🚚 Fleet Status</span>
+          <button class="btn btn-ghost btn-sm" id="m-add-lorry-toggle">+ Add Lorry</button>
+        </div>
+        <div id="m-add-lorry-form" style="display:none;margin-bottom:16px;padding:14px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;">
+          <div class="field-row">
+            <div class="field"><label>Driver Name</label><input id="nl-driver" placeholder="e.g. Bala Murugan"></div>
+            <div class="field"><label>Plate Number</label><input id="nl-plate" placeholder="KA-05 XY 1122"></div>
+          </div>
+          <div class="field"><label>Tank Capacity</label><input id="nl-capacity" placeholder="6000 L"></div>
+          <button class="btn btn-primary btn-sm" id="nl-save" style="width:100%;">Add to Fleet</button>
+        </div>
+        <div class="fleet-grid" id="m-fleet-grid"></div>
+      </div>
+    </div>
+
+    <div class="page-head" style="margin-top:26px;">
+      <h2 style="font-size:19px;">🏆 Driver Leaderboard</h2>
+      <p>Urgent runs earn 10 points · standard runs earn 5 points.</p>
+    </div>
+    <div id="m-leaderboard"></div>
+
+    <div class="page-head" style="margin-top:26px;">
+      <h2 style="font-size:19px;">Active Deliveries</h2>
+    </div>
+    <div id="m-active-list"></div>
+
+    <div class="page-head" style="margin-top:26px;">
+      <h2 style="font-size:19px;">❌ Rejected Requests</h2>
+    </div>
+    <div id="m-rejected-list"></div>
+  </section>
+
+  <!-- ============ DRIVER VIEW ============ -->
+  <section class="view" id="view-driver">
+    <div class="page-head">
+      <h2>Driver Cab</h2>
+      <p>Pick your lorry to see your assigned run.</p>
+    </div>
+
+    <div class="field driver-select" style="max-width:340px;">
+      <label>I'm driving</label>
+      <select id="d-lorry-select"></select>
+    </div>
+
+    <div id="d-content"></div>
+  </section>
+
+</div>
+
+<script>
+/* ================= STATE ================= */
+const STAGES = [
+  {key:'requested', label:'Request Received', icon:'📝'},
+  {key:'assigned', label:'Lorry Assigned', icon:'🚚'},
+  {key:'accepted', label:'Driver Accepted', icon:'✅'},
+  {key:'filling_depot', label:'Filling Tanker at Depot', icon:'🛢️'},
+  {key:'on_the_way', label:'On the Way', icon:'🛣️'},
+  {key:'arrived', label:'Arrived at Your Location', icon:'📍'},
+  {key:'filling_location', label:'Filling Your Tank', icon:'💧'},
+  {key:'completed', label:'Delivery Completed', icon:'🎉'},
+];
+// Only two manual taps for the driver: Accept the run, and confirm it's done.
+// Everything between (filling the tanker → on the way → arrived → filling the tank)
+// now advances on its own — total time is set by Dispatch (1–15 min), instead of a click each time.
+const NEXT_ACTION_LABEL = ['','Accept Order','','','','','Complete Delivery',''];
+const autoTimers = {}; // orderCode -> timeout id, so we never double-schedule
+
+const state = {
+  customer: null, // {name, mobile, addrType, addrName, address}
+  orders: [
+    // seed a couple of demo orders so Dispatch/Driver aren't empty on first load
+    {code:'WB-3190', name:'Ashwin Rao', mobile:'9845012233', addrType:'PG', addrName:'Green Nest PG', address:'4th Cross, BTM Layout, Bengaluru', date:'', time:'', urgent:true, notes:'Ring bell twice', stageIdx:0, lorryId:null, createdAt:Date.now()-1000*60*10, timestamps:{}},
+    {code:'WB-2207', name:'Meera Iyer', mobile:'9900112244', addrType:'Home', addrName:'', address:'12, Lakeview Road, Indiranagar, Bengaluru', date:'2026-08-19', time:'11:00', urgent:false, notes:'', stageIdx:4, lorryId:'L2', createdAt:Date.now()-1000*60*40, timestamps:{}},
+  ],
+  lorries: [
+    {id:'L1', plate:'KA-05 AB 1234', driver:'Ramesh Kumar', capacity:'6000 L', status:'idle', orderCode:null, points:15, completedToday:2},
+    {id:'L2', plate:'KA-05 CD 5566', driver:'Suresh Naik', capacity:'8000 L', status:'busy', orderCode:'WB-2207', points:5, completedToday:1},
+    {id:'L3', plate:'KA-05 EF 7788', driver:'Manjunath Gowda', capacity:'6000 L', status:'idle', orderCode:null, points:0, completedToday:0},
+    {id:'L4', plate:'KA-05 GH 9900', driver:'Farhan Sheikh', capacity:'5000 L', status:'idle', orderCode:null, points:10, completedToday:1},
+    {id:'L5', plate:'KA-05 IJ 3344', driver:'Dinesh Patil', capacity:'8000 L', status:'idle', orderCode:null, points:0, completedToday:0},
+  ],
+  nextLorryNum: 6,
+  autoDurationMinutes: 5, // manager-controlled: 1–15 min for the whole automatic run
+};
+let lastSubmitAt = 0;
+let draftCustomer = null; // step 1 details, held until step 2 is submitted
+state.orders[1].timestamps.assigned = new Date(Date.now()-1000*60*35).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+state.orders[1].timestamps.on_the_way = new Date(Date.now()-1000*60*15).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+let notifiedCompleted = new Set();
+let notifiedRejected = new Set();
+
+/* ================= HELPERS ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function genCode(){
+  let code;
+  do{ code = 'WB-' + (1000 + Math.floor(Math.random()*9000)); }
+  while(state.orders.some(o=>o.code===code));
+  return code;
+}
+function pctFor(idx){ return Math.round(idx/(STAGES.length-1)*100); }
+function findOrder(code){ return state.orders.find(o=>o.code.toLowerCase()===String(code).trim().toLowerCase()); }
+function lorryFor(order){ return state.lorries.find(l=>l.id===order.lorryId); }
+
+// Auto-advances an order through the stages the driver doesn't tap manually:
+// accepted(2) -> filling_depot(3) -> on_the_way(4) -> arrived(5) -> filling_location(6).
+// Stops at 6, where the driver taps "Complete Delivery" themselves.
+// The four steps split state.autoDurationMinutes evenly (with a little jitter) so the
+// whole automatic run finishes in whatever total Dispatch has dialed in (1–15 min).
+function scheduleAuto(order){
+  if(!order || order.stageIdx < 2 || order.stageIdx >= 6) return;
+  if(autoTimers[order.code]) return; // already scheduled, don't double up
+  const totalMs = Math.max(1, Math.min(15, state.autoDurationMinutes)) * 60 * 1000;
+  const perStep = totalMs / 4;
+  const jitter = perStep * 0.2;
+  const delay = Math.max(1500, perStep - jitter + Math.random()*jitter*2);
+  autoTimers[order.code] = setTimeout(()=>{
+    delete autoTimers[order.code];
+    if(order.stageIdx>=2 && order.stageIdx<6){
+      order.stageIdx += 1;
+      order.timestamps[STAGES[order.stageIdx].key] = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+      renderAll();
+      scheduleAuto(order);
+    }
+  }, delay);
+}
+
+function showToast(msg, icon='💧'){
+  $('#toast-icon').textContent = icon;
+  $('#toast-msg').textContent = msg;
+  $('#toast').classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> $('#toast').classList.remove('show'), 4200);
+}
+
+/* ================= ROLE SWITCH ================= */
+$$('.role-btn').forEach(b=>b.addEventListener('click', ()=>{
+  $$('.role-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#view-'+b.dataset.role).classList.add('active');
+  renderAll();
+}));
+
+/* ================= TRACKER (shared component) ================= */
+function trackerHTML(order){
+  const pct = pctFor(order.stageIdx);
+  const l = lorryFor(order);
+  const moving = order.stageIdx===4;
+  return `
+    <div class="tracker">
+      <div class="order-summary">
+        <div class="item"><div class="k">Code</div><div class="v" style="font-family:'JetBrains Mono',monospace;color:var(--aqua-bright)">${order.code}</div></div>
+        <div class="item"><div class="k">Customer</div><div class="v">${order.name}</div></div>
+        <div class="item"><div class="k">Lorry</div><div class="v">${l ? l.plate : 'Not assigned yet'}</div></div>
+        <div class="item"><div class="k">Driver</div><div class="v">${l ? l.driver : '—'}</div></div>
+      </div>
+
+      <div class="road-wrap">
+        <div class="road-line"></div>
+        <div class="road-fill" style="width:${Math.max(pct-8,0)*0.84}%"></div>
+        <div class="road-node depot">🏭</div>
+        <div class="road-node home">${order.addrType==='PG'?'🏢':'🏠'}</div>
+        <div class="road-truck ${moving?'moving':''}" style="left:${8 + pct*0.84}%;">🚚</div>
+      </div>
+
+      <div class="tracker-body">
+        <div class="stage-list">
+          ${STAGES.map((s,i)=>`
+            <div class="stage-item ${i<order.stageIdx?'done':''} ${i===order.stageIdx?'current':''}">
+              <div class="stage-dot">${i<order.stageIdx?'✓':s.icon}</div>
+              <div class="stage-label">${s.label}</div>
+              ${order.timestamps[s.key] ? `<div class="stage-time">${order.timestamps[s.key]}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge">
+            <div class="gauge-water" style="top:${100-pct}%;">
+              <div class="w1"></div><div class="w2"></div>
+            </div>
+            <div class="gauge-pct">${pct}%</div>
+          </div>
+          <div class="gauge-caption">${STAGES[order.stageIdx].label}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ================= CUSTOMER VIEW (booking wizard) ================= */
+let selectedAddrType = 'PG';
+$$('.toggle-opt[data-addrtype]').forEach(b=>b.addEventListener('click', ()=>{
+  $$('.toggle-opt[data-addrtype]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  selectedAddrType = b.dataset.addrtype;
+  $('#c-addrname-label').textContent = selectedAddrType==='PG' ? 'PG Name' : 'Home / Building Name';
+  $('#c-addrname').placeholder = selectedAddrType==='PG' ? 'e.g. Sunrise Boys PG' : 'e.g. Meera Residency';
+}));
+
+function goToStep(n){
+  $('#wz-step-1').style.display = n===1 ? 'block' : 'none';
+  $('#wz-step-2').style.display = n===2 ? 'block' : 'none';
+  $('#wz-dot-1').classList.toggle('active', n===1);
+  $('#wz-dot-1').classList.toggle('done', n===2);
+  $('#wz-dot-2').classList.toggle('active', n===2);
+}
+
+$('#c-next-step').addEventListener('click', ()=>{
+  const name = $('#c-name').value.trim();
+  const mobile = $('#c-mobile').value.trim();
+  const addrName = $('#c-addrname').value.trim();
+  const address = $('#c-address').value.trim();
+  if(!name || mobile.length<10 || !address){
+    showToast('Please fill name, a valid 10-digit mobile, and address', '⚠️');
+    return;
+  }
+  draftCustomer = {name, mobile, addrType:selectedAddrType, addrName, address};
+  $('#c-date').value = new Date().toISOString().slice(0,10);
+  goToStep(2);
+});
+
+$('#c-back-step').addEventListener('click', ()=> goToStep(1));
+
+function resetWizard(){
+  draftCustomer = null;
+  $('#c-name').value=''; $('#c-mobile').value=''; $('#c-addrname').value=''; $('#c-address').value='';
+  $('#c-notes').value=''; $('#c-code-result').innerHTML='';
+  urgentOn = false;
+  $('#urgent-switch').classList.remove('on');
+  $('#schedule-fields').style.display='block';
+  goToStep(1);
+}
+
+let urgentOn = false;
+$('#urgent-switch').addEventListener('click', ()=>{
+  urgentOn = !urgentOn;
+  $('#urgent-switch').classList.toggle('on', urgentOn);
+  $('#schedule-fields').style.display = urgentOn ? 'none' : 'block';
+});
+
+$('#c-submit-request').addEventListener('click', ()=>{
+  if(!draftCustomer){ showToast('Please complete your name & address first', '⚠️'); goToStep(1); return; }
+
+  // require a schedule unless marked urgent
+  if(!urgentOn && (!$('#c-date').value || !$('#c-time').value)){
+    showToast('Please pick a date & time, or mark it Urgent', '⚠️');
+    $('#c-date').focus();
+    return;
+  }
+
+  // block accidental double-taps / repeat submits within 3s
+  const now = Date.now();
+  if(now - lastSubmitAt < 3000){
+    showToast('Hang on — that request was just submitted', '⏳');
+    return;
+  }
+  lastSubmitAt = now;
+
+  $('#c-submit-request').disabled = true;
+  setTimeout(()=>{ $('#c-submit-request').disabled = false; }, 3000);
+
+  const code = genCode();
+  const order = {
+    code,
+    name: draftCustomer.name,
+    mobile: draftCustomer.mobile,
+    addrType: draftCustomer.addrType,
+    addrName: draftCustomer.addrName,
+    address: draftCustomer.address,
+    date: urgentOn ? '' : $('#c-date').value,
+    time: urgentOn ? '' : $('#c-time').value,
+    urgent: urgentOn,
+    notes: $('#c-notes').value.trim(),
+    stageIdx: 0,
+    lorryId: null,
+    rejected: false,
+    rejectReason: '',
+    createdAt: Date.now(),
+    timestamps: {requested: new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
+  };
+  state.orders.unshift(order);
+  $('#c-code-result').innerHTML = `
+    <div class="code-card">
+      <div class="lbl">Your Booking Code</div>
+      <div class="code">${code}</div>
+      <div class="sub">Share this code with the Track Order tab anytime — the same code goes to Dispatch.</div>
+    </div>
+    <button class="btn btn-ghost" id="c-new-request" style="margin-top:14px;">Book Another Request →</button>
+  `;
+  showToast(`Request submitted! Code ${code}`, '✅');
+  renderAll();
+
+  // loop back to Name & Address for the next person, same as a shared kiosk would
+  clearTimeout(window.__wizardResetTimer);
+  window.__wizardResetTimer = setTimeout(resetWizard, 6000);
+  $('#c-new-request').addEventListener('click', ()=>{
+    clearTimeout(window.__wizardResetTimer);
+    resetWizard();
+  });
+});
+
+$('#c-track-btn').addEventListener('click', ()=>{
+  const order = findOrder($('#c-track-code').value);
+  if(!order){
+    $('#c-track-result').innerHTML = `<div class="empty">No request found for that code. Double-check and try again.</div>`;
+    return;
+  }
+  if(order.rejected){
+    $('#c-track-result').innerHTML = `
+      <div class="card" style="border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.06);">
+        <div class="card-title" style="color:var(--danger);">🚫 Request Rejected</div>
+        <p style="font-size:13.5px;color:var(--text-dim);">Dispatch couldn't fulfil booking <b style="color:var(--text)">${order.code}</b>.</p>
+        <p style="font-size:13px;margin-top:8px;"><b>Reason:</b> ${order.rejectReason || 'Not specified'}</p>
+      </div>`;
+    return;
+  }
+  $('#c-track-result').innerHTML = trackerHTML(order);
+});
+
+function renderCustomerRequests(){
+  const recent = [...state.orders].sort((a,b)=>b.createdAt-a.createdAt).slice(0,10);
+  $('#c-my-requests').innerHTML = recent.length ? recent.map(o=>`
+    <div class="req-row">
+      <span class="code-mini">${o.code}</span>
+      <div class="info">
+        <div class="name">${o.name} — ${o.addrType==='PG' ? (o.addrName||'PG') : (o.addrName||'Home')}</div>
+        <div class="addr">${o.address}</div>
+      </div>
+      <div class="meta">${o.urgent ? 'Urgent' : (o.date ? o.date+' · '+o.time : '—')}</div>
+      ${o.rejected
+        ? '<span class="badge badge-rejected">Rejected</span>'
+        : (o.urgent && o.stageIdx<STAGES.length-1 ? '<span class="badge badge-urgent">Urgent</span>' : '')}
+      ${!o.rejected ? `<span class="badge ${o.stageIdx===STAGES.length-1?'badge-done':(o.stageIdx===0?'badge-pending':'badge-progress')}">${STAGES[o.stageIdx].label}</span>` : ''}
+      <button class="btn btn-ghost btn-sm" data-viewcode="${o.code}">Track</button>
+    </div>
+  `).join('') : `<div class="empty">No requests yet — book one above 💧</div>`;
+
+  $$('[data-viewcode]').forEach(b=>b.addEventListener('click', ()=>{
+    $$('.role-btn').forEach(x=>x.classList.remove('active'));
+    $('.role-btn[data-role="track"]').classList.add('active');
+    $$('.view').forEach(v=>v.classList.remove('active'));
+    $('#view-track').classList.add('active');
+    $('#c-track-code').value = b.dataset.viewcode;
+    $('#c-track-btn').click();
+  }));
+
+  // completion + rejection notifications, session-wide since this device can serve many requesters
+  state.orders.forEach(o=>{
+    if(o.stageIdx===STAGES.length-1 && !o.rejected && !notifiedCompleted.has(o.code)){
+      notifiedCompleted.add(o.code);
+      showToast(`${o.code} delivered! Tank is full 🎉`, '🎉');
+    }
+    if(o.rejected && !notifiedRejected.has(o.code)){
+      notifiedRejected.add(o.code);
+      showToast(`${o.code} was rejected: ${o.rejectReason || 'no reason given'}`, '🚫');
+    }
+  });
+}
+
+/* ================= MANAGER VIEW ================= */
+$('#m-duration-slider').addEventListener('input', ()=>{
+  state.autoDurationMinutes = Number($('#m-duration-slider').value);
+  $('#m-duration-val').textContent = state.autoDurationMinutes;
+});
+
+$('#m-add-lorry-toggle').addEventListener('click', ()=>{
+  const f = $('#m-add-lorry-form');
+  f.style.display = f.style.display==='none' ? 'block' : 'none';
+});
+$('#nl-save').addEventListener('click', ()=>{
+  const driver = $('#nl-driver').value.trim();
+  const plate = $('#nl-plate').value.trim();
+  const capacity = $('#nl-capacity').value.trim() || '6000 L';
+  if(!driver || !plate){
+    showToast('Enter a driver name and plate number', '⚠️');
+    return;
+  }
+  const id = 'L' + (state.nextLorryNum++);
+  state.lorries.push({id, plate, driver, capacity, status:'idle', orderCode:null, points:0, completedToday:0});
+  $('#nl-driver').value=''; $('#nl-plate').value=''; $('#nl-capacity').value='';
+  $('#m-add-lorry-form').style.display='none';
+  showToast(`${driver} added to the fleet as ${id}`, '🚚');
+  populateDriverSelect();
+  renderAll();
+});
+
+function renderManager(){
+  const pending = state.orders.filter(o=>o.stageIdx===0 && !o.rejected);
+  const active = state.orders.filter(o=>o.stageIdx>0 && o.stageIdx<STAGES.length-1 && !o.rejected);
+  const done = state.orders.filter(o=>o.stageIdx===STAGES.length-1 && !o.rejected);
+  const rejected = state.orders.filter(o=>o.rejected);
+  const freeLorries = state.lorries.filter(l=>l.status==='idle');
+
+  $('#m-stat-pending').textContent = pending.length;
+  $('#m-stat-active').textContent = active.length;
+  $('#m-stat-free').textContent = `${freeLorries.length} / ${state.lorries.length}`;
+  $('#m-stat-done').textContent = done.length;
+
+  $('#m-pending-list').innerHTML = pending.length ? pending.map(o=>`
+    <div class="req-row" style="flex-direction:column;align-items:stretch;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span class="code-mini">${o.code}</span>
+        <div class="info">
+          <div class="name">${o.name} · ${o.mobile}</div>
+          <div class="addr">${o.addrType==='PG'?'🏢':'🏠'} ${o.addrName ? o.addrName+' — ' : ''}${o.address}</div>
+        </div>
+        ${o.urgent ? '<span class="badge badge-urgent">Urgent</span>' : `<span class="meta" style="font-size:11.5px;color:var(--text-dim)">${o.date} · ${o.time}</span>`}
+        <button class="btn btn-primary btn-sm" data-assignopen="${o.code}">Assign Lorry</button>
+        <button class="btn btn-ghost btn-sm" data-rejectopen="${o.code}" style="color:var(--danger);border-color:rgba(255,107,107,.4);">Reject</button>
+      </div>
+      <div class="assign-picker" id="assign-${o.code}" style="display:none;">
+        ${state.lorries.filter(l=>l.status==='idle').map(l=>`<button class="assign-pick-btn" data-assign="${o.code}|${l.id}">🚚 ${l.id} · ${l.driver}</button>`).join('') || '<span style="font-size:12px;color:var(--text-dim)">No lorries free right now</span>'}
+      </div>
+      <div class="assign-picker" id="reject-${o.code}" style="display:none;">
+        <input id="reject-reason-${o.code}" placeholder="Reason (optional) — e.g. Outside service area" style="flex:1;min-width:200px;padding:9px 12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:9px;font-size:12.5px;color:var(--text);">
+        <button class="assign-pick-btn" data-rejectconfirm="${o.code}" style="color:var(--danger);border-color:rgba(255,107,107,.4);">Confirm Reject</button>
+      </div>
+    </div>
+  `).join('') : `<div class="empty">No pending requests — all caught up! 🌊</div>`;
+
+  $$('[data-assignopen]').forEach(b=>b.addEventListener('click', ()=>{
+    const el = $('#assign-'+b.dataset.assignopen);
+    el.style.display = el.style.display==='none' ? 'flex' : 'none';
+  }));
+  $$('[data-rejectopen]').forEach(b=>b.addEventListener('click', ()=>{
+    const el = $('#reject-'+b.dataset.rejectopen);
+    el.style.display = el.style.display==='none' ? 'flex' : 'none';
+  }));
+  $$('[data-rejectconfirm]').forEach(b=>b.addEventListener('click', ()=>{
+    const code = b.dataset.rejectconfirm;
+    const order = findOrder(code);
+    const reasonInput = $('#reject-reason-'+code);
+    order.rejected = true;
+    order.rejectReason = (reasonInput && reasonInput.value.trim()) || 'Not specified';
+    order.timestamps.rejected = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    showToast(`${code} rejected`, '🚫');
+    renderAll();
+  }));
+  $$('[data-assign]').forEach(b=>b.addEventListener('click', ()=>{
+    const [code, lid] = b.dataset.assign.split('|');
+    const order = findOrder(code);
+    const lorry = state.lorries.find(l=>l.id===lid);
+    order.lorryId = lid;
+    order.stageIdx = 1;
+    order.timestamps.assigned = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    lorry.status='busy';
+    lorry.orderCode=code;
+    showToast(`${code} assigned to ${lorry.id} (${lorry.driver})`, '🚚');
+    renderAll();
+  }));
+
+  $('#m-fleet-grid').innerHTML = state.lorries.map(l=>`
+    <div class="lorry-card ${l.status==='busy'?'busy':''}">
+      <div class="lorry-top"><span class="lorry-icon">🚚</span><span class="badge ${l.status==='busy'?'badge-progress':'badge-done'}">${l.status==='busy'?'On Delivery':'Idle'}</span></div>
+      <div class="lorry-driver">${l.driver}</div>
+      <div class="lorry-plate">${l.plate}</div>
+      <div class="lorry-cap">Capacity: ${l.capacity}</div>
+      ${l.orderCode ? `<div class="lorry-cap">Run: <b style="color:var(--aqua-bright)">${l.orderCode}</b></div>` : ''}
+      <div class="stat-mini">✅ <b>${l.completedToday}</b> today · <b>${l.points}</b> pts</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+        ${l.status==='busy' ? `<button class="btn btn-ghost btn-sm" data-unassignrun="${l.id}">Unassign Run</button>` : ''}
+        <button class="btn btn-ghost btn-sm" data-removelorry="${l.id}" style="color:var(--danger);">Remove Driver</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Unassign Run — only clears the current delivery, driver stays in the fleet
+  $$('[data-unassignrun]').forEach(b=>b.addEventListener('click', ()=>{
+    const l = state.lorries.find(x=>x.id===b.dataset.unassignrun);
+    if(!l || !l.orderCode) return;
+    if(!confirm(`Send run ${l.orderCode} back to Pending? ${l.driver} (${l.id}) stays in the fleet.`)) return;
+    const order = findOrder(l.orderCode);
+    if(order){
+      clearTimeout(autoTimers[order.code]);
+      delete autoTimers[order.code];
+      order.stageIdx = 0;
+      order.lorryId = null;
+      ['assigned','accepted','filling_depot','on_the_way','arrived','filling_location'].forEach(k=>delete order.timestamps[k]);
+      showToast(`${order.code} sent back to Pending`, '↩️');
+    }
+    l.status = 'idle';
+    l.orderCode = null;
+    renderAll();
+  }));
+
+  // Remove Driver — deletes the driver from the fleet, requires manager password
+  $$('[data-removelorry]').forEach(b=>b.addEventListener('click', ()=>{
+    const l = state.lorries.find(x=>x.id===b.dataset.removelorry);
+    if(!l) return;
+    const pwd = prompt(`Manager password required to remove ${l.driver} (${l.id}) from the fleet:`);
+    if(pwd === null) return; // cancelled
+    if(pwd !== '1234'){
+      showToast('Incorrect password — driver not removed', '⛔');
+      return;
+    }
+    if(l.status==='busy' && !confirm(`${l.driver} (${l.id}) is still on delivery ${l.orderCode}. Removing them also sends that run back to Pending. Continue?`)) return;
+    if(l.orderCode){
+      const order = findOrder(l.orderCode);
+      if(order){
+        clearTimeout(autoTimers[order.code]);
+        delete autoTimers[order.code];
+        order.stageIdx = 0;
+        order.lorryId = null;
+        ['assigned','accepted','filling_depot','on_the_way','arrived','filling_location'].forEach(k=>delete order.timestamps[k]);
+        showToast(`${order.code} sent back to Pending`, '↩️');
+      }
+    }
+    state.lorries = state.lorries.filter(x=>x.id!==l.id);
+    showToast(`${l.driver} removed from fleet`, '🗑️');
+    populateDriverSelect();
+    renderAll();
+  }));
+
+  // leaderboard, ranked by points
+  const ranked = [...state.lorries].sort((a,b)=>b.points-a.points);
+  const medals = ['🥇','🥈','🥉'];
+  $('#m-leaderboard').innerHTML = ranked.length ? ranked.map((l,i)=>`
+    <div class="lb-row ${i<3?'top':''}">
+      <span class="lb-rank">${medals[i] || (i+1)}</span>
+      <div class="lb-name"><div class="n">${l.driver}</div><div class="p">${l.id} · ${l.plate}</div></div>
+      <span class="stat-mini">✅ <b>${l.completedToday}</b> completed today</span>
+      <span class="lb-points">${l.points} pts</span>
+    </div>
+  `).join('') : `<div class="empty">No drivers in the fleet yet.</div>`;
+
+  $('#m-active-list').innerHTML = active.length ? active.map(o=>{
+    const pct = pctFor(o.stageIdx);
+    const l = lorryFor(o);
+    const canReject = o.stageIdx===1; // assigned, but driver hasn't accepted yet
+    return `
+    <div class="req-row">
+      <span class="code-mini">${o.code}</span>
+      <div class="info">
+        <div class="name">${o.name} — ${l?l.id:'—'} (${l?l.driver:'—'})</div>
+        <div class="addr">${STAGES[o.stageIdx].label}</div>
+      </div>
+      <div style="flex:1;min-width:120px;background:var(--bg-elevated);border-radius:20px;height:8px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--aqua-deep),var(--aqua-bright));"></div>
+      </div>
+      <span class="badge badge-progress">${pct}%</span>
+      ${canReject ? `<button class="btn btn-ghost btn-sm" data-rejectassigned="${o.code}" style="color:var(--danger);border-color:rgba(255,107,107,.4);">Reject</button>` : ''}
+    </div>`;
+  }).join('') : `<div class="empty">No deliveries in progress right now.</div>`;
+
+  $$('[data-rejectassigned]').forEach(b=>b.addEventListener('click', ()=>{
+    const code = b.dataset.rejectassigned;
+    const order = findOrder(code);
+    const reason = prompt('Reason for rejecting this assigned order? (optional)') || 'Not specified';
+    const lorry = lorryFor(order);
+    if(lorry){ lorry.status='idle'; lorry.orderCode=null; }
+    order.rejected = true;
+    order.rejectReason = reason;
+    order.lorryId = null;
+    order.timestamps.rejected = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    showToast(`${code} rejected — ${lorry ? lorry.id+' freed up' : ''}`, '🚫');
+    renderAll();
+  }));
+
+  $('#m-rejected-list').innerHTML = rejected.length ? rejected.map(o=>`
+    <div class="req-row">
+      <span class="code-mini">${o.code}</span>
+      <div class="info">
+        <div class="name">${o.name} · ${o.mobile}</div>
+        <div class="addr">Reason: ${o.rejectReason || 'Not specified'}</div>
+      </div>
+      <span class="meta">${o.timestamps.rejected || ''}</span>
+      <span class="badge badge-rejected">Rejected</span>
+    </div>
+  `).join('') : `<div class="empty">No rejected requests — nice and tidy.</div>`;
+}
+
+/* ================= DRIVER VIEW ================= */
+function populateDriverSelect(){
+  $('#d-lorry-select').innerHTML = state.lorries.map(l=>`<option value="${l.id}">${l.id} — ${l.driver}</option>`).join('');
+}
+$('#d-lorry-select').addEventListener('change', renderDriver);
+
+function renderDriver(){
+  const lid = $('#d-lorry-select').value || (state.lorries[0] && state.lorries[0].id);
+  const lorry = state.lorries.find(l=>l.id===lid);
+  if(!lorry){ $('#d-content').innerHTML = `<div class="empty">No lorries in the fleet. Ask Dispatch to add one.</div>`; return; }
+
+  const statsBar = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+      <span class="stat-mini">✅ <b>${lorry.completedToday}</b> completed today</span>
+      <span class="stat-mini">🏆 <b>${lorry.points}</b> points total</span>
+    </div>`;
+
+  const order = lorry.orderCode ? findOrder(lorry.orderCode) : null;
+
+  if(!order){
+    $('#d-content').innerHTML = statsBar + `<div class="empty">No active run assigned to ${lorry.driver} right now. Sit tight — Dispatch will assign one soon 🚚</div>`;
+    return;
+  }
+
+  const actionIdx = order.stageIdx; // action moves stageIdx -> stageIdx+1
+  const actionLabel = NEXT_ACTION_LABEL[actionIdx] || null;
+  const isAuto = actionIdx>=2 && actionIdx<6; // between Accept and Complete — runs on its own
+
+  let footer;
+  if(actionLabel){
+    footer = `<button class="btn btn-primary" style="margin-top:18px;" id="d-advance">${actionLabel} →</button>`;
+  } else if(isAuto){
+    footer = `<div class="stat-mini" style="margin-top:18px;justify-content:center;width:100%;padding:12px;">
+      <span class="road-truck moving" style="position:static;font-size:16px;">🔄</span>
+      Moving on its own — updates in a minute or two, no tap needed
+    </div>`;
+  } else {
+    footer = `<div class="empty" style="margin-top:18px;">Delivery complete — nice work! 🎉</div>`;
+  }
+
+  $('#d-content').innerHTML = statsBar + `
+    <div class="driver-order-card">
+      <div class="order-summary">
+        <div class="item"><div class="k">Code</div><div class="v" style="font-family:'JetBrains Mono',monospace;color:var(--aqua-bright)">${order.code}</div></div>
+        <div class="item"><div class="k">Customer</div><div class="v">${order.name} · ${order.mobile}</div></div>
+        <div class="item"><div class="k">Deliver To</div><div class="v">${order.addrType==='PG'?'🏢':'🏠'} ${order.addrName||order.addrType}</div></div>
+        ${order.urgent ? '<span class="badge badge-urgent">Urgent</span>' : ''}
+      </div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">${order.address}${order.notes ? ' — '+order.notes : ''}</p>
+      ${trackerHTML(order)}
+      ${footer}
+    </div>
+  `;
+
+  const advBtn = $('#d-advance');
+  if(advBtn) advBtn.addEventListener('click', ()=>{
+    order.stageIdx += 1;
+    order.timestamps[STAGES[order.stageIdx].key] = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    if(order.stageIdx === STAGES.length-1){
+      lorry.status='idle';
+      lorry.orderCode=null;
+      const earned = order.urgent ? 10 : 5;
+      lorry.points += earned;
+      lorry.completedToday += 1;
+      showToast(`${order.code} delivered! +${earned} pts for ${lorry.driver} 🏆`, '🎉');
+    } else if(order.stageIdx===2){
+      // just accepted — hand off to the auto-advance chain
+      scheduleAuto(order);
+      showToast(`Order accepted — now moving through the run automatically`, '🔄');
+    }
+    renderAll();
+  });
+}
+
+/* ================= RENDER ALL ================= */
+function renderAll(){
+  renderCustomerRequests();
+  renderManager();
+  renderDriver();
+}
+populateDriverSelect();
+state.orders.forEach(scheduleAuto);
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,2938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduAdmin — School Management System</title>
+<style>
+  :root{
+    --bg:#0d1b2a; --panel:#132a3e; --panel2:#0f2337; --border:#1f3f57;
+    --text:#e8f1f8; --text-dim:#8fa8bd; --amber:#f2a541; --green:#3ecf8e;
+    --red:#ef5b5b; --blue:#4fa3e3; --purple:#a78bfa; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .hidden{display:none !important;}
+
+  /* ===== LOGIN ===== */
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .login-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:32px;width:380px;max-width:100%;}
+  .login-card h1{margin:0 0 4px;font-size:22px;display:flex;align-items:center;gap:8px;}
+  .login-card .sub{color:var(--text-dim);font-size:13.5px;margin-bottom:22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:5px;}
+  .field input,.field select{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:14px;}
+  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+  .role-opt{border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);border-radius:9px;padding:9px 6px;text-align:center;font-size:12.5px;cursor:pointer;}
+  .role-opt.active{border-color:var(--amber);color:var(--amber);background:rgba(242,165,65,.08);}
+  .btn{border:none;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
+  .btn-amber{background:var(--amber);color:#1a1206;}
+  .btn-amber:hover{filter:brightness(1.08);}
+  .btn-amber:disabled{opacity:.45;cursor:not-allowed;}
+  .login-err{color:var(--red);font-size:13px;margin-top:10px;display:none;}
+  .demo-box{margin-top:18px;border-top:1px solid var(--border);padding-top:14px;}
+  .demo-box summary{cursor:pointer;color:var(--blue);font-size:12.5px;}
+  .demo-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);padding:5px 0;border-bottom:1px dashed var(--border);}
+  .demo-row b{color:var(--text);}
+  .demo-row span{font-family:'Consolas',monospace;color:var(--green);}
+
+  /* ===== APP SHELL ===== */
+  #app-screen{display:none;min-height:100vh;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--border);background:var(--panel2);}
+  header h1{font-size:18px;margin:0;display:flex;align-items:center;gap:9px;}
+  .who{display:flex;align-items:center;gap:12px;font-size:13.5px;}
+  .who .role-tag{background:var(--panel);border:1px solid var(--border);padding:4px 10px;border-radius:20px;color:var(--amber);font-size:11.5px;font-weight:700;text-transform:uppercase;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:9px;padding:8px 14px;font-size:13px;cursor:pointer;}
+  .btn-ghost:hover{border-color:var(--blue);}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .tab-btn{background:var(--panel);border:1px solid var(--border);color:var(--text-dim);padding:9px 16px;border-radius:9px;font-size:13.5px;cursor:pointer;}
+  .tab-btn.active{border-color:var(--amber);color:var(--amber);background:rgba(242,165,65,.08);}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+  .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+  .stat-card .lbl{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
+  .stat-card .val{font-size:26px;font-weight:700;margin-top:6px;}
+
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+  .panel h3{margin:0 0 14px;font-size:15.5px;}
+  .panel .desc{color:var(--text-dim);font-size:13px;margin:-8px 0 16px;}
+  .row-flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .row-flex select, .row-flex input{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:8px;font-size:13.5px;}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  th,td{padding:10px 13px;text-align:left;font-size:13px;border-bottom:1px solid var(--border);}
+  th{background:var(--panel2);color:var(--text-dim);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.4px;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#12293d;}
+  .idcode{font-family:'Consolas',monospace;color:var(--blue);font-size:12px;}
+  .pw{font-family:'Consolas',monospace;color:var(--green);font-size:12px;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(167,139,250,.15);color:var(--purple);}
+  .badge.present{background:rgba(62,207,142,.15);color:var(--green);}
+  .badge.absent{background:rgba(239,91,91,.15);color:var(--red);}
+  .badge.completed{background:rgba(62,207,142,.15);color:var(--green);}
+  .badge.pending{background:rgba(242,165,65,.15);color:var(--amber);}
+
+  .toggle-att{border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;margin-right:4px;}
+  .toggle-att.present.on{background:rgba(62,207,142,.18);border-color:var(--green);color:var(--green);}
+  .toggle-att.absent.on{background:rgba(239,91,91,.18);border-color:var(--red);color:var(--red);}
+  .marks-input{width:70px;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:13px;}
+
+  .profile-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:460px;}
+  .profile-card .avatar{width:56px;height:56px;border-radius:50%;background:var(--amber);color:#1a1206;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .profile-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13.5px;}
+  .profile-row span:first-child{color:var(--text-dim);}
+
+  .topper-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--panel2);}
+  .topper-rank{width:30px;height:30px;border-radius:50%;background:var(--panel);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--amber);border:1px solid var(--border);}
+  .topper-item.me{border-color:var(--amber);}
+  .subj-block{margin-bottom:16px;}
+  .subj-block .subj-head{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:6px;}
+  .progress-bar{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+  .progress-fill{height:100%;background:var(--green);}
+  .topic-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;color:var(--text-dim);border-bottom:1px dashed var(--border);}
+
+  .task-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;background:var(--panel2);}
+  .task-card .task-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+  .task-card .task-loc{font-weight:700;font-size:14.5px;}
+  .task-card .task-title{color:var(--text-dim);font-size:13px;margin-bottom:10px;}
+  .badge.open{background:rgba(239,91,91,.15);color:var(--red);}
+  .badge.inprogress{background:rgba(242,165,65,.15);color:var(--amber);}
+  .status-btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+  .status-btn{border:1px solid var(--border);background:var(--panel);color:var(--text-dim);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;}
+  .status-btn.active{border-color:var(--amber);color:var(--amber);}
+  .mat-list{margin-top:10px;font-size:12.5px;color:var(--text-dim);}
+  .mat-list li{margin-bottom:3px;}
+  .mat-add-row{display:flex;gap:6px;margin-top:8px;}
+  .mat-add-row input{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:7px;font-size:12.5px;}
+  .mat-add-row button{border:1px solid var(--border);background:var(--panel);color:var(--amber);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;}
+
+  /* Calendar */
+  .cal-wrap{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .cal-nav button{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 11px;cursor:pointer;font-size:13px;}
+  .cal-nav .cal-title{font-weight:700;font-size:14px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .cal-dow{text-align:center;font-size:11px;color:var(--text-dim);text-transform:uppercase;padding-bottom:4px;}
+  .cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;background:var(--panel);border:1px solid var(--border);}
+  .cal-cell.empty{background:transparent;border:none;}
+  .cal-cell.present{background:rgba(62,207,142,.16);border-color:var(--green);color:var(--green);}
+  .cal-cell.absent{background:rgba(239,91,91,.16);border-color:var(--red);color:var(--red);}
+  .cal-cell.today{outline:2px solid var(--amber);}
+  .cal-cell.clickable{cursor:pointer;}
+  .cal-cell.clickable:hover{border-color:var(--blue);}
+  .cal-cell.selected{outline:2px solid var(--blue);}
+  .cal-legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--text-dim);flex-wrap:wrap;}
+  .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .cal-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  /* Reminder / info modal */
+  .reminder-item{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--panel2);}
+  .reminder-item .r-days{color:var(--amber);font-weight:700;font-size:12px;}
+
+  /* dark-theme inputs/selects inside any table (fixes native white dropdowns) */
+  td input, td select{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12.5px;}
+  td select{cursor:pointer;}
+
+  .school-topper-card{border:2px solid var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:14px;background:rgba(242,165,65,.08);display:flex;align-items:center;gap:14px;}
+  .school-topper-card .trophy{font-size:26px;}
+  .school-topper-card .st-name{font-weight:700;font-size:15px;}
+  .school-topper-card .st-meta{color:var(--text-dim);font-size:12.5px;}
+
+  /* Day-grouped timetable editor */
+  .tt-day-block{margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed var(--border);}
+  .tt-day-block:last-child{border-bottom:none;}
+  .tt-day-block h4{margin:0 0 8px;color:var(--amber);font-size:13.5px;text-transform:uppercase;letter-spacing:.4px;}
+
+  /* Custom time picker (Hour / Minute / AM-PM) — replaces the plain native clock widget */
+  .time-picker{display:inline-flex;align-items:center;gap:3px;}
+  .time-picker select{padding:5px 3px!important;text-align:center;cursor:pointer;}
+  .time-picker select[data-tp-h]{width:42px;}
+  .time-picker select[data-tp-m]{width:48px;}
+  .time-picker select[data-tp-ap]{width:52px;font-weight:700;color:var(--amber)!important;}
+  .time-picker .tp-colon{color:var(--text-dim);font-weight:700;}
+
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:50;}
+  .modal-bg.open{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px;width:400px;max-width:92vw;max-height:85vh;overflow-y:auto;}
+  #op-modal-bg .modal{display:flex;flex-direction:column;max-height:82vh;overflow:hidden;}
+  #op-modal-body{overflow-y:auto;flex:1 1 auto;min-height:0;margin:6px 0;padding-right:6px;}
+  .modal h3{margin:0 0 16px;font-size:16px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);padding:12px 18px;border-radius:10px;font-size:13.5px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .toast.show{display:block;animation:fade 2.5s forwards;}
+  @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px);}10%{opacity:1;transform:translateX(-50%) translateY(0);}85%{opacity:1;}100%{opacity:0;}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>🏫 EduAdmin</h1>
+    <div class="sub">School Management System — sign in</div>
+
+    <div class="field"><label>Name / Username</label><input id="li-name" placeholder="e.g. Balasubramani"></div>
+    <div class="field"><label>Password</label><input id="li-pass" type="password" placeholder="e.g. Bala@STU001"></div>
+
+    <label style="display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;">Login as</label>
+    <div class="role-grid">
+      <div class="role-opt active" data-role="student">🎓 Student</div>
+      <div class="role-opt" data-role="staff">👩‍🏫 Staff</div>
+      <div class="role-opt" data-role="housekeeping">🧹 Housekeeping / Maintenance</div>
+      <div class="role-opt" data-role="management">🗂️ Management</div>
+    </div>
+
+    <button class="btn btn-amber" id="login-btn" disabled>Loading saved data…</button>
+    <div class="login-err" id="login-err">Name, password, or role doesn't match our records.</div>
+
+    <details class="demo-box">
+      <summary>Show test credentials</summary>
+      <div id="demo-list"></div>
+    </details>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app-screen">
+  <header>
+    <h1>🏫 EduAdmin</h1>
+    <div class="who">
+      <span id="who-name"></span>
+      <span class="role-tag" id="who-role"></span>
+      <button class="btn-ghost" id="logout-btn">Log Out</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- MANAGEMENT VIEW -->
+    <div id="view-management" class="hidden">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="students">Students</button>
+        <button class="tab-btn" data-tab="staff">Staff</button>
+        <button class="tab-btn" data-tab="housekeeping">Housekeeping</button>
+        <button class="tab-btn" data-tab="classes">Classes &amp; Sections</button>
+        <button class="tab-btn" data-tab="myattendance">My Attendance</button>
+        <button class="tab-btn" data-tab="attendance">Student Attendance</button>
+        <button class="tab-btn" data-tab="timetable">Timetable</button>
+        <button class="tab-btn" data-tab="exams">Exams</button>
+        <button class="tab-btn" data-tab="holidays">Holidays</button>
+        <button class="tab-btn" data-tab="syllabus">Syllabus</button>
+        <button class="tab-btn" data-tab="marks">Marks</button>
+        <button class="tab-btn" data-tab="toppers">Toppers</button>
+        <button class="tab-btn" data-tab="reports">Reports</button>
+        <button class="tab-btn" data-tab="maintenance">Maintenance</button>
+        <button class="tab-btn" data-tab="leave">Leave Requests</button>
+      </div>
+
+      <div id="tab-overview">
+        <div class="stats">
+          <div class="stat-card"><div class="lbl">Total Students</div><div class="val" id="m-total-students">0</div></div>
+          <div class="stat-card"><div class="lbl">Total Staff</div><div class="val" id="m-total-staff">0</div></div>
+          <div class="stat-card"><div class="lbl">Housekeeping / Maintenance</div><div class="val" id="m-total-hsk">0</div></div>
+          <div class="stat-card"><div class="lbl">Classes × Sections</div><div class="val">12 × 3</div></div>
+        </div>
+        <div class="panel">
+          <h3>School Structure</h3>
+          <p style="color:var(--text-dim);font-size:13.5px;line-height:1.6;">
+            Classes 1–12, each split into Sections A, B and C. Every section holds 30 students,
+            giving 90 students per class and 1,080 students school-wide. Each account gets an
+            auto-generated ID and password in the format <b style="color:var(--text)">First 4 letters of name</b> +
+            <b style="color:var(--text)">@</b> + <b style="color:var(--text)">Role Code</b> +
+            <b style="color:var(--text)">3-digit serial</b> (e.g. <span class="pw">Bala@STU001</span>).
+          </p>
+        </div>
+      </div>
+
+      <div id="tab-students" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Browse / Manage Students</h3>
+            <button class="btn btn-amber" style="width:auto;" id="add-student-btn">+ Add Student</button>
+          </div>
+          <div class="row-flex">
+            <select id="sel-class"></select>
+            <select id="sel-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <table>
+            <thead><tr><th>Roll No</th><th>Student ID</th><th>Name</th><th>Password</th><th></th></tr></thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-staff" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Staff Directory</h3>
+            <button class="btn btn-amber" style="width:auto;" id="add-staff-btn">+ Add Staff</button>
+          </div>
+          <table>
+            <thead><tr><th>Staff ID</th><th>Name</th><th>Subject / Role</th><th>Password</th><th></th></tr></thead>
+            <tbody id="staff-tbody"></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>Assign Class Teacher</h3>
+          <div class="row-flex">
+            <select id="assign-class"></select>
+            <select id="assign-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+            <select id="assign-staff"></select>
+            <button class="btn btn-amber" style="width:auto;" id="assign-teacher-btn">Assign</button>
+          </div>
+          <table><thead><tr><th>Class - Section</th><th>Class Teacher</th></tr></thead><tbody id="assign-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="tab-housekeeping" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Housekeeping / Maintenance</h3>
+            <button class="btn btn-amber" style="width:auto;" id="add-hsk-btn">+ Add Staff</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Duty</th><th>Password</th><th></th></tr></thead>
+            <tbody id="hsk-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-classes" class="hidden">
+        <div class="panel">
+          <h3>Classes &amp; Sections</h3>
+          <div class="row-flex">
+            <select id="cls-add-class"></select>
+            <input type="text" id="cls-add-section" placeholder="New section letter e.g. D" style="width:180px;">
+            <button class="btn btn-amber" style="width:auto;" id="cls-add-btn">+ Create Section</button>
+          </div>
+          <p class="desc">New sections appear here immediately. Note: existing Student/Staff dropdowns elsewhere in the app list A/B/C by default — assign students into a new section from the Students tab's Edit form.</p>
+          <table><thead><tr><th>Class</th><th>Sections</th><th>Total Students</th></tr></thead><tbody id="cls-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="tab-myattendance" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">My Attendance</h3>
+            <button class="btn btn-amber" style="width:auto;" id="mgt-mark-btn">Mark Today Present</button>
+          </div>
+          <div id="mgt-myatt-calendar"></div>
+        </div>
+      </div>
+
+      <div id="tab-attendance" class="hidden">
+        <div class="panel">
+          <h3>Attendance Register — Add / View</h3>
+          <div class="row-flex">
+            <select id="mgt-att-class"></select>
+            <select id="mgt-att-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <div id="mgt-att-calendar"></div>
+          <input type="hidden" id="mgt-att-date">
+          <h3 style="margin-top:18px;">Roster — <span id="mgt-att-seldate"></span> <span id="mgt-att-recorded-badge" class="badge" style="margin-left:8px;"></span></h3>
+          <table><thead><tr><th>Roll</th><th>Name</th><th>Attendance</th></tr></thead><tbody id="mgt-att-tbody"></tbody></table>
+          <button class="btn btn-amber" style="width:auto;margin-top:12px;" id="mgt-att-save">Save Attendance</button>
+        </div>
+      </div>
+
+      <div id="tab-timetable" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Daily Timetable</h3>
+            <button class="btn btn-amber" style="width:auto;" data-open-editor="mgt-tt-editor" data-editor-title="Edit Daily Timetable" data-refresh="renderMgtTimetableReadonly">Edit Timetable</button>
+          </div>
+          <div class="row-flex">
+            <select id="mgt-tt-class"></select>
+            <select id="mgt-tt-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <div id="mgt-tt-readonly"></div>
+        </div>
+      </div>
+      <div id="mgt-tt-editor-slot" class="hidden">
+        <div id="mgt-tt-editor">
+          <div id="mgt-tt-daywrap"></div>
+        </div>
+      </div>
+
+      <div id="tab-exams" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Exam Timetable</h3>
+            <button class="btn btn-amber" style="width:auto;" data-open-editor="mgt-exam-editor" data-editor-title="Edit Exam Timetable" data-refresh="renderMgtExamTTReadonly">Edit Exam Timetable</button>
+          </div>
+          <div class="row-flex"><select id="mgt-exam-class"></select></div>
+          <div id="mgt-exam-readonly"></div>
+        </div>
+      </div>
+      <div id="mgt-exam-editor-slot" class="hidden">
+        <div id="mgt-exam-editor">
+          <table><thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Start</th><th>End</th><th></th></tr></thead><tbody id="mgt-exam-tbody"></tbody></table>
+          <button class="btn-ghost" style="margin-top:12px;" id="mgt-exam-addrow">+ Add Exam Entry</button>
+        </div>
+      </div>
+
+      <div id="tab-holidays" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Holidays</h3>
+            <button class="btn btn-amber" style="width:auto;" data-open-editor="mgt-hol-editor" data-editor-title="Edit Holidays" data-refresh="renderMgtHolidaysReadonly">Edit Holidays</button>
+          </div>
+          <div id="mgt-hol-readonly"></div>
+        </div>
+      </div>
+      <div id="mgt-hol-editor-slot" class="hidden">
+        <div id="mgt-hol-editor">
+          <div class="row-flex">
+            <input type="date" id="mgt-hol-date">
+            <input type="text" id="mgt-hol-name" placeholder="Occasion name">
+            <button class="btn btn-amber" style="width:auto;" id="mgt-hol-add">+ Add Holiday</button>
+          </div>
+          <table><thead><tr><th>Date</th><th>Occasion</th><th></th></tr></thead><tbody id="mgt-hol-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="tab-syllabus" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Syllabus</h3>
+            <div class="row-flex" style="margin:0;">
+              <select id="mgt-syl-subject"></select>
+              <button class="btn btn-amber" style="width:auto;" data-open-editor="mgt-syl-editor" data-editor-title="Edit Syllabus" data-refresh="renderMgtSyllabusReadonly">Edit Syllabus</button>
+            </div>
+          </div>
+          <div class="row-flex">
+            <select id="mgt-syl-class"></select>
+            <select id="mgt-syl-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <div id="mgt-syl-readonly"></div>
+        </div>
+      </div>
+      <div id="mgt-syl-editor-slot" class="hidden">
+        <div id="mgt-syl-editor">
+          <table><thead><tr><th>Topic</th><th>Status</th><th></th></tr></thead><tbody id="mgt-syl-tbody"></tbody></table>
+          <div class="row-flex" style="margin-top:12px;">
+            <input type="text" id="mgt-syl-topic" placeholder="New topic name">
+            <button class="btn btn-amber" style="width:auto;" id="mgt-syl-add">+ Add Topic</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-marks" class="hidden">
+        <div class="panel">
+          <h3>Student Marks — Add / Update</h3>
+          <div class="row-flex">
+            <select id="mgt-marks-class"></select>
+            <select id="mgt-marks-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+            <select id="mgt-marks-exam"></select>
+            <select id="mgt-marks-subject"></select>
+          </div>
+          <table><thead><tr><th>Roll</th><th>Name</th><th>Marks</th><th>Max</th></tr></thead><tbody id="mgt-marks-tbody"></tbody></table>
+          <button class="btn btn-amber" style="width:auto;margin-top:12px;" id="mgt-marks-save">Save Marks</button>
+        </div>
+      </div>
+
+      <div id="tab-toppers" class="hidden">
+        <div class="panel">
+          <h3>🏆 School Topper</h3>
+          <div class="row-flex"><select id="mgt-schooltopper-exam"></select></div>
+          <div id="mgt-schooltopper-card"></div>
+        </div>
+        <div class="panel">
+          <h3>Class / Section Toppers</h3>
+          <div class="row-flex">
+            <select id="mgt-topper-class"></select>
+            <select id="mgt-topper-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+            <select id="mgt-topper-exam"></select>
+          </div>
+          <div id="mgt-topper-list"></div>
+        </div>
+      </div>
+
+      <div id="tab-reports" class="hidden">
+        <div class="panel">
+          <h3>School Reports</h3>
+          <p class="desc">Attendance and Term 1 Exam averages, computed live across all classes.</p>
+          <table>
+            <thead><tr><th>Class</th><th>Students</th><th>Avg Attendance %</th><th>Avg Marks (Term 1 Exam)</th></tr></thead>
+            <tbody id="rep-tbody"></tbody>
+          </table>
+        </div>
+        <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="lbl">Open Maintenance Issues</div><div class="val" id="rep-open">0</div></div>
+          <div class="stat-card"><div class="lbl">In Progress</div><div class="val" id="rep-inprogress">0</div></div>
+          <div class="stat-card"><div class="lbl">Completed</div><div class="val" id="rep-completed">0</div></div>
+        </div>
+      </div>
+
+      <div id="tab-maintenance" class="hidden">
+        <div class="panel">
+          <h3>Report a New Issue</h3>
+          <div class="field"><label>Location</label><input id="mgt-rep-location" placeholder="e.g. Classroom 5A"></div>
+          <div class="field"><label>Issue</label><input id="mgt-rep-title" placeholder="e.g. Ceiling fan not working"></div>
+          <div class="field"><label>Details (optional)</label><input id="mgt-rep-desc" placeholder="Any extra notes"></div>
+          <div class="field"><label>Assign To (optional)</label>
+            <select id="mgt-rep-assign"><option value="">Unassigned — anyone can claim</option></select>
+          </div>
+          <button class="btn btn-amber" style="width:auto;" id="mgt-rep-submit">Submit Issue</button>
+        </div>
+        <div class="panel">
+          <h3>All Maintenance Issues</h3>
+          <div id="mgt-issues-list"></div>
+        </div>
+        <div class="panel">
+          <h3>Required Materials — All Issues</h3>
+          <table><thead><tr><th>Material</th><th>Total Qty</th><th>Used In</th></tr></thead><tbody id="mgt-mat-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="tab-leave" class="hidden">
+        <div class="panel">
+          <h3>All Student Leave Requests</h3>
+          <div id="mgt-leave-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOUSEKEEPING / MAINTENANCE VIEW -->
+    <div id="view-housekeeping" class="hidden">
+      <div class="tabs">
+        <button class="tab-btn active" data-hk-tab="attendance">Attendance</button>
+        <button class="tab-btn" data-hk-tab="report">Report Issue</button>
+        <button class="tab-btn" data-hk-tab="tasks">My Tasks</button>
+        <button class="tab-btn" data-hk-tab="profile">My Profile</button>
+      </div>
+
+      <div id="hk-attendance">
+        <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="lbl">Attendance %</div><div class="val" id="hk-att-pct">—</div></div>
+          <div class="stat-card"><div class="lbl">Days Present</div><div class="val" id="hk-att-present">0</div></div>
+          <div class="stat-card"><div class="lbl">Days Recorded</div><div class="val" id="hk-att-total">0</div></div>
+        </div>
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">My Attendance</h3>
+            <button class="btn btn-amber" style="width:auto;" id="hk-mark-btn">Mark Today Present</button>
+          </div>
+          <div id="hk-att-calendar"></div>
+        </div>
+      </div>
+
+      <div id="hk-report" class="hidden">
+        <div class="panel">
+          <h3>Report a Maintenance Issue</h3>
+          <p class="desc">e.g. "Classroom 5A fan not working" — this creates a task that any maintenance staff (including you) can pick up.</p>
+          <div class="field"><label>Location</label><input id="hk-rep-location" placeholder="e.g. Classroom 5A"></div>
+          <div class="field"><label>Issue</label><input id="hk-rep-title" placeholder="e.g. Ceiling fan not working"></div>
+          <div class="field"><label>Details (optional)</label><input id="hk-rep-desc" placeholder="Any extra notes"></div>
+          <button class="btn btn-amber" style="width:auto;" id="hk-rep-submit">Submit Report</button>
+        </div>
+      </div>
+
+      <div id="hk-tasks" class="hidden">
+        <div class="panel">
+          <h3>Assigned to Me</h3>
+          <div id="hk-mytasks-list"></div>
+        </div>
+        <div class="panel">
+          <h3>Unassigned Issues — Available to Pick Up</h3>
+          <div id="hk-open-list"></div>
+        </div>
+      </div>
+
+      <div id="hk-profile" class="hidden">
+        <div class="profile-card">
+          <div class="avatar" id="hk-initial"></div>
+          <div class="profile-row"><span>Full Name</span><span id="hk-name"></span></div>
+          <div class="profile-row"><span>ID</span><span class="idcode" id="hk-id"></span></div>
+          <div class="profile-row"><span>Duty</span><span id="hk-duty"></span></div>
+          <div class="profile-row"><span>Role</span><span class="badge">housekeeping</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STUDENT MODULE ============ -->
+    <div id="view-student" class="hidden">
+      <div class="tabs">
+        <button class="tab-btn active" data-stu-tab="attendance">Attendance</button>
+        <button class="tab-btn" data-stu-tab="timetable">Daily Timetable</button>
+        <button class="tab-btn" data-stu-tab="examtt">Exam Timetable</button>
+        <button class="tab-btn" data-stu-tab="holidays">Holidays</button>
+        <button class="tab-btn" data-stu-tab="syllabus">Syllabus</button>
+        <button class="tab-btn" data-stu-tab="marks">Marks</button>
+        <button class="tab-btn" data-stu-tab="topper">Topper</button>
+        <button class="tab-btn" data-stu-tab="profile">My Profile</button>
+        <button class="tab-btn" data-stu-tab="leave">Leave Request</button>
+      </div>
+
+      <div id="stu-attendance">
+        <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="lbl">Attendance %</div><div class="val" id="stu-att-pct">—</div></div>
+          <div class="stat-card"><div class="lbl">Days Present</div><div class="val" id="stu-att-present">0</div></div>
+          <div class="stat-card"><div class="lbl">Days Recorded</div><div class="val" id="stu-att-total">0</div></div>
+        </div>
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">My Attendance</h3>
+            <button class="btn btn-amber" style="width:auto;" id="stu-mark-btn">Mark Today Present</button>
+          </div>
+          <div id="stu-att-calendar"></div>
+        </div>
+      </div>
+
+      <div id="stu-timetable" class="hidden">
+        <div class="panel">
+          <h3>Daily Timetable — <span id="stu-tt-classsec"></span></h3>
+          <div id="stu-tt-readonly"></div>
+        </div>
+      </div>
+
+      <div id="stu-examtt" class="hidden">
+        <div class="panel">
+          <h3>Exam Timetable — Class <span id="stu-exam-class"></span></h3>
+          <table><thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Time</th></tr></thead><tbody id="stu-exam-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="stu-holidays" class="hidden">
+        <div class="panel">
+          <h3>School Holidays</h3>
+          <table><thead><tr><th>Date</th><th>Occasion</th></tr></thead><tbody id="stu-hol-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="stu-syllabus" class="hidden">
+        <div class="panel">
+          <h3>Syllabus — <span id="stu-syl-classsec"></span></h3>
+          <div id="stu-syl-body"></div>
+        </div>
+      </div>
+
+      <div id="stu-marks" class="hidden">
+        <div class="panel">
+          <h3>My Marks</h3>
+          <div class="row-flex"><select id="stu-marks-exam"></select></div>
+          <table><thead><tr><th>Subject</th><th>Marks</th><th>Max</th><th>%</th></tr></thead><tbody id="stu-marks-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="stu-topper" class="hidden">
+        <div class="panel">
+          <h3>🏆 School Topper</h3>
+          <div id="stu-schooltopper-card"></div>
+        </div>
+        <div class="panel">
+          <h3>Class/Section Topper — <span id="stu-topper-classsec"></span></h3>
+          <div class="row-flex"><select id="stu-topper-exam"></select></div>
+          <div id="stu-topper-list"></div>
+        </div>
+      </div>
+
+      <div id="stu-profile" class="hidden">
+        <div class="profile-card">
+          <div class="avatar" id="stu-pf-initial"></div>
+          <div class="profile-row"><span>Full Name</span><span id="stu-pf-name"></span></div>
+          <div class="profile-row"><span>Student ID</span><span class="idcode" id="stu-pf-id"></span></div>
+          <div class="profile-row"><span>Class & Section</span><span id="stu-pf-classsec"></span></div>
+          <div class="profile-row"><span>Roll No</span><span id="stu-pf-roll"></span></div>
+          <div class="profile-row"><span>Role</span><span class="badge">student</span></div>
+        </div>
+      </div>
+
+      <div id="stu-leave" class="hidden">
+        <div class="panel">
+          <h3>Request Leave</h3>
+          <div class="field"><label>Send To (Staff)</label><select id="stu-leave-staff"></select></div>
+          <div class="field"><label>From Date</label><input type="date" id="stu-leave-from"></div>
+          <div class="field"><label>To Date</label><input type="date" id="stu-leave-to"></div>
+          <div class="field"><label>Reason</label><input type="text" id="stu-leave-reason" placeholder="e.g. Family function"></div>
+          <button class="btn btn-amber" style="width:auto;" id="stu-leave-submit">Submit Request</button>
+        </div>
+        <div class="panel">
+          <h3>My Leave Requests</h3>
+          <div id="stu-leave-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STAFF MODULE ============ -->
+    <div id="view-staff" class="hidden">
+      <div class="tabs">
+        <button class="tab-btn active" data-stf-tab="myattendance">My Attendance</button>
+        <button class="tab-btn" data-stf-tab="attendance">Student Attendance</button>
+        <button class="tab-btn" data-stf-tab="timetable">Daily Timetable</button>
+        <button class="tab-btn" data-stf-tab="examtt">Exam Timetable</button>
+        <button class="tab-btn" data-stf-tab="holidays">Holidays</button>
+        <button class="tab-btn" data-stf-tab="syllabus">Syllabus</button>
+        <button class="tab-btn" data-stf-tab="marks">Marks</button>
+        <button class="tab-btn" data-stf-tab="topper">Toppers</button>
+        <button class="tab-btn" data-stf-tab="leave">Leave Requests</button>
+      </div>
+
+      <div id="stf-myattendance" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">My Attendance</h3>
+            <button class="btn btn-amber" style="width:auto;" id="stf-mark-btn">Mark Today Present</button>
+          </div>
+          <div id="stf-myatt-calendar"></div>
+        </div>
+      </div>
+
+      <div id="stf-attendance">
+        <div class="panel">
+          <h3>Attendance Register — Add / View</h3>
+          <div class="row-flex">
+            <select id="stf-att-class"></select>
+            <select id="stf-att-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <div id="stf-att-calendar"></div>
+          <input type="hidden" id="stf-att-date">
+          <h3 style="margin-top:18px;">Roster — <span id="stf-att-seldate"></span> <span id="stf-att-recorded-badge" class="badge" style="margin-left:8px;"></span></h3>
+          <table><thead><tr><th>Roll</th><th>Name</th><th>Attendance</th></tr></thead><tbody id="stf-att-tbody"></tbody></table>
+          <button class="btn btn-amber" style="width:auto;margin-top:12px;" id="stf-att-save">Save Attendance</button>
+        </div>
+      </div>
+
+      <div id="stf-timetable" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Daily Timetable</h3>
+            <button class="btn btn-amber" style="width:auto;" data-open-editor="stf-tt-editor" data-editor-title="Edit Daily Timetable" data-refresh="renderStfTimetableReadonly">Edit Timetable</button>
+          </div>
+          <div class="row-flex">
+            <select id="stf-tt-class"></select>
+            <select id="stf-tt-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <div id="stf-tt-readonly"></div>
+        </div>
+      </div>
+      <div id="stf-tt-editor-slot" class="hidden">
+        <div id="stf-tt-editor">
+          <div id="stf-tt-daywrap"></div>
+        </div>
+      </div>
+
+      <div id="stf-examtt" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Exam Timetable</h3>
+            <button class="btn btn-amber" style="width:auto;" data-open-editor="stf-exam-editor" data-editor-title="Edit Exam Timetable" data-refresh="renderStfExamTTReadonly">Edit Exam Timetable</button>
+          </div>
+          <div class="row-flex"><select id="stf-exam-class"></select></div>
+          <div id="stf-exam-readonly"></div>
+        </div>
+      </div>
+      <div id="stf-exam-editor-slot" class="hidden">
+        <div id="stf-exam-editor">
+          <table>
+            <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Start</th><th>End</th><th></th></tr></thead>
+            <tbody id="stf-exam-tbody"></tbody>
+          </table>
+          <button class="btn-ghost" style="margin-top:12px;" id="stf-exam-addrow">+ Add Exam Entry</button>
+        </div>
+      </div>
+
+      <div id="stf-holidays" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Holidays</h3>
+            <button class="btn btn-amber" style="width:auto;" data-open-editor="stf-hol-editor" data-editor-title="Edit Holidays" data-refresh="renderStfHolidaysReadonly">Edit Holidays</button>
+          </div>
+          <div id="stf-hol-readonly"></div>
+        </div>
+      </div>
+      <div id="stf-hol-editor-slot" class="hidden">
+        <div id="stf-hol-editor">
+          <div class="row-flex">
+            <input type="date" id="stf-hol-date">
+            <input type="text" id="stf-hol-name" placeholder="Occasion name">
+            <button class="btn btn-amber" style="width:auto;" id="stf-hol-add">+ Add Holiday</button>
+          </div>
+          <table><thead><tr><th>Date</th><th>Occasion</th><th></th></tr></thead><tbody id="stf-hol-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="stf-syllabus" class="hidden">
+        <div class="panel">
+          <div class="row-flex" style="justify-content:space-between;">
+            <h3 style="margin:0;">Syllabus</h3>
+            <div class="row-flex" style="margin:0;">
+              <select id="stf-syl-subject"></select>
+              <button class="btn btn-amber" style="width:auto;" data-open-editor="stf-syl-editor" data-editor-title="Edit Syllabus" data-refresh="renderStfSyllabusReadonly">Edit Syllabus</button>
+            </div>
+          </div>
+          <div class="row-flex">
+            <select id="stf-syl-class"></select>
+            <select id="stf-syl-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+          </div>
+          <div id="stf-syl-readonly"></div>
+        </div>
+      </div>
+      <div id="stf-syl-editor-slot" class="hidden">
+        <div id="stf-syl-editor">
+          <table><thead><tr><th>Topic</th><th>Status</th><th></th></tr></thead><tbody id="stf-syl-tbody"></tbody></table>
+          <div class="row-flex" style="margin-top:12px;">
+            <input type="text" id="stf-syl-topic" placeholder="New topic name">
+            <button class="btn btn-amber" style="width:auto;" id="stf-syl-add">+ Add Topic</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="stf-marks" class="hidden">
+        <div class="panel">
+          <h3>Student Marks — Add / Update</h3>
+          <div class="row-flex">
+            <select id="stf-marks-class"></select>
+            <select id="stf-marks-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+            <select id="stf-marks-exam"></select>
+            <select id="stf-marks-subject"></select>
+          </div>
+          <table><thead><tr><th>Roll</th><th>Name</th><th>Marks</th><th>Max</th></tr></thead><tbody id="stf-marks-tbody"></tbody></table>
+          <button class="btn btn-amber" style="width:auto;margin-top:12px;" id="stf-marks-save">Save Marks</button>
+        </div>
+      </div>
+
+      <div id="stf-topper" class="hidden">
+        <div class="panel">
+          <h3>🏆 School Topper</h3>
+          <div class="row-flex"><select id="stf-schooltopper-exam"></select></div>
+          <div id="stf-schooltopper-card"></div>
+        </div>
+        <div class="panel">
+          <h3>Class / Section Toppers</h3>
+          <div class="row-flex">
+            <select id="stf-topper-class"></select>
+            <select id="stf-topper-section"><option value="A">Section A</option><option value="B">Section B</option><option value="C">Section C</option></select>
+            <select id="stf-topper-exam"></select>
+          </div>
+          <div id="stf-topper-list"></div>
+        </div>
+      </div>
+
+      <div id="stf-leave" class="hidden">
+        <div class="panel">
+          <h3>Student Leave Requests</h3>
+          <div id="stf-leave-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add/Edit staff or housekeeping modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-title">Add Staff</h3>
+    <input type="hidden" id="f-id">
+    <div class="field"><label>Full Name</label><input id="f-name" placeholder="e.g. Kavitha Reddy"></div>
+    <div class="field"><label id="f-role-label">Subject Taught</label><input id="f-role" placeholder="e.g. Mathematics"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-amber" style="width:auto;" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit student modal -->
+<div class="modal-bg" id="student-modal-bg">
+  <div class="modal">
+    <h3 id="student-modal-title">Add Student</h3>
+    <input type="hidden" id="s-id">
+    <div class="field"><label>Full Name</label><input id="s-name" placeholder="e.g. Ananya Rao"></div>
+    <div class="field"><label>Class</label><select id="s-class"></select></div>
+    <div class="field"><label>Section</label><input id="s-section" placeholder="e.g. A" maxlength="1"></div>
+    <div class="field"><label>Roll No</label><input id="s-roll" type="number" min="1"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="student-modal-cancel">Cancel</button>
+      <button class="btn btn-amber" style="width:auto;" id="student-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic editor modal (used by Timetable / Exam Timetable / Holidays / Syllabus edit buttons) -->
+<div class="modal-bg" id="op-modal-bg">
+  <div class="modal" style="width:640px;">
+    <h3 id="op-modal-title">Edit</h3>
+    <div id="op-modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-amber" style="width:auto;" id="op-modal-done">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exam reminder popup (students) -->
+<div class="modal-bg" id="reminder-modal-bg">
+  <div class="modal" style="width:420px;">
+    <h3>📅 Upcoming Exams</h3>
+    <div id="reminder-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-amber" style="width:auto;" id="reminder-close">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Term-end notification (staff/management) -->
+<div class="modal-bg" id="staff-notify-modal-bg">
+  <div class="modal" style="width:420px;">
+    <h3>📚 Term Complete</h3>
+    <p id="staff-notify-text" style="color:var(--text-dim);font-size:13.5px;line-height:1.6;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-amber" style="width:auto;" id="staff-notify-close">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const pad = (n,l=2) => String(n).padStart(l,'0');
+const todayStr = () => new Date().toISOString().slice(0,10);
+const classSecKey = (c,s) => `${c}${s}`;
+
+/* ---------- Name pools & ID/password generation ---------- */
+const firstNames = ['Balasubramani','Aarav','Diya','Kiran','Meera','Rohan','Ananya','Vikram','Sneha','Arjun',
+  'Kavya','Rahul','Priya','Suresh','Lakshmi','Manoj','Divya','Karthik','Pooja','Naveen',
+  'Deepa','Ashwin','Nisha','Ganesh','Ritu','Sanjay','Anitha','Vijay','Swathi','Harish'];
+const lastNames = ['Kumar','Reddy','Sharma','Iyer','Nair','Rao','Menon','Pillai','Gupta','Verma','Das','Patil'];
+
+let serial = 0;
+function nextName(i){
+  const f = firstNames[i % firstNames.length];
+  const l = lastNames[Math.floor(i / firstNames.length) % lastNames.length];
+  return `${f} ${l}`;
+}
+function makePassword(name, roleCode){
+  serial++;
+  const base = name.replace(/[^A-Za-z]/g,'').slice(0,4);
+  const cap = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
+  return `${cap}@${roleCode}${pad(serial,3)}`;
+}
+
+/* ---------- Seed: students / staff / housekeeping / management ---------- */
+let students = [];
+let nameIdx = 0;
+for(let c=1;c<=12;c++){
+  for(const sec of ['A','B','C']){
+    for(let roll=1;roll<=30;roll++){
+      const name = nextName(nameIdx++);
+      const id = `STU${pad(c)}${sec}${pad(roll)}`;
+      students.push({id, name, cls:c, section:sec, roll, password: makePassword(name,'STU')});
+    }
+  }
+}
+
+const teachSubjects = ['Mathematics','English','Science','Social Studies','Physical Education','Computer Science','Hindi','Art'];
+let staff = [];
+for(let i=0;i<24;i++){
+  const name = nextName(nameIdx++);
+  const id = `STF${pad(i+1,3)}`;
+  staff.push({id, name, role: teachSubjects[i % teachSubjects.length] + ' Teacher', password: makePassword(name,'STF')});
+}
+
+const duties = ['Housekeeping — Block A','Housekeeping — Block B','Maintenance — Electrical','Maintenance — Plumbing','Groundskeeping'];
+let housekeeping = [];
+for(let i=0;i<5;i++){
+  const name = nextName(nameIdx++);
+  const id = `HSK${pad(i+1,3)}`;
+  housekeeping.push({id, name, role: duties[i % duties.length], password: makePassword(name,'HSK')});
+}
+
+let management = [
+  {id:'MGT001', name:'Balasubramani Kumar', role:'Principal', password:'Bala@BK001'},
+  {id:'MGT002', name:'Radhika Menon', role:'Vice Principal', password: makePassword('Radhika Menon','MGT')},
+  {id:'MGT003', name:'Suresh Iyer', role:'Admin Officer', password: makePassword('Suresh Iyer','MGT')},
+];
+
+// School structure: which sections exist per class, and class-teacher assignments
+let sectionsByClass = {};
+for(let c=1;c<=12;c++) sectionsByClass[c] = ['A','B','C'];
+let classTeachers = {}; // { "7C": staffId }
+
+/* ---------- Part 3/4 shared academic data ---------- */
+const academicSubjects = ['Mathematics','English','Science','Social Studies','Hindi','Computer Science'];
+const periodTimes = ['9:00–9:45','9:45–10:30','10:45–11:30','11:30–12:15','1:00–1:45','1:45–2:30'];
+const weekDays = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Holidays (global list)
+let holidays = [
+  {date:'2026-09-05', name:"Teachers' Day"},
+  {date:'2026-10-02', name:'Gandhi Jayanti'},
+  {date:'2026-10-20', name:'Dussehra'},
+  {date:'2026-11-08', name:'Diwali'},
+  {date:'2026-12-25', name:'Christmas'},
+  {date:'2027-01-01', name:'New Year'},
+  {date:'2027-01-14', name:'Makar Sankranti / Pongal'},
+];
+
+// Daily timetable: { "7C": [{day,period,time,subject}] }
+let dailyTimetable = {};
+for(let c=1;c<=12;c++){
+  for(const sec of ['A','B','C']){
+    const key = classSecKey(c,sec);
+    const rows = [];
+    weekDays.forEach((day, dIdx) => {
+      periodTimes.forEach((time, pIdx) => {
+        rows.push({day, period: pIdx+1, time, subject: academicSubjects[(pIdx+dIdx) % academicSubjects.length]});
+      });
+    });
+    dailyTimetable[key] = rows;
+  }
+}
+
+// Exam timetable: { "7": [{exam,subject,date,time}] }
+let examTimetable = {};
+for(let c=1;c<=12;c++){
+  const rows = [];
+  academicSubjects.forEach((subj, i) => {
+    const day = 10 + i;
+    rows.push({exam:'Term 1 Exam', subject: subj, date:`2026-09-${pad(day)}`, time:'10:00 AM – 12:00 PM'});
+  });
+  examTimetable[String(c)] = rows;
+}
+
+// Syllabus: { "7C": { "Mathematics": [{topic,status}] } }
+let syllabus = {};
+for(let c=1;c<=12;c++){
+  for(const sec of ['A','B','C']){
+    const key = classSecKey(c,sec);
+    syllabus[key] = {};
+    academicSubjects.forEach(subj => {
+      syllabus[key][subj] = [1,2,3,4,5].map(n => ({
+        topic:`Chapter ${n}`,
+        status: n<=3 ? 'Completed' : 'Pending'
+      }));
+    });
+  }
+}
+
+// Attendance: { studentId: { date: 'present'|'absent' } } — seeded for the last 14 days (not incl. today)
+let attendance = {};
+students.forEach(s => {
+  const rec = {};
+  for(let i=1;i<=14;i++){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = d.toISOString().slice(0,10);
+    rec[key] = Math.random() < 0.9 ? 'present' : 'absent';
+  }
+  attendance[s.id] = rec;
+});
+
+// Marks: { "7C": { "Term 1 Exam": { studentId: { subject: marks } } } }
+let marksData = {};
+students.forEach(s => {
+  const key = classSecKey(s.cls, s.section);
+  if(!marksData[key]) marksData[key] = {};
+  if(!marksData[key]['Term 1 Exam']) marksData[key]['Term 1 Exam'] = {};
+  const subjMarks = {};
+  academicSubjects.forEach(subj => { subjMarks[subj] = 40 + Math.floor(Math.random()*61); });
+  marksData[key]['Term 1 Exam'][s.id] = subjMarks;
+});
+
+// Maintenance issues / tasks: { id, location, title, desc, status, assignedTo, reportedBy, materials:[{name,qty}], createdAt }
+let issues = [];
+let issueSerial = 0;
+function newIssueId(){ issueSerial++; return `ISS${pad(issueSerial,3)}`; }
+
+// Leave requests: student -> staff/management approval workflow
+let leaveRequests = [];
+let leaveSerial = 0;
+function newLeaveId(){ leaveSerial++; return `LV${pad(leaveSerial,3)}`; }
+
+// seed: one completed example (the fan story) + one open unassigned issue
+issues.push({
+  id:newIssueId(), location:'Classroom 5A', title:'Ceiling fan not working',
+  desc:'Fan makes noise then stops.', status:'Completed',
+  assignedTo: housekeeping[0].id, reportedBy: housekeeping[0].id,
+  materials:[{name:'Fan capacitor', qty:1}], createdAt:'2026-08-10'
+});
+issues.push({
+  id:newIssueId(), location:'Staff Room', title:'Leaking tap',
+  desc:'Water dripping continuously from the sink tap.', status:'Open',
+  assignedTo:null, reportedBy: housekeeping[1].id,
+  materials:[], createdAt:'2026-08-19'
+});
+issues.push({
+  id:newIssueId(), location:'Classroom 9B', title:'Broken window latch',
+  desc:'', status:'In Progress',
+  assignedTo: housekeeping[2].id, reportedBy: housekeeping[2].id,
+  materials:[{name:'Window latch', qty:2}], createdAt:'2026-08-17'
+});
+
+function attendancePercent(studentId){
+  const rec = attendance[studentId] || {};
+  const days = Object.keys(rec);
+  if(!days.length) return {pct:0, present:0, total:0};
+  const present = days.filter(d => rec[d]==='present').length;
+  return {pct: Math.round(present/days.length*100), present, total: days.length};
+}
+
+function examListFor(classSec){
+  const key = classSec;
+  if(!marksData[key]) return [];
+  return Object.keys(marksData[key]).filter(exam => Object.keys(marksData[key][exam]).length > 0);
+}
+
+function computeToppers(cls, section, exam){
+  const key = classSecKey(cls, section);
+  const examMarks = (marksData[key] && marksData[key][exam]) || {};
+  const rows = Object.keys(examMarks).map(studentId => {
+    const st = students.find(s=>s.id===studentId);
+    const subjMarks = examMarks[studentId];
+    const subjCount = Object.keys(subjMarks).length;
+    const total = Object.values(subjMarks).reduce((a,b)=>a+b,0);
+    return {studentId, name: st ? st.name : studentId, total, max: subjCount*100};
+  });
+  rows.sort((a,b)=>b.total-a.total);
+  return rows;
+}
+
+function allExamNames(){
+  const names = new Set();
+  Object.keys(marksData).forEach(key=>{
+    Object.keys(marksData[key]).forEach(exam=>{
+      if(Object.keys(marksData[key][exam]).length > 0) names.add(exam);
+    });
+  });
+  return [...names];
+}
+
+function computeSchoolToppers(exam){
+  const rows = [];
+  Object.keys(marksData).forEach(key=>{
+    const examMarks = marksData[key][exam];
+    if(!examMarks) return;
+    Object.keys(examMarks).forEach(studentId=>{
+      const st = students.find(s=>s.id===studentId);
+      if(!st) return;
+      const subjMarks = examMarks[studentId];
+      const subjCount = Object.keys(subjMarks).length;
+      const total = Object.values(subjMarks).reduce((a,b)=>a+b,0);
+      rows.push({studentId, name: st.name, cls: st.cls, section: st.section, total, max: subjCount*100});
+    });
+  });
+  rows.sort((a,b)=>b.total-a.total);
+  return rows;
+}
+
+function renderSchoolTopperCard(containerId, exam){
+  const el = $(`#${containerId}`);
+  if(!el) return;
+  if(!exam){ el.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">No marks recorded yet.</p>'; return; }
+  const rows = computeSchoolToppers(exam);
+  if(!rows.length){ el.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">No marks recorded for this exam yet.</p>'; return; }
+  const top = rows[0];
+  el.innerHTML = `
+    <div class="school-topper-card">
+      <div class="trophy">🏆</div>
+      <div>
+        <div class="st-name">${top.name}</div>
+        <div class="st-meta">Class ${top.cls} - ${top.section} · ${top.total} / ${top.max} marks · ${exam}</div>
+      </div>
+    </div>`;
+}
+
+/* ---------- Login ---------- */
+let selectedRole = 'student';
+let currentUser = null, currentRole = null;
+
+$$('.role-opt').forEach(o=>o.addEventListener('click', ()=>{
+  $$('.role-opt').forEach(x=>x.classList.remove('active'));
+  o.classList.add('active');
+  selectedRole = o.dataset.role;
+}));
+
+function findUser(name, pass, role){
+  const pool = role==='student'?students : role==='staff'?staff : role==='housekeeping'?housekeeping : management;
+  return pool.find(u => u.name.toLowerCase()===name.trim().toLowerCase() && u.password===pass);
+}
+
+function renderDemoList(){
+  const rows = [
+    ['Student', students[210]], // a mid-list student so class/section data looks populated
+    ['Staff', staff[0]],
+    ['Housekeeping', housekeeping[0]],
+    ['Management', management[0]],
+  ];
+  $('#demo-list').innerHTML = rows.map(([label,u])=>`
+    <div class="demo-row"><b>${label}</b><span>${u.name} / ${u.password}</span></div>
+  `).join('');
+}
+
+$('#login-btn').addEventListener('click', ()=>{
+  const name = $('#li-name').value;
+  const pass = $('#li-pass').value;
+  const user = findUser(name, pass, selectedRole);
+  if(!user){
+    $('#login-err').style.display = 'block';
+    return;
+  }
+  $('#login-err').style.display = 'none';
+  currentUser = user; currentRole = selectedRole;
+  enterApp();
+});
+
+$('#logout-btn').addEventListener('click', ()=>{
+  currentUser = null; currentRole = null;
+  $('#app-screen').style.display = 'none';
+  $('#login-screen').style.display = 'flex';
+  $('#li-name').value=''; $('#li-pass').value='';
+});
+
+function showToast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  scheduleSave();
+}
+
+function enterApp(){
+  $('#login-screen').style.display = 'none';
+  $('#app-screen').style.display = 'block';
+  $('#who-name').textContent = currentUser.name;
+  $('#who-role').textContent = currentRole;
+
+  $('#view-management').classList.toggle('hidden', currentRole!=='management');
+  $('#view-housekeeping').classList.toggle('hidden', currentRole!=='housekeeping');
+  $('#view-student').classList.toggle('hidden', currentRole!=='student');
+  $('#view-staff').classList.toggle('hidden', currentRole!=='staff');
+
+  if(currentRole==='management'){
+    renderOverview(); populateClassSelect(); renderStudentsTable(); renderStaffTable(); renderHskTable();
+    populateAssignSelects(); renderAssignTable(); renderMgtClasses(); populateMgtOpsSelects();
+    renderMgtMyAttendance();
+    checkTermCompletion();
+  } else if(currentRole==='housekeeping'){
+    initHousekeepingModule();
+  } else if(currentRole==='student'){
+    initStudentModule();
+  } else if(currentRole==='staff'){
+    initStaffModule();
+  }
+}
+
+/* ================= HOUSEKEEPING / MAINTENANCE MODULE ================= */
+function initHousekeepingModule(){
+  $$('.tab-btn[data-hk-tab]').forEach(b=>b.classList.remove('active'));
+  $$('.tab-btn[data-hk-tab]')[0].classList.add('active');
+  ['attendance','report','tasks','profile'].forEach((t,i)=>{
+    $(`#hk-${t}`).classList.toggle('hidden', i!==0);
+  });
+  renderHkAttendance();
+  renderHkTasks();
+  renderHkProfile();
+}
+$$('.tab-btn[data-hk-tab]').forEach(b=>b.addEventListener('click', ()=>{
+  $$('.tab-btn[data-hk-tab]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  ['attendance','report','tasks','profile'].forEach(t=>{
+    $(`#hk-${t}`).classList.toggle('hidden', t!==b.dataset.hkTab);
+  });
+  if(b.dataset.hkTab==='tasks') renderHkTasks();
+}));
+
+function renderHkProfile(){
+  const u = currentUser;
+  $('#hk-initial').textContent = u.name.charAt(0).toUpperCase();
+  $('#hk-name').textContent = u.name;
+  $('#hk-id').textContent = u.id;
+  $('#hk-duty').textContent = u.role;
+}
+
+function renderHkAttendance(){
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  const {pct, present, total} = attendancePercent(currentUser.id);
+  $('#hk-att-pct').textContent = total ? pct + '%' : '—';
+  $('#hk-att-present').textContent = present;
+  $('#hk-att-total').textContent = total;
+  renderCalendar('hk-att-calendar', { markerFn: d => attendance[currentUser.id][d] || null, selectable:false });
+  const marked = !!attendance[currentUser.id][todayStr()];
+  $('#hk-mark-btn').disabled = marked;
+  $('#hk-mark-btn').textContent = marked ? 'Already Marked Today' : 'Mark Today Present';
+}
+$('#hk-mark-btn').addEventListener('click', ()=>{
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  attendance[currentUser.id][todayStr()] = 'present';
+  showToast('Attendance marked for today');
+  renderHkAttendance();
+});
+
+$('#hk-rep-submit').addEventListener('click', ()=>{
+  const location = $('#hk-rep-location').value.trim();
+  const title = $('#hk-rep-title').value.trim();
+  const desc = $('#hk-rep-desc').value.trim();
+  if(!location || !title){ showToast('Please fill in location and issue'); return; }
+  issues.unshift({
+    id:newIssueId(), location, title, desc, status:'Open',
+    assignedTo:null, reportedBy: currentUser.id, materials:[], createdAt: todayStr()
+  });
+  $('#hk-rep-location').value=''; $('#hk-rep-title').value=''; $('#hk-rep-desc').value='';
+  showToast(`Reported: ${title} — ${location}`);
+  renderHkTasks();
+});
+
+function statusClass(s){ return s==='Completed'?'completed':s==='In Progress'?'inprogress':'open'; }
+
+function taskCardHtml(t, showClaim){
+  return `
+  <div class="task-card" data-issue="${t.id}">
+    <div class="task-head">
+      <div><div class="task-loc">${t.location}</div><div class="task-title">${t.title}${t.desc? ' — '+t.desc:''}</div></div>
+      <span class="badge ${statusClass(t.status)}">${t.status}</span>
+    </div>
+    ${showClaim ? `<button class="status-btn" data-claim="${t.id}">Claim this task</button>` : `
+    <div class="status-btns">
+      <button class="status-btn ${t.status==='Open'?'active':''}" data-setstatus="${t.id}" data-val="Open">Open</button>
+      <button class="status-btn ${t.status==='In Progress'?'active':''}" data-setstatus="${t.id}" data-val="In Progress">In Progress</button>
+      <button class="status-btn ${t.status==='Completed'?'active':''}" data-setstatus="${t.id}" data-val="Completed">Completed</button>
+    </div>
+    <ul class="mat-list">
+      ${t.materials.map(m=>`<li>${m.name} × ${m.qty}</li>`).join('') || '<li>No materials added yet</li>'}
+    </ul>
+    <div class="mat-add-row">
+      <input type="text" placeholder="Material / item name" data-mat-name="${t.id}">
+      <input type="number" min="1" value="1" style="width:60px;" data-mat-qty="${t.id}">
+      <button data-mat-add="${t.id}">+ Add</button>
+    </div>`}
+  </div>`;
+}
+
+function renderHkTasks(){
+  const mine = issues.filter(t=>t.assignedTo===currentUser.id);
+  const open = issues.filter(t=>!t.assignedTo);
+  $('#hk-mytasks-list').innerHTML = mine.length
+    ? mine.map(t=>taskCardHtml(t,false)).join('')
+    : '<p style="color:var(--text-dim);font-size:13px;">No tasks assigned to you yet.</p>';
+  $('#hk-open-list').innerHTML = open.length
+    ? open.map(t=>taskCardHtml(t,true)).join('')
+    : '<p style="color:var(--text-dim);font-size:13px;">No unassigned issues right now.</p>';
+
+  $$('[data-claim]').forEach(b=>b.addEventListener('click', ()=>{
+    const t = issues.find(x=>x.id===b.dataset.claim);
+    t.assignedTo = currentUser.id;
+    t.status = 'In Progress';
+    showToast(`Task claimed: ${t.title}`);
+    renderHkTasks();
+  }));
+  $$('[data-setstatus]').forEach(b=>b.addEventListener('click', ()=>{
+    const t = issues.find(x=>x.id===b.dataset.setstatus);
+    t.status = b.dataset.val;
+    showToast(`Status updated: ${t.status}`);
+    renderHkTasks();
+  }));
+  $$('[data-mat-add]').forEach(b=>b.addEventListener('click', ()=>{
+    const id = b.dataset.matAdd;
+    const t = issues.find(x=>x.id===id);
+    const nameInp = document.querySelector(`[data-mat-name="${id}"]`);
+    const qtyInp = document.querySelector(`[data-mat-qty="${id}"]`);
+    const name = nameInp.value.trim();
+    const qty = Math.max(1, Number(qtyInp.value)||1);
+    if(!name){ showToast('Enter a material name'); return; }
+    t.materials.push({name, qty});
+    showToast(`${name} added to ${t.title}`);
+    renderHkTasks();
+  }));
+}
+
+/* ---------- Management: Overview ---------- */
+function renderOverview(){
+  $('#m-total-students').textContent = students.length;
+  $('#m-total-staff').textContent = staff.length;
+  $('#m-total-hsk').textContent = housekeeping.length;
+}
+$$('.tab-btn[data-tab]').forEach(b=>b.addEventListener('click', ()=>{
+  $$('.tab-btn[data-tab]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const allTabs = ['overview','students','staff','housekeeping','classes','myattendance','attendance','timetable','exams','holidays','syllabus','marks','toppers','reports','maintenance','leave'];
+  allTabs.forEach(t=>{
+    const el = $(`#tab-${t}`);
+    if(el) el.classList.toggle('hidden', t!==b.dataset.tab);
+  });
+  if(b.dataset.tab==='classes') renderMgtClasses();
+  if(b.dataset.tab==='myattendance') renderMgtMyAttendance();
+  if(b.dataset.tab==='attendance') renderMgtAttendance();
+  if(b.dataset.tab==='timetable') renderMgtTimetable();
+  if(b.dataset.tab==='exams') renderMgtExamTT();
+  if(b.dataset.tab==='holidays') renderMgtHolidays();
+  if(b.dataset.tab==='syllabus') renderMgtSyllabus();
+  if(b.dataset.tab==='marks') renderMgtMarks();
+  if(b.dataset.tab==='toppers') populateMgtTopperExam();
+  if(b.dataset.tab==='reports') renderMgtReports();
+  if(b.dataset.tab==='maintenance') renderMgtMaintenance();
+  if(b.dataset.tab==='leave') renderMgtLeave();
+}));
+function populateClassSelect(){
+  const opts = Array.from({length:12},(_,i)=>i+1).map(c=>`<option value="${c}">Class ${c}</option>`).join('');
+  $('#sel-class').innerHTML = opts;
+}
+function renderStudentsTable(){
+  const cls = Number($('#sel-class').value)||1;
+  const sec = $('#sel-section').value;
+  const rows = students.filter(s=>s.cls===cls && s.section===sec).sort((a,b)=>a.roll-b.roll);
+  $('#students-tbody').innerHTML = rows.map(s=>`
+    <tr>
+      <td>${s.roll}</td><td class="idcode">${s.id}</td><td>${s.name}</td><td class="pw">${s.password}</td>
+      <td><button class="btn-ghost btn-sm" data-edit-student="${s.id}">Edit</button> <button class="btn-ghost btn-sm" style="color:var(--red);" data-del-student="${s.id}">Delete</button></td>
+    </tr>
+  `).join('') || `<tr><td colspan="5" style="color:var(--text-dim);">No students in this section yet.</td></tr>`;
+  $$('[data-edit-student]').forEach(b=>b.addEventListener('click', ()=>openStudentModal(students.find(s=>s.id===b.dataset.editStudent))));
+  $$('[data-del-student]').forEach(b=>b.addEventListener('click', ()=>{
+    const s = students.find(x=>x.id===b.dataset.delStudent);
+    if(!confirm(`Delete ${s.name} (${s.id}) permanently?`)) return;
+    students = students.filter(x=>x.id!==s.id);
+    showToast(`${s.name} deleted`);
+    renderStudentsTable(); renderOverview();
+  }));
+}
+$('#sel-class').addEventListener('change', renderStudentsTable);
+$('#sel-section').addEventListener('change', renderStudentsTable);
+
+/* --- Add / Edit / reassign student --- */
+function openStudentModal(student){
+  $('#student-class-options') // no-op guard
+  $('#s-class').innerHTML = Array.from({length:12},(_,i)=>i+1).map(c=>`<option value="${c}">Class ${c}</option>`).join('');
+  $('#student-modal-title').textContent = student ? 'Edit Student' : 'Add Student';
+  $('#s-id').value = student ? student.id : '';
+  $('#s-name').value = student ? student.name : '';
+  $('#s-class').value = student ? student.cls : 1;
+  $('#s-section').value = student ? student.section : 'A';
+  $('#s-roll').value = student ? student.roll : '';
+  $('#student-modal-bg').classList.add('open');
+  $('#s-name').focus();
+}
+function closeStudentModal(){ $('#student-modal-bg').classList.remove('open'); }
+$('#add-student-btn').addEventListener('click', ()=>openStudentModal(null));
+$('#student-modal-cancel').addEventListener('click', closeStudentModal);
+$('#student-modal-bg').addEventListener('click', e=>{ if(e.target.id==='student-modal-bg') closeStudentModal(); });
+
+function migrateStudentRecords(oldId, newId, oldKey, newKey){
+  if(oldId!==newId && attendance[oldId]){
+    attendance[newId] = attendance[oldId];
+    delete attendance[oldId];
+  }
+  if(oldKey!==newKey){
+    Object.keys(marksData).forEach(k=>{
+      if(k!==oldKey) return;
+      Object.keys(marksData[oldKey]).forEach(exam=>{
+        const rec = marksData[oldKey][exam][oldId];
+        if(rec){
+          if(!marksData[newKey]) marksData[newKey] = {};
+          if(!marksData[newKey][exam]) marksData[newKey][exam] = {};
+          marksData[newKey][exam][newId] = rec;
+          delete marksData[oldKey][exam][oldId];
+        }
+      });
+    });
+  } else if(oldId!==newId && marksData[oldKey]){
+    Object.keys(marksData[oldKey]).forEach(exam=>{
+      const rec = marksData[oldKey][exam][oldId];
+      if(rec){ marksData[oldKey][exam][newId] = rec; delete marksData[oldKey][exam][oldId]; }
+    });
+  }
+}
+
+$('#student-modal-save').addEventListener('click', ()=>{
+  const id = $('#s-id').value;
+  const name = $('#s-name').value.trim();
+  const cls = Number($('#s-class').value)||1;
+  const section = ($('#s-section').value.trim()||'A').toUpperCase().slice(0,1);
+  const roll = Number($('#s-roll').value)||1;
+  if(!name){ showToast('Enter a student name'); return; }
+  if(!sectionsByClass[cls]) sectionsByClass[cls] = [];
+  if(!sectionsByClass[cls].includes(section)) sectionsByClass[cls].push(section);
+
+  if(id){
+    const s = students.find(x=>x.id===id);
+    const oldKey = classSecKey(s.cls, s.section);
+    const newKey = classSecKey(cls, section);
+    const newId = `STU${pad(cls)}${section}${pad(roll)}`;
+    migrateStudentRecords(s.id, newId, oldKey, newKey);
+    s.name = name; s.cls = cls; s.section = section; s.roll = roll; s.id = newId;
+    showToast(`${name} updated`);
+  } else {
+    const newId = `STU${pad(cls)}${section}${pad(roll)}`;
+    students.push({id:newId, name, cls, section, roll, password: makePassword(name,'STU')});
+    showToast(`${name} added`);
+  }
+  closeStudentModal();
+  renderStudentsTable(); renderOverview();
+});
+function renderStaffTable(){
+  $('#staff-tbody').innerHTML = staff.map(s=>`
+    <tr><td class="idcode">${s.id}</td><td>${s.name}</td><td>${s.role}</td><td class="pw">${s.password}</td>
+      <td><button class="btn-ghost btn-sm" data-edit-staff="${s.id}">Edit</button> <button class="btn-ghost btn-sm" style="color:var(--red);" data-del-staff="${s.id}">Delete</button></td>
+    </tr>
+  `).join('');
+  $$('[data-edit-staff]').forEach(b=>b.addEventListener('click', ()=>openAddModal('staff', staff.find(s=>s.id===b.dataset.editStaff))));
+  $$('[data-del-staff]').forEach(b=>b.addEventListener('click', ()=>{
+    const s = staff.find(x=>x.id===b.dataset.delStaff);
+    if(!confirm(`Delete ${s.name} (${s.id}) from staff?`)) return;
+    staff = staff.filter(x=>x.id!==s.id);
+    Object.keys(classTeachers).forEach(k=>{ if(classTeachers[k]===s.id) delete classTeachers[k]; });
+    showToast(`${s.name} deleted`);
+    renderStaffTable(); renderOverview(); renderAssignTable();
+  }));
+}
+function renderHskTable(){
+  $('#hsk-tbody').innerHTML = housekeeping.map(s=>`
+    <tr><td class="idcode">${s.id}</td><td>${s.name}</td><td>${s.role}</td><td class="pw">${s.password}</td>
+      <td><button class="btn-ghost btn-sm" data-edit-hsk="${s.id}">Edit</button> <button class="btn-ghost btn-sm" style="color:var(--red);" data-del-hsk="${s.id}">Delete</button></td>
+    </tr>
+  `).join('');
+  $$('[data-edit-hsk]').forEach(b=>b.addEventListener('click', ()=>openAddModal('housekeeping', housekeeping.find(s=>s.id===b.dataset.editHsk))));
+  $$('[data-del-hsk]').forEach(b=>b.addEventListener('click', ()=>{
+    const s = housekeeping.find(x=>x.id===b.dataset.delHsk);
+    if(!confirm(`Delete ${s.name} (${s.id}) from housekeeping?`)) return;
+    housekeeping = housekeeping.filter(x=>x.id!==s.id);
+    issues.forEach(t=>{ if(t.assignedTo===s.id) t.assignedTo=null; });
+    showToast(`${s.name} deleted`);
+    renderHskTable(); renderOverview();
+  }));
+}
+let addTarget = null;
+function openAddModal(target, record){
+  addTarget = target;
+  $('#modal-title').textContent = record ? `Edit ${target==='staff'?'Staff':'Housekeeping'}` : (target==='staff' ? 'Add Staff' : 'Add Housekeeping / Maintenance');
+  $('#f-role-label').textContent = target==='staff' ? 'Subject Taught' : 'Duty';
+  $('#f-id').value = record ? record.id : '';
+  $('#f-name').value = record ? record.name : '';
+  $('#f-role').value = record ? (target==='staff' ? record.role.replace(' Teacher','') : record.role) : '';
+  $('#modal-bg').classList.add('open');
+  $('#f-name').focus();
+}
+function closeModal(){ $('#modal-bg').classList.remove('open'); }
+$('#add-staff-btn').addEventListener('click', ()=>openAddModal('staff'));
+$('#add-hsk-btn').addEventListener('click', ()=>openAddModal('housekeeping'));
+$('#modal-cancel').addEventListener('click', closeModal);
+$('#modal-bg').addEventListener('click', e=>{ if(e.target.id==='modal-bg') closeModal(); });
+$('#modal-save').addEventListener('click', ()=>{
+  const id = $('#f-id').value;
+  const name = $('#f-name').value.trim();
+  const role = $('#f-role').value.trim();
+  if(!name || !role){ showToast('Please fill in both fields'); return; }
+  if(addTarget==='staff'){
+    if(id){
+      const s = staff.find(x=>x.id===id);
+      s.name = name; s.role = role + ' Teacher';
+      showToast(`${name} updated`);
+    } else {
+      const newId = `STF${pad(staff.length+1,3)}`;
+      staff.push({id:newId, name, role: role + ' Teacher', password: makePassword(name,'STF')});
+      showToast(`${name} added`);
+    }
+    renderStaffTable();
+    renderAssignTable();
+  } else {
+    if(id){
+      const s = housekeeping.find(x=>x.id===id);
+      s.name = name; s.role = role;
+      showToast(`${name} updated`);
+    } else {
+      const newId = `HSK${pad(housekeeping.length+1,3)}`;
+      housekeeping.push({id:newId, name, role, password: makePassword(name,'HSK')});
+      showToast(`${name} added`);
+    }
+    renderHskTable();
+  }
+  renderOverview();
+  closeModal();
+});
+
+/* --- Classes & Sections --- */
+function renderMgtClasses(){
+  $('#cls-add-class').innerHTML = classOptions();
+  const rows = Array.from({length:12},(_,i)=>i+1).map(c=>{
+    const secs = sectionsByClass[c] || [];
+    const count = students.filter(s=>s.cls===c).length;
+    return `<tr><td>Class ${c}</td><td>${secs.join(', ')}</td><td>${count}</td></tr>`;
+  }).join('');
+  $('#cls-tbody').innerHTML = rows;
+}
+$('#cls-add-btn').addEventListener('click', ()=>{
+  const cls = Number($('#cls-add-class').value)||1;
+  const sec = ($('#cls-add-section').value.trim()||'').toUpperCase().slice(0,1);
+  if(!sec){ showToast('Enter a section letter'); return; }
+  if(!sectionsByClass[cls]) sectionsByClass[cls] = [];
+  if(sectionsByClass[cls].includes(sec)){ showToast(`Section ${sec} already exists for Class ${cls}`); return; }
+  sectionsByClass[cls].push(sec);
+  $('#cls-add-section').value = '';
+  showToast(`Section ${sec} created for Class ${cls}`);
+  renderMgtClasses();
+});
+
+/* --- Assign Class Teacher --- */
+function populateAssignSelects(){
+  $('#assign-class').innerHTML = classOptions();
+  $('#assign-staff').innerHTML = staff.map(s=>`<option value="${s.id}">${s.name} (${s.role})</option>`).join('');
+}
+function renderAssignTable(){
+  const rows = [];
+  for(let c=1;c<=12;c++){
+    (sectionsByClass[c]||[]).forEach(sec=>{
+      const key = classSecKey(c, sec);
+      const teacherId = classTeachers[key];
+      const teacher = teacherId ? staff.find(s=>s.id===teacherId) : null;
+      rows.push(`<tr><td>${c} - ${sec}</td><td>${teacher ? teacher.name : '<span style="color:var(--text-dim);">Unassigned</span>'}</td></tr>`);
+    });
+  }
+  $('#assign-tbody').innerHTML = rows.join('');
+}
+$('#assign-teacher-btn').addEventListener('click', ()=>{
+  const cls = Number($('#assign-class').value)||1;
+  const sec = $('#assign-section').value;
+  const staffId = $('#assign-staff').value;
+  if(!staffId){ showToast('Add a staff member first'); return; }
+  classTeachers[classSecKey(cls, sec)] = staffId;
+  const t = staff.find(s=>s.id===staffId);
+  showToast(`${t.name} assigned as class teacher for ${cls} - ${sec}`);
+  renderAssignTable();
+});
+
+/* --- Reports --- */
+function renderMgtReports(){
+  $('#rep-tbody').innerHTML = Array.from({length:12},(_,i)=>i+1).map(c=>{
+    const clsStudents = students.filter(s=>s.cls===c);
+    const count = clsStudents.length;
+    const attAvg = count ? Math.round(clsStudents.reduce((sum,s)=>sum+attendancePercent(s.id).pct,0)/count) : 0;
+    let marksSum = 0, marksN = 0;
+    clsStudents.forEach(s=>{
+      const key = classSecKey(s.cls, s.section);
+      const rec = marksData[key] && marksData[key]['Term 1 Exam'] && marksData[key]['Term 1 Exam'][s.id];
+      if(rec){ marksSum += Object.values(rec).reduce((a,b)=>a+b,0)/Object.values(rec).length; marksN++; }
+    });
+    const marksAvg = marksN ? Math.round(marksSum/marksN) : 0;
+    return `<tr><td>Class ${c}</td><td>${count}</td><td>${attAvg}%</td><td>${marksAvg}%</td></tr>`;
+  }).join('');
+  $('#rep-open').textContent = issues.filter(t=>t.status==='Open').length;
+  $('#rep-inprogress').textContent = issues.filter(t=>t.status==='In Progress').length;
+  $('#rep-completed').textContent = issues.filter(t=>t.status==='Completed').length;
+}
+
+/* --- Maintenance (full access) --- */
+function mgtTaskCardHtml(t){
+  return `
+  <div class="task-card" data-issue="${t.id}">
+    <div class="task-head">
+      <div><div class="task-loc">${t.location}</div><div class="task-title">${t.title}${t.desc? ' — '+t.desc:''}</div></div>
+      <span class="badge ${statusClass(t.status)}">${t.status}</span>
+    </div>
+    <div class="row-flex" style="margin-bottom:6px;">
+      <select data-reassign="${t.id}">
+        <option value="">Unassigned</option>
+        ${housekeeping.map(h=>`<option value="${h.id}" ${t.assignedTo===h.id?'selected':''}>${h.name}</option>`).join('')}
+      </select>
+      <button class="btn-ghost btn-sm" style="color:var(--red);" data-del-issue="${t.id}">Delete</button>
+    </div>
+    <div class="status-btns">
+      <button class="status-btn ${t.status==='Open'?'active':''}" data-setstatus="${t.id}" data-val="Open">Open</button>
+      <button class="status-btn ${t.status==='In Progress'?'active':''}" data-setstatus="${t.id}" data-val="In Progress">In Progress</button>
+      <button class="status-btn ${t.status==='Completed'?'active':''}" data-setstatus="${t.id}" data-val="Completed">Completed</button>
+    </div>
+    <ul class="mat-list">${t.materials.map(m=>`<li>${m.name} × ${m.qty}</li>`).join('') || '<li>No materials added yet</li>'}</ul>
+    <div class="mat-add-row">
+      <input type="text" placeholder="Material / item name" data-mat-name="${t.id}">
+      <input type="number" min="1" value="1" style="width:60px;" data-mat-qty="${t.id}">
+      <button data-mat-add="${t.id}">+ Add</button>
+    </div>
+  </div>`;
+}
+function renderMgtMaintenance(){
+  $('#mgt-rep-assign').innerHTML = '<option value="">Unassigned — anyone can claim</option>' + housekeeping.map(h=>`<option value="${h.id}">${h.name}</option>`).join('');
+  $('#mgt-issues-list').innerHTML = issues.length ? issues.map(mgtTaskCardHtml).join('') : '<p style="color:var(--text-dim);font-size:13px;">No issues reported yet.</p>';
+  $$('[data-reassign]').forEach(sel=>sel.addEventListener('change', ()=>{
+    const t = issues.find(x=>x.id===sel.dataset.reassign);
+    t.assignedTo = sel.value || null;
+    if(sel.value && t.status==='Open') t.status = 'In Progress';
+    showToast('Task reassigned');
+    renderMgtMaintenance();
+  }));
+  $$('[data-del-issue]').forEach(b=>b.addEventListener('click', ()=>{
+    if(!confirm('Delete this maintenance issue?')) return;
+    issues = issues.filter(x=>x.id!==b.dataset.delIssue);
+    showToast('Issue deleted');
+    renderMgtMaintenance(); renderMgtMaterials();
+  }));
+  $$('[data-setstatus]').forEach(b=>b.addEventListener('click', ()=>{
+    const t = issues.find(x=>x.id===b.dataset.setstatus);
+    t.status = b.dataset.val;
+    showToast(`Status updated: ${t.status}`);
+    renderMgtMaintenance();
+  }));
+  $$('[data-mat-add]').forEach(b=>b.addEventListener('click', ()=>{
+    const id = b.dataset.matAdd;
+    const t = issues.find(x=>x.id===id);
+    const nameInp = document.querySelector(`[data-mat-name="${id}"]`);
+    const qtyInp = document.querySelector(`[data-mat-qty="${id}"]`);
+    const name = nameInp.value.trim();
+    const qty = Math.max(1, Number(qtyInp.value)||1);
+    if(!name){ showToast('Enter a material name'); return; }
+    t.materials.push({name, qty});
+    showToast(`${name} added to ${t.title}`);
+    renderMgtMaintenance(); renderMgtMaterials();
+  }));
+  renderMgtMaterials();
+}
+$('#mgt-rep-submit').addEventListener('click', ()=>{
+  const location = $('#mgt-rep-location').value.trim();
+  const title = $('#mgt-rep-title').value.trim();
+  const desc = $('#mgt-rep-desc').value.trim();
+  const assignedTo = $('#mgt-rep-assign').value || null;
+  if(!location || !title){ showToast('Please fill in location and issue'); return; }
+  issues.unshift({
+    id:newIssueId(), location, title, desc, status: assignedTo ? 'In Progress' : 'Open',
+    assignedTo, reportedBy: currentUser.id, materials:[], createdAt: todayStr()
+  });
+  $('#mgt-rep-location').value=''; $('#mgt-rep-title').value=''; $('#mgt-rep-desc').value=''; $('#mgt-rep-assign').value='';
+  showToast(`Reported: ${title} — ${location}`);
+  renderMgtMaintenance();
+});
+function renderMgtMaterials(){
+  const totals = {};
+  issues.forEach(t=>t.materials.forEach(m=>{
+    if(!totals[m.name]) totals[m.name] = {qty:0, used:new Set()};
+    totals[m.name].qty += m.qty;
+    totals[m.name].used.add(`${t.location} (${t.title})`);
+  }));
+  const names = Object.keys(totals);
+  $('#mgt-mat-tbody').innerHTML = names.length ? names.map(n=>`
+    <tr><td>${n}</td><td>${totals[n].qty}</td><td style="color:var(--text-dim);font-size:12px;">${[...totals[n].used].join(', ')}</td></tr>
+  `).join('') : '<tr><td colspan="3" style="color:var(--text-dim);">No materials logged yet.</td></tr>';
+}
+
+/* ================= STUDENT MODULE ================= */
+function initStudentModule(){
+  $$('.tab-btn[data-stu-tab]').forEach(b=>b.classList.remove('active'));
+  $$('.tab-btn[data-stu-tab]')[0].classList.add('active');
+  ['attendance','timetable','examtt','holidays','syllabus','marks','topper','profile','leave'].forEach((t,i)=>{
+    $(`#stu-${t}`).classList.toggle('hidden', i!==0);
+  });
+  renderStuAttendance();
+  renderStuTimetable();
+  renderStuExamTT();
+  renderStuHolidays();
+  renderStuSyllabus();
+  populateStuMarksExamSelect();
+  populateStuTopperExamSelect();
+  renderStuProfile();
+  renderStuLeave();
+  checkExamReminders();
+}
+$$('.tab-btn[data-stu-tab]').forEach(b=>b.addEventListener('click', ()=>{
+  $$('.tab-btn[data-stu-tab]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  ['attendance','timetable','examtt','holidays','syllabus','marks','topper','profile','leave'].forEach(t=>{
+    $(`#stu-${t}`).classList.toggle('hidden', t!==b.dataset.stuTab);
+  });
+  if(b.dataset.stuTab==='marks') populateStuMarksExamSelect();
+  if(b.dataset.stuTab==='topper') populateStuTopperExamSelect();
+}));
+
+function renderStuAttendance(){
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  const {pct, present, total} = attendancePercent(currentUser.id);
+  $('#stu-att-pct').textContent = total ? pct + '%' : '—';
+  $('#stu-att-present').textContent = present;
+  $('#stu-att-total').textContent = total;
+  renderCalendar('stu-att-calendar', { markerFn: d => attendance[currentUser.id][d] || null, selectable:false });
+  const marked = !!attendance[currentUser.id][todayStr()];
+  $('#stu-mark-btn').disabled = marked;
+  $('#stu-mark-btn').textContent = marked ? 'Already Marked Today' : 'Mark Today Present';
+}
+$('#stu-mark-btn').addEventListener('click', ()=>{
+  attendance[currentUser.id][todayStr()] = 'present';
+  showToast('Attendance marked for today');
+  renderStuAttendance();
+});
+
+function renderStuTimetable(){
+  const key = classSecKey(currentUser.cls, currentUser.section);
+  $('#stu-tt-classsec').textContent = `Class ${currentUser.cls} - ${currentUser.section}`;
+  renderDayWiseTimetable('stu-tt-readonly', key);
+}
+function renderStuExamTT(){
+  $('#stu-exam-class').textContent = currentUser.cls;
+  const rows = examTimetable[String(currentUser.cls)] || [];
+  $('#stu-exam-tbody').innerHTML = rows.map(r=>`
+    <tr><td>${r.exam}</td><td>${r.subject}</td><td>${r.date}</td><td>${r.time}</td></tr>
+  `).join('');
+}
+function renderStuHolidays(){
+  const rows = [...holidays].sort((a,b)=>a.date.localeCompare(b.date));
+  $('#stu-hol-tbody').innerHTML = rows.map(h=>`<tr><td>${h.date}</td><td>${h.name}</td></tr>`).join('');
+}
+function renderStuSyllabus(){
+  const key = classSecKey(currentUser.cls, currentUser.section);
+  $('#stu-syl-classsec').textContent = `Class ${currentUser.cls} - ${currentUser.section}`;
+  const data = syllabus[key] || {};
+  $('#stu-syl-body').innerHTML = Object.keys(data).map(subj=>{
+    const topics = data[subj];
+    const done = topics.filter(t=>t.status==='Completed').length;
+    const pct = Math.round(done/topics.length*100);
+    return `
+    <div class="subj-block">
+      <div class="subj-head"><span>${subj}</span><span>${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      ${topics.map(t=>`<div class="topic-row"><span>${t.topic}</span><span class="badge ${t.status.toLowerCase()}">${t.status}</span></div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function populateStuMarksExamSelect(){
+  const key = classSecKey(currentUser.cls, currentUser.section);
+  const exams = examListFor(key);
+  $('#stu-marks-exam').innerHTML = exams.map(e=>`<option value="${e}">${e}</option>`).join('');
+  renderStuMarks();
+}
+$('#stu-marks-exam').addEventListener('change', renderStuMarks);
+function renderStuMarks(){
+  const key = classSecKey(currentUser.cls, currentUser.section);
+  const exam = $('#stu-marks-exam').value;
+  const subjMarks = (marksData[key] && marksData[key][exam] && marksData[key][exam][currentUser.id]) || {};
+  $('#stu-marks-tbody').innerHTML = Object.keys(subjMarks).map(subj=>{
+    const m = subjMarks[subj];
+    return `<tr><td>${subj}</td><td>${m}</td><td>100</td><td>${m}%</td></tr>`;
+  }).join('');
+}
+function populateStuTopperExamSelect(){
+  const key = classSecKey(currentUser.cls, currentUser.section);
+  $('#stu-topper-classsec').textContent = `Class ${currentUser.cls} - ${currentUser.section}`;
+  const exams = examListFor(key);
+  $('#stu-topper-exam').innerHTML = exams.map(e=>`<option value="${e}">${e}</option>`).join('');
+  renderStuTopper();
+}
+$('#stu-topper-exam').addEventListener('change', renderStuTopper);
+function renderStuTopper(){
+  const exam = $('#stu-topper-exam').value;
+  const rows = computeToppers(currentUser.cls, currentUser.section, exam).slice(0,5);
+  $('#stu-topper-list').innerHTML = rows.map((r,i)=>`
+    <div class="topper-item ${r.studentId===currentUser.id?'me':''}">
+      <div class="topper-rank">${i+1}</div>
+      <div style="flex:1;">${r.name}${r.studentId===currentUser.id?' (You)':''}</div>
+      <div class="pw">${r.total} / ${r.max}</div>
+    </div>
+  `).join('');
+  renderSchoolTopperCard('stu-schooltopper-card', exam);
+}
+function renderStuProfile(){
+  const u = currentUser;
+  $('#stu-pf-initial').textContent = u.name.charAt(0).toUpperCase();
+  $('#stu-pf-name').textContent = u.name;
+  $('#stu-pf-id').textContent = u.id;
+  $('#stu-pf-classsec').textContent = `${u.cls} - ${u.section}`;
+  $('#stu-pf-roll').textContent = u.roll;
+}
+
+/* ================= STAFF MODULE ================= */
+function classOptions(){ return Array.from({length:12},(_,i)=>i+1).map(c=>`<option value="${c}">Class ${c}</option>`).join(''); }
+function subjOptions(){ return academicSubjects.map(s=>`<option value="${s}">${s}</option>`).join(''); }
+
+function initStaffModule(){
+  $$('.tab-btn[data-stf-tab]').forEach(b=>b.classList.remove('active'));
+  $$('.tab-btn[data-stf-tab]')[0].classList.add('active');
+  ['myattendance','attendance','timetable','examtt','holidays','syllabus','marks','topper','leave'].forEach((t,i)=>{
+    $(`#stf-${t}`).classList.toggle('hidden', i!==0);
+  });
+  $('#stf-att-class').innerHTML = classOptions();
+  $('#stf-tt-class').innerHTML = classOptions();
+  $('#stf-exam-class').innerHTML = classOptions();
+  $('#stf-syl-class').innerHTML = classOptions();
+  $('#stf-marks-class').innerHTML = classOptions();
+  $('#stf-topper-class').innerHTML = classOptions();
+  $('#stf-syl-subject').innerHTML = subjOptions();
+  $('#stf-marks-subject').innerHTML = subjOptions();
+  $('#stf-att-date').value = todayStr();
+
+  renderStfMyAttendance();
+  renderStfAttendance();
+  renderStfTimetable();
+  renderStfExamTT();
+  renderStfHolidays();
+  renderStfSyllabus();
+  renderStfMarks();
+  populateStfTopperExam();
+  renderStfLeave();
+  checkTermCompletion();
+}
+$$('.tab-btn[data-stf-tab]').forEach(b=>b.addEventListener('click', ()=>{
+  $$('.tab-btn[data-stf-tab]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  ['myattendance','attendance','timetable','examtt','holidays','syllabus','marks','topper','leave'].forEach(t=>{
+    $(`#stf-${t}`).classList.toggle('hidden', t!==b.dataset.stfTab);
+  });
+  if(b.dataset.stfTab==='marks') renderStfMarks();
+  if(b.dataset.stfTab==='topper') populateStfTopperExam();
+}));
+
+/* --- Staff: Attendance --- */
+function renderStfAttendance(){
+  const cls = Number($('#stf-att-class').value)||1;
+  const sec = $('#stf-att-section').value;
+  if(!$('#stf-att-date').value) $('#stf-att-date').value = todayStr();
+  const date = $('#stf-att-date').value;
+  $('#stf-att-seldate').textContent = date;
+  renderCalendar('stf-att-calendar', {
+    selected: date,
+    selectable: true,
+    markerFn: d => {
+      const roster = students.filter(s=>s.cls===cls && s.section===sec);
+      const first = roster[0];
+      return (first && attendance[first.id] && attendance[first.id][d]) ? 'present' : null;
+    },
+    onSelect: d => { $('#stf-att-date').value = d; $('#stf-att-seldate').textContent = d; renderStfAttendanceRoster(); }
+  });
+  renderStfAttendanceRoster();
+}
+function renderStfAttendanceRoster(){
+  const cls = Number($('#stf-att-class').value)||1;
+  const sec = $('#stf-att-section').value;
+  const date = $('#stf-att-date').value || todayStr();
+  const rows = students.filter(s=>s.cls===cls && s.section===sec).sort((a,b)=>a.roll-b.roll);
+  const alreadyRecorded = rows.some(s => attendance[s.id] && attendance[s.id][date] !== undefined);
+  const badge = $('#stf-att-recorded-badge');
+  badge.textContent = alreadyRecorded ? '✓ Already recorded' : '⚠ Not yet recorded';
+  badge.className = 'badge ' + (alreadyRecorded ? 'completed' : 'pending');
+  $('#stf-att-save').textContent = alreadyRecorded ? 'Update Attendance' : 'Save Attendance';
+  $('#stf-att-tbody').innerHTML = rows.map(s=>{
+    const recorded = attendance[s.id] && attendance[s.id][date];
+    const st = recorded || 'present';
+    return `
+    <tr data-sid="${s.id}">
+      <td>${s.roll}</td><td>${s.name}</td>
+      <td>
+        <button class="toggle-att present ${st==='present'?'on':''}" data-att="present">Present</button>
+        <button class="toggle-att absent ${st==='absent'?'on':''}" data-att="absent">Absent</button>
+        ${!recorded ? '<span style="color:var(--text-dim);font-size:11px;margin-left:6px;">(defaulted — click Save to confirm)</span>' : ''}
+      </td>
+    </tr>`;
+  }).join('');
+  $$('.toggle-att').forEach(b=>b.addEventListener('click', ()=>{
+    const tr = b.closest('tr');
+    tr.querySelectorAll('.toggle-att').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+}
+['stf-att-class','stf-att-section'].forEach(id=>$('#'+id).addEventListener('change', renderStfAttendance));
+$('#stf-att-save').addEventListener('click', ()=>{
+  const date = $('#stf-att-date').value || todayStr();
+  $$('#stf-att-tbody tr').forEach(tr=>{
+    const sid = tr.dataset.sid;
+    const on = tr.querySelector('.toggle-att.on');
+    const status = on ? on.dataset.att : 'present';
+    if(!attendance[sid]) attendance[sid] = {};
+    attendance[sid][date] = status;
+  });
+  showToast(`Attendance saved for ${date}`);
+  renderStfAttendance();
+});
+
+/* --- Staff: Daily Timetable --- */
+// School hours run 9:00 AM to ~2:30 PM. Hours 1-7 without a marker mean PM in this context.
+function to24Hour(h){ h = Number(h); return (h>=1 && h<=7) ? h+12 : h; }
+function parseTimeRange(str){
+  const parts = String(str).split(/[–-]/).map(s=>s.trim());
+  const parse = t => {
+    const [h,m] = t.split(':').map(Number);
+    return `${pad(to24Hour(h||0))}:${pad(m||0)}`;
+  };
+  return { start: parse(parts[0]||'9:00'), end: parse(parts[1]||'9:45') };
+}
+function toMinutes(hhmm){ const [h,m] = hhmm.split(':').map(Number); return h*60+m; }
+
+// Exam time helpers: exam times can be any hour with AM/PM, unlike the short school day above.
+function parseExamTimeToInputs(str){
+  const parts = String(str||'').split(/[–-]/).map(s=>s.trim()).filter(Boolean);
+  const parseOne = t => {
+    const m = t.match(/(\d{1,2}):(\d{2})\s*([AaPp][Mm])?/);
+    if(!m) return '';
+    let h = Number(m[1]);
+    const min = Number(m[2]);
+    const ampm = m[3] ? m[3].toUpperCase() : null;
+    if(ampm === 'PM' && h < 12) h += 12;
+    if(ampm === 'AM' && h === 12) h = 0;
+    return `${pad(h)}:${pad(min)}`;
+  };
+  return { start: parseOne(parts[0]||''), end: parts[1] ? parseOne(parts[1]) : '' };
+}
+function to12Hour(hhmm){
+  if(!hhmm) return '';
+  const [h,m] = hhmm.split(':').map(Number);
+  const ampm = h>=12 ? 'PM' : 'AM';
+  let h12 = h%12; if(h12===0) h12 = 12;
+  return `${h12}:${pad(m)} ${ampm}`;
+}
+function formatExamTime(start,end){
+  if(start && end) return `${to12Hour(start)} – ${to12Hour(end)}`;
+  if(start) return to12Hour(start);
+  return '';
+}
+
+/* Custom time picker: Hour / Minute / AM-PM dropdowns, styled consistently everywhere
+   instead of relying on the browser's native (often plain-looking) clock widget. */
+function timePickerHTML(name, idx, hhmm){
+  let h24 = 9, m = 0;
+  if(hhmm){ const p = hhmm.split(':').map(Number); if(!isNaN(p[0])) h24 = p[0]; if(!isNaN(p[1])) m = p[1]; }
+  let h12 = h24 % 12; if(h12===0) h12 = 12;
+  const ampm = h24 >= 12 ? 'PM' : 'AM';
+  const key = `${name}-${idx}`;
+  const hourOpts = Array.from({length:12},(_,i)=>i+1).map(h=>`<option value="${h}" ${h===h12?'selected':''}>${h}</option>`).join('');
+  const minOpts = [0,5,10,15,20,25,30,35,40,45,50,55].map(mm=>`<option value="${mm}" ${mm===m?'selected':''}>${pad(mm)}</option>`).join('');
+  return `<span class="time-picker" data-tp-group="${key}">
+    <select data-tp-h="${key}" aria-label="Hour">${hourOpts}</select>
+    <span class="tp-colon">:</span>
+    <select data-tp-m="${key}" aria-label="Minute">${minOpts}</select>
+    <select data-tp-ap="${key}" aria-label="AM or PM"><option value="AM" ${ampm==='AM'?'selected':''}>AM</option><option value="PM" ${ampm==='PM'?'selected':''}>PM</option></select>
+  </span>`;
+}
+function readTimePicker(root, name, idx){
+  const key = `${name}-${idx}`;
+  const hEl = root.querySelector(`[data-tp-h="${key}"]`);
+  const mEl = root.querySelector(`[data-tp-m="${key}"]`);
+  const apEl = root.querySelector(`[data-tp-ap="${key}"]`);
+  if(!hEl || !mEl || !apEl) return '';
+  let h = Number(hEl.value) % 12;
+  if(apEl.value === 'PM') h += 12;
+  return `${pad(h)}:${pad(Number(mEl.value))}`;
+}
+function setTimePickerValue(root, name, idx, hhmm){
+  const key = `${name}-${idx}`;
+  const hEl = root.querySelector(`[data-tp-h="${key}"]`);
+  const mEl = root.querySelector(`[data-tp-m="${key}"]`);
+  const apEl = root.querySelector(`[data-tp-ap="${key}"]`);
+  if(!hEl || !mEl || !apEl || !hhmm) return;
+  const [h24,m] = hhmm.split(':').map(Number);
+  let h12 = h24 % 12; if(h12===0) h12 = 12;
+  hEl.value = h12;
+  mEl.value = m;
+  apEl.value = h24 >= 12 ? 'PM' : 'AM';
+}
+
+function renderTimetableEditorFor(prefix){
+  const cls = Number($(`#${prefix}-tt-class`).value)||1;
+  const sec = $(`#${prefix}-tt-section`).value;
+  const key = classSecKey(cls, sec);
+  if(!dailyTimetable[key]) dailyTimetable[key] = [];
+  const rows = dailyTimetable[key];
+  const wrap = $(`#${prefix}-tt-daywrap`);
+  wrap.innerHTML = weekDays.map(day=>{
+    const dayRows = rows.map((r,i)=>({...r, idx:i})).filter(r=>r.day===day).sort((a,b)=>a.period-b.period);
+    return `
+    <div class="tt-day-block">
+      <h4>${day}</h4>
+      <table><thead><tr><th>Period</th><th>Start</th><th>End</th><th>Subject</th><th></th></tr></thead>
+      <tbody>
+        ${dayRows.length ? dayRows.map(r=>{
+          const {start,end} = parseTimeRange(r.time);
+          return `
+        <tr data-tt-rowday="${day}" data-row-idx="${r.idx}">
+          <td><input type="number" min="1" data-tt-period="${r.idx}" value="${r.period}" style="width:55px;"></td>
+          <td>${timePickerHTML('tt-start', r.idx, start)}</td>
+          <td>${timePickerHTML('tt-end', r.idx, end)}</td>
+          <td><select data-tt-subject="${r.idx}">${academicSubjects.map(s=>`<option ${s===r.subject?'selected':''}>${s}</option>`).join('')}</select></td>
+          <td><button class="btn-ghost" data-tt-del="${r.idx}">✕</button></td>
+        </tr>`;}).join('') : `<tr><td colspan="5" style="color:var(--text-dim);">No periods yet.</td></tr>`}
+      </tbody></table>
+      <button class="btn-ghost btn-sm" data-tt-addday="${day}">+ Add Period</button>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('[data-tt-period]').forEach(el=>{
+    el.dataset.prevValue = el.value;
+    el.addEventListener('change', ()=>saveTimetableRow(el, prefix));
+  });
+  wrap.querySelectorAll('[data-tt-subject]').forEach(el=>el.addEventListener('change', ()=>saveTimetableRow(el, prefix)));
+  wrap.querySelectorAll('[data-tp-h],[data-tp-m],[data-tp-ap]').forEach(el=>el.addEventListener('change', ()=>saveTimetableRow(el, prefix)));
+  wrap.querySelectorAll('[data-tt-del]').forEach(b=>b.addEventListener('click', ()=>{
+    rows.splice(Number(b.dataset.ttDel),1);
+    renderTimetableEditorFor(prefix);
+    showToast('Period removed');
+  }));
+  wrap.querySelectorAll('[data-tt-addday]').forEach(b=>b.addEventListener('click', ()=>{
+    const day = b.dataset.ttAddday;
+    const dayCount = rows.filter(r=>r.day===day).length;
+    rows.push({day, period: dayCount+1, time: periodTimes[dayCount] || periodTimes[periodTimes.length-1], subject: academicSubjects[0]});
+    renderTimetableEditorFor(prefix);
+    showToast('Period added');
+  }));
+  renderTimetableReadonly(prefix);
+}
+function saveTimetableRow(el, prefix){
+  const cls = Number($(`#${prefix}-tt-class`).value)||1;
+  const sec = $(`#${prefix}-tt-section`).value;
+  const key = classSecKey(cls, sec);
+  const rows = dailyTimetable[key];
+  const tr = el.closest('tr');
+  const idx = Number(tr.dataset.rowIdx);
+  const day = tr.dataset.ttRowday;
+  const prevTime = rows[idx].time;
+  const start = readTimePicker(tr, 'tt-start', idx);
+  const end = readTimePicker(tr, 'tt-end', idx);
+
+  // validate: no overlap with other periods on the same day for this class-section
+  if(start && end){
+    const newStart = toMinutes(start), newEnd = toMinutes(end);
+    if(newEnd <= newStart){
+      showToast('End time must be after start time');
+      const prev = parseTimeRange(prevTime);
+      setTimePickerValue(tr, 'tt-start', idx, prev.start);
+      setTimePickerValue(tr, 'tt-end', idx, prev.end);
+      return;
+    }
+    const conflict = rows.find((r,i)=>{
+      if(i===idx || r.day!==day) return false;
+      const rr = parseTimeRange(r.time);
+      const rs = toMinutes(rr.start), re = toMinutes(rr.end);
+      return newStart < re && rs < newEnd;
+    });
+    if(conflict){
+      showToast(`Time conflicts with Period ${conflict.period} (${conflict.time}) on ${day}`);
+      const prev = parseTimeRange(prevTime);
+      setTimePickerValue(tr, 'tt-start', idx, prev.start);
+      setTimePickerValue(tr, 'tt-end', idx, prev.end);
+      return;
+    }
+  }
+
+  rows[idx] = {
+    day,
+    period: Number(tr.querySelector('[data-tt-period]').value),
+    time: `${start}–${end}`,
+    subject: tr.querySelector('[data-tt-subject]').value,
+  };
+  showToast('Timetable updated');
+}
+function renderStfTimetable(){ renderTimetableEditorFor('stf'); }
+['stf-tt-class','stf-tt-section'].forEach(id=>$('#'+id).addEventListener('change', renderStfTimetable));
+
+/* --- Staff: Exam Timetable --- */
+function renderStfExamTT(){
+  const cls = $('#stf-exam-class').value || '1';
+  if(!examTimetable[cls]) examTimetable[cls] = [];
+  const rows = examTimetable[cls];
+  $('#stf-exam-tbody').innerHTML = rows.map((r,i)=>{
+    const {start,end} = parseExamTimeToInputs(r.time);
+    return `
+    <tr data-row-idx="${i}">
+      <td><input type="text" data-ex-name="${i}" value="${r.exam}" style="width:120px;"></td>
+      <td><select data-ex-subject="${i}">${academicSubjects.map(s=>`<option ${s===r.subject?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td><input type="date" data-ex-date="${i}" value="${r.date}"></td>
+      <td>${timePickerHTML('ex-start', i, start)}</td>
+      <td>${timePickerHTML('ex-end', i, end)}</td>
+      <td><button class="btn-ghost" data-ex-del="${i}">✕</button></td>
+    </tr>`;
+  }).join('');
+  $$('#stf-exam-tbody [data-ex-name],#stf-exam-tbody [data-ex-subject],#stf-exam-tbody [data-ex-date],#stf-exam-tbody [data-tp-h],#stf-exam-tbody [data-tp-m],#stf-exam-tbody [data-tp-ap]').forEach(el=>el.addEventListener('change', saveExamRow));
+  $$('[data-ex-del]').forEach(b=>b.addEventListener('click', ()=>{
+    rows.splice(Number(b.dataset.exDel),1);
+    renderStfExamTT();
+    showToast('Exam entry removed');
+  }));
+  renderStfExamTTReadonly();
+}
+function saveExamRow(e){
+  const cls = $('#stf-exam-class').value || '1';
+  const rows = examTimetable[cls];
+  const tr = e.target.closest('tr');
+  const idx = Number(tr.dataset.rowIdx);
+  rows[idx] = {
+    exam: tr.querySelector('[data-ex-name]').value,
+    subject: tr.querySelector('[data-ex-subject]').value,
+    date: tr.querySelector('[data-ex-date]').value,
+    time: formatExamTime(readTimePicker(tr, 'ex-start', idx), readTimePicker(tr, 'ex-end', idx)),
+  };
+  showToast('Exam timetable updated');
+}
+$('#stf-exam-class').addEventListener('change', renderStfExamTT);
+$('#stf-exam-addrow').addEventListener('click', ()=>{
+  const cls = $('#stf-exam-class').value || '1';
+  if(!examTimetable[cls]) examTimetable[cls] = [];
+  examTimetable[cls].push({exam:'Term 2 Exam', subject: academicSubjects[0], date: todayStr(), time:'10:00 AM – 12:00 PM'});
+  renderStfExamTT();
+});
+
+/* --- Staff: Holidays --- */
+function renderStfHolidays(){
+  const rows = [...holidays].sort((a,b)=>a.date.localeCompare(b.date));
+  $('#stf-hol-tbody').innerHTML = rows.map((h,i)=>`
+    <tr><td>${h.date}</td><td>${h.name}</td><td><button class="btn-ghost" data-hol-del="${holidays.indexOf(h)}">✕</button></td></tr>
+  `).join('');
+  $$('[data-hol-del]').forEach(b=>b.addEventListener('click', ()=>{
+    holidays.splice(Number(b.dataset.holDel),1);
+    renderStfHolidays();
+    showToast('Holiday removed');
+  }));
+  renderStfHolidaysReadonly();
+}
+$('#stf-hol-add').addEventListener('click', ()=>{
+  const date = $('#stf-hol-date').value;
+  const name = $('#stf-hol-name').value.trim();
+  if(!date || !name){ showToast('Enter a date and occasion name'); return; }
+  holidays.push({date, name});
+  $('#stf-hol-date').value=''; $('#stf-hol-name').value='';
+  renderStfHolidays();
+  showToast('Holiday added');
+});
+
+/* --- Staff: Syllabus --- */
+function renderStfSyllabus(){
+  const cls = Number($('#stf-syl-class').value)||1;
+  const sec = $('#stf-syl-section').value;
+  const subj = $('#stf-syl-subject').value || academicSubjects[0];
+  const key = classSecKey(cls, sec);
+  if(!syllabus[key]) syllabus[key] = {};
+  if(!syllabus[key][subj]) syllabus[key][subj] = [];
+  const topics = syllabus[key][subj];
+  $('#stf-syl-tbody').innerHTML = topics.map((t,i)=>`
+    <tr>
+      <td>${t.topic}</td>
+      <td>
+        <button class="toggle-att present ${t.status==='Completed'?'on':''}" data-syl-status="${i}" data-val="Completed">Completed</button>
+        <button class="toggle-att absent ${t.status==='Pending'?'on':''}" data-syl-status="${i}" data-val="Pending">Pending</button>
+      </td>
+      <td><button class="btn-ghost" data-syl-del="${i}">✕</button></td>
+    </tr>
+  `).join('');
+  $$('[data-syl-status]').forEach(b=>b.addEventListener('click', ()=>{
+    topics[Number(b.dataset.sylStatus)].status = b.dataset.val;
+    renderStfSyllabus();
+    showToast('Syllabus updated');
+  }));
+  $$('[data-syl-del]').forEach(b=>b.addEventListener('click', ()=>{
+    topics.splice(Number(b.dataset.sylDel),1);
+    renderStfSyllabus();
+  }));
+  renderStfSyllabusReadonly();
+}
+['stf-syl-class','stf-syl-section','stf-syl-subject'].forEach(id=>$('#'+id).addEventListener('change', renderStfSyllabus));
+$('#stf-syl-add').addEventListener('click', ()=>{
+  const cls = Number($('#stf-syl-class').value)||1;
+  const sec = $('#stf-syl-section').value;
+  const subj = $('#stf-syl-subject').value || academicSubjects[0];
+  const key = classSecKey(cls, sec);
+  const topic = $('#stf-syl-topic').value.trim();
+  if(!topic){ showToast('Enter a topic name'); return; }
+  syllabus[key][subj].push({topic, status:'Pending'});
+  $('#stf-syl-topic').value='';
+  renderStfSyllabus();
+  showToast('Topic added');
+});
+
+/* --- Staff: Marks --- */
+function examNamesForClass(cls){
+  const scheduled = (examTimetable[String(cls)] || []).map(e=>e.exam);
+  const fromMarks = [];
+  Object.keys(marksData).forEach(key=>{
+    if(key.startsWith(String(cls))) Object.keys(marksData[key]).forEach(e=>fromMarks.push(e));
+  });
+  return [...new Set([...scheduled, ...fromMarks])];
+}
+function populateMarksExamSelect(prefix){
+  const cls = Number($(`#${prefix}-marks-class`).value)||1;
+  const names = examNamesForClass(cls);
+  const sel = $(`#${prefix}-marks-exam`);
+  const prevVal = sel.value;
+  sel.innerHTML = names.length ? names.map(n=>`<option value="${n}">${n}</option>`).join('') : '<option value="">No exam scheduled yet</option>';
+  if(names.includes(prevVal)) sel.value = prevVal;
+}
+function renderStfMarks(){
+  populateMarksExamSelect('stf');
+  const cls = Number($('#stf-marks-class').value)||1;
+  const sec = $('#stf-marks-section').value;
+  const exam = $('#stf-marks-exam').value;
+  const subj = $('#stf-marks-subject').value || academicSubjects[0];
+  const key = classSecKey(cls, sec);
+  const rows = students.filter(s=>s.cls===cls && s.section===sec).sort((a,b)=>a.roll-b.roll);
+  if(!exam){
+    $('#stf-marks-tbody').innerHTML = `<tr><td colspan="4" style="color:var(--text-dim);">Schedule an exam for this class in Exam Timetable first.</td></tr>`;
+    return;
+  }
+  $('#stf-marks-tbody').innerHTML = rows.map(s=>{
+    const existing = (marksData[key] && marksData[key][exam] && marksData[key][exam][s.id] && marksData[key][exam][s.id][subj] !== undefined) ? marksData[key][exam][s.id][subj] : '';
+    return `<tr><td>${s.roll}</td><td>${s.name}</td><td><input class="marks-input" type="number" min="0" max="100" placeholder="—" data-sid="${s.id}" value="${existing}"></td><td>100</td></tr>`;
+  }).join('');
+}
+['stf-marks-class','stf-marks-section','stf-marks-subject','stf-marks-exam'].forEach(id=>$('#'+id).addEventListener('change', renderStfMarks));
+$('#stf-marks-save').addEventListener('click', ()=>{
+  const cls = Number($('#stf-marks-class').value)||1;
+  const sec = $('#stf-marks-section').value;
+  const exam = $('#stf-marks-exam').value;
+  const subj = $('#stf-marks-subject').value || academicSubjects[0];
+  if(!exam){ showToast('Schedule an exam for this class first'); return; }
+  const key = classSecKey(cls, sec);
+  if(!marksData[key]) marksData[key] = {};
+  if(!marksData[key][exam]) marksData[key][exam] = {};
+  let entered = 0;
+  $$('#stf-marks-tbody input').forEach(inp=>{
+    if(inp.value === '') return; // leave unmarked students unmarked, don't record a 0
+    const sid = inp.dataset.sid;
+    const val = Math.max(0, Math.min(100, Number(inp.value)||0));
+    if(!marksData[key][exam][sid]) marksData[key][exam][sid] = {};
+    marksData[key][exam][sid][subj] = val;
+    entered++;
+  });
+  if(entered===0 && Object.keys(marksData[key][exam]).length===0) delete marksData[key][exam];
+  showToast(entered ? `Marks saved for ${subj} — ${exam}` : 'No marks entered — nothing saved');
+  populateStfTopperExam();
+});
+
+/* --- Staff: Toppers --- */
+function populateStfTopperExam(){
+  const cls = Number($('#stf-topper-class').value)||1;
+  const sec = $('#stf-topper-section').value;
+  const key = classSecKey(cls, sec);
+  const exams = examListFor(key);
+  $('#stf-topper-exam').innerHTML = exams.map(e=>`<option value="${e}">${e}</option>`).join('');
+  renderStfTopper();
+  populateStfSchoolTopper();
+}
+['stf-topper-class','stf-topper-section','stf-topper-exam'].forEach(id=>$('#'+id).addEventListener('change', ()=>{
+  if(id==='stf-topper-exam') renderStfTopper(); else populateStfTopperExam();
+}));
+function renderStfTopper(){
+  const cls = Number($('#stf-topper-class').value)||1;
+  const sec = $('#stf-topper-section').value;
+  const exam = $('#stf-topper-exam').value;
+  const rows = computeToppers(cls, sec, exam).slice(0,10);
+  $('#stf-topper-list').innerHTML = rows.map((r,i)=>`
+    <div class="topper-item"><div class="topper-rank">${i+1}</div><div style="flex:1;">${r.name}</div><div class="pw">${r.total} / ${r.max}</div></div>
+  `).join('') || '<p style="color:var(--text-dim);font-size:13px;">No marks recorded for this exam yet.</p>';
+}
+function populateStfSchoolTopper(){
+  const names = allExamNames();
+  const sel = $('#stf-schooltopper-exam');
+  const prevVal = sel.value;
+  sel.innerHTML = names.length ? names.map(e=>`<option value="${e}">${e}</option>`).join('') : '<option value="">No marks recorded yet</option>';
+  if(names.includes(prevVal)) sel.value = prevVal;
+  renderSchoolTopperCard('stf-schooltopper-card', sel.value);
+}
+$('#stf-schooltopper-exam').addEventListener('change', ()=> renderSchoolTopperCard('stf-schooltopper-card', $('#stf-schooltopper-exam').value));
+/* ================= MANAGEMENT: ACADEMIC OPERATIONS (attendance/timetable/exams/holidays/syllabus/marks/toppers) ================= */
+
+function populateMgtOpsSelects(){
+  $('#mgt-att-class').innerHTML = classOptions();
+  $('#mgt-tt-class').innerHTML = classOptions();
+  $('#mgt-exam-class').innerHTML = classOptions();
+  $('#mgt-syl-class').innerHTML = classOptions();
+  $('#mgt-marks-class').innerHTML = classOptions();
+  $('#mgt-topper-class').innerHTML = classOptions();
+  $('#mgt-syl-subject').innerHTML = subjOptions();
+  $('#mgt-marks-subject').innerHTML = subjOptions();
+  $('#mgt-att-date').value = todayStr();
+}
+
+/* --- Management: Attendance --- */
+function renderMgtAttendance(){
+  const cls = Number($('#mgt-att-class').value)||1;
+  const sec = $('#mgt-att-section').value;
+  if(!$('#mgt-att-date').value) $('#mgt-att-date').value = todayStr();
+  const date = $('#mgt-att-date').value;
+  $('#mgt-att-seldate').textContent = date;
+  renderCalendar('mgt-att-calendar', {
+    selected: date,
+    selectable: true,
+    markerFn: d => {
+      const roster = students.filter(s=>s.cls===cls && s.section===sec);
+      const first = roster[0];
+      return (first && attendance[first.id] && attendance[first.id][d]) ? 'present' : null;
+    },
+    onSelect: d => { $('#mgt-att-date').value = d; $('#mgt-att-seldate').textContent = d; renderMgtAttendanceRoster(); }
+  });
+  renderMgtAttendanceRoster();
+}
+function renderMgtAttendanceRoster(){
+  const cls = Number($('#mgt-att-class').value)||1;
+  const sec = $('#mgt-att-section').value;
+  const date = $('#mgt-att-date').value || todayStr();
+  const rows = students.filter(s=>s.cls===cls && s.section===sec).sort((a,b)=>a.roll-b.roll);
+  const alreadyRecorded = rows.some(s => attendance[s.id] && attendance[s.id][date] !== undefined);
+  const badge = $('#mgt-att-recorded-badge');
+  badge.textContent = alreadyRecorded ? '✓ Already recorded' : '⚠ Not yet recorded';
+  badge.className = 'badge ' + (alreadyRecorded ? 'completed' : 'pending');
+  $('#mgt-att-save').textContent = alreadyRecorded ? 'Update Attendance' : 'Save Attendance';
+  $('#mgt-att-tbody').innerHTML = rows.map(s=>{
+    const recorded = attendance[s.id] && attendance[s.id][date];
+    const st = recorded || 'present';
+    return `
+    <tr data-sid="${s.id}">
+      <td>${s.roll}</td><td>${s.name}</td>
+      <td>
+        <button class="toggle-att present ${st==='present'?'on':''}" data-att="present">Present</button>
+        <button class="toggle-att absent ${st==='absent'?'on':''}" data-att="absent">Absent</button>
+        ${!recorded ? '<span style="color:var(--text-dim);font-size:11px;margin-left:6px;">(defaulted — click Save to confirm)</span>' : ''}
+      </td>
+    </tr>`;
+  }).join('');
+  $$('.toggle-att').forEach(b=>b.addEventListener('click', ()=>{
+    const tr = b.closest('tr');
+    tr.querySelectorAll('.toggle-att').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+  }));
+}
+['mgt-att-class','mgt-att-section'].forEach(id=>$('#'+id).addEventListener('change', renderMgtAttendance));
+$('#mgt-att-save').addEventListener('click', ()=>{
+  const date = $('#mgt-att-date').value || todayStr();
+  $$('#mgt-att-tbody tr').forEach(tr=>{
+    const sid = tr.dataset.sid;
+    const on = tr.querySelector('.toggle-att.on');
+    const status = on ? on.dataset.att : 'present';
+    if(!attendance[sid]) attendance[sid] = {};
+    attendance[sid][date] = status;
+  });
+  showToast(`Attendance saved for ${date}`);
+  renderMgtAttendance();
+});
+
+/* --- Management: Daily Timetable --- */
+function renderMgtTimetable(){ renderTimetableEditorFor('mgt'); }
+['mgt-tt-class','mgt-tt-section'].forEach(id=>$('#'+id).addEventListener('change', renderMgtTimetable));
+
+/* --- Management: Exam Timetable --- */
+function renderMgtExamTT(){
+  const cls = $('#mgt-exam-class').value || '1';
+  if(!examTimetable[cls]) examTimetable[cls] = [];
+  const rows = examTimetable[cls];
+  $('#mgt-exam-tbody').innerHTML = rows.map((r,i)=>{
+    const {start,end} = parseExamTimeToInputs(r.time);
+    return `
+    <tr data-row-idx="${i}">
+      <td><input type="text" data-ex-name="${i}" value="${r.exam}" style="width:120px;"></td>
+      <td><select data-ex-subject="${i}">${academicSubjects.map(s=>`<option ${s===r.subject?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td><input type="date" data-ex-date="${i}" value="${r.date}"></td>
+      <td>${timePickerHTML('ex-start', i, start)}</td>
+      <td>${timePickerHTML('ex-end', i, end)}</td>
+      <td><button class="btn-ghost" data-ex-del="${i}">✕</button></td>
+    </tr>`;
+  }).join('');
+  $$('#mgt-exam-tbody [data-ex-name],#mgt-exam-tbody [data-ex-subject],#mgt-exam-tbody [data-ex-date],#mgt-exam-tbody [data-tp-h],#mgt-exam-tbody [data-tp-m],#mgt-exam-tbody [data-tp-ap]').forEach(el=>el.addEventListener('change', saveMgtOpsExamRow));
+  $$('[data-ex-del]').forEach(b=>b.addEventListener('click', ()=>{
+    rows.splice(Number(b.dataset.exDel),1);
+    renderMgtExamTT();
+    showToast('Exam entry removed');
+  }));
+  renderMgtExamTTReadonly();
+}
+function saveMgtOpsExamRow(e){
+  const cls = $('#mgt-exam-class').value || '1';
+  const rows = examTimetable[cls];
+  const tr = e.target.closest('tr');
+  const idx = Number(tr.dataset.rowIdx);
+  rows[idx] = {
+    exam: tr.querySelector('[data-ex-name]').value,
+    subject: tr.querySelector('[data-ex-subject]').value,
+    date: tr.querySelector('[data-ex-date]').value,
+    time: formatExamTime(readTimePicker(tr, 'ex-start', idx), readTimePicker(tr, 'ex-end', idx)),
+  };
+  showToast('Exam timetable updated');
+}
+$('#mgt-exam-class').addEventListener('change', renderMgtExamTT);
+$('#mgt-exam-addrow').addEventListener('click', ()=>{
+  const cls = $('#mgt-exam-class').value || '1';
+  if(!examTimetable[cls]) examTimetable[cls] = [];
+  examTimetable[cls].push({exam:'Term 2 Exam', subject: academicSubjects[0], date: todayStr(), time:'10:00 AM – 12:00 PM'});
+  renderMgtExamTT();
+});
+
+/* --- Management: Holidays --- */
+function renderMgtHolidays(){
+  const rows = [...holidays].sort((a,b)=>a.date.localeCompare(b.date));
+  $('#mgt-hol-tbody').innerHTML = rows.map((h,i)=>`
+    <tr><td>${h.date}</td><td>${h.name}</td><td><button class="btn-ghost" data-hol-del="${holidays.indexOf(h)}">✕</button></td></tr>
+  `).join('');
+  $$('[data-hol-del]').forEach(b=>b.addEventListener('click', ()=>{
+    holidays.splice(Number(b.dataset.holDel),1);
+    renderMgtHolidays();
+    showToast('Holiday removed');
+  }));
+  renderMgtHolidaysReadonly();
+}
+$('#mgt-hol-add').addEventListener('click', ()=>{
+  const date = $('#mgt-hol-date').value;
+  const name = $('#mgt-hol-name').value.trim();
+  if(!date || !name){ showToast('Enter a date and occasion name'); return; }
+  holidays.push({date, name});
+  $('#mgt-hol-date').value=''; $('#mgt-hol-name').value='';
+  renderMgtHolidays();
+  showToast('Holiday added');
+});
+
+/* --- Management: Syllabus --- */
+function renderMgtSyllabus(){
+  const cls = Number($('#mgt-syl-class').value)||1;
+  const sec = $('#mgt-syl-section').value;
+  const subj = $('#mgt-syl-subject').value || academicSubjects[0];
+  const key = classSecKey(cls, sec);
+  if(!syllabus[key]) syllabus[key] = {};
+  if(!syllabus[key][subj]) syllabus[key][subj] = [];
+  const topics = syllabus[key][subj];
+  $('#mgt-syl-tbody').innerHTML = topics.map((t,i)=>`
+    <tr>
+      <td>${t.topic}</td>
+      <td>
+        <button class="toggle-att present ${t.status==='Completed'?'on':''}" data-syl-status="${i}" data-val="Completed">Completed</button>
+        <button class="toggle-att absent ${t.status==='Pending'?'on':''}" data-syl-status="${i}" data-val="Pending">Pending</button>
+      </td>
+      <td><button class="btn-ghost" data-syl-del="${i}">✕</button></td>
+    </tr>
+  `).join('');
+  $$('[data-syl-status]').forEach(b=>b.addEventListener('click', ()=>{
+    topics[Number(b.dataset.sylStatus)].status = b.dataset.val;
+    renderMgtSyllabus();
+    showToast('Syllabus updated');
+  }));
+  $$('[data-syl-del]').forEach(b=>b.addEventListener('click', ()=>{
+    topics.splice(Number(b.dataset.sylDel),1);
+    renderMgtSyllabus();
+  }));
+  renderMgtSyllabusReadonly();
+}
+['mgt-syl-class','mgt-syl-section','mgt-syl-subject'].forEach(id=>$('#'+id).addEventListener('change', renderMgtSyllabus));
+$('#mgt-syl-add').addEventListener('click', ()=>{
+  const cls = Number($('#mgt-syl-class').value)||1;
+  const sec = $('#mgt-syl-section').value;
+  const subj = $('#mgt-syl-subject').value || academicSubjects[0];
+  const key = classSecKey(cls, sec);
+  const topic = $('#mgt-syl-topic').value.trim();
+  if(!topic){ showToast('Enter a topic name'); return; }
+  syllabus[key][subj].push({topic, status:'Pending'});
+  $('#mgt-syl-topic').value='';
+  renderMgtSyllabus();
+  showToast('Topic added');
+});
+
+/* --- Management: Marks --- */
+function renderMgtMarks(){
+  populateMarksExamSelect('mgt');
+  const cls = Number($('#mgt-marks-class').value)||1;
+  const sec = $('#mgt-marks-section').value;
+  const exam = $('#mgt-marks-exam').value;
+  const subj = $('#mgt-marks-subject').value || academicSubjects[0];
+  const key = classSecKey(cls, sec);
+  const rows = students.filter(s=>s.cls===cls && s.section===sec).sort((a,b)=>a.roll-b.roll);
+  if(!exam){
+    $('#mgt-marks-tbody').innerHTML = `<tr><td colspan="4" style="color:var(--text-dim);">Schedule an exam for this class in Exam Timetable first.</td></tr>`;
+    return;
+  }
+  $('#mgt-marks-tbody').innerHTML = rows.map(s=>{
+    const existing = (marksData[key] && marksData[key][exam] && marksData[key][exam][s.id] && marksData[key][exam][s.id][subj] !== undefined) ? marksData[key][exam][s.id][subj] : '';
+    return `<tr><td>${s.roll}</td><td>${s.name}</td><td><input class="marks-input" type="number" min="0" max="100" placeholder="—" data-sid="${s.id}" value="${existing}"></td><td>100</td></tr>`;
+  }).join('');
+}
+['mgt-marks-class','mgt-marks-section','mgt-marks-subject','mgt-marks-exam'].forEach(id=>$('#'+id).addEventListener('change', renderMgtMarks));
+$('#mgt-marks-save').addEventListener('click', ()=>{
+  const cls = Number($('#mgt-marks-class').value)||1;
+  const sec = $('#mgt-marks-section').value;
+  const exam = $('#mgt-marks-exam').value;
+  const subj = $('#mgt-marks-subject').value || academicSubjects[0];
+  if(!exam){ showToast('Schedule an exam for this class first'); return; }
+  const key = classSecKey(cls, sec);
+  if(!marksData[key]) marksData[key] = {};
+  if(!marksData[key][exam]) marksData[key][exam] = {};
+  let entered = 0;
+  $$('#mgt-marks-tbody input').forEach(inp=>{
+    if(inp.value === '') return;
+    const sid = inp.dataset.sid;
+    const val = Math.max(0, Math.min(100, Number(inp.value)||0));
+    if(!marksData[key][exam][sid]) marksData[key][exam][sid] = {};
+    marksData[key][exam][sid][subj] = val;
+    entered++;
+  });
+  if(entered===0 && Object.keys(marksData[key][exam]).length===0) delete marksData[key][exam];
+  showToast(entered ? `Marks saved for ${subj} — ${exam}` : 'No marks entered — nothing saved');
+  populateMgtTopperExam();
+});
+
+/* --- Management: Toppers --- */
+function populateMgtTopperExam(){
+  const cls = Number($('#mgt-topper-class').value)||1;
+  const sec = $('#mgt-topper-section').value;
+  const key = classSecKey(cls, sec);
+  const exams = examListFor(key);
+  $('#mgt-topper-exam').innerHTML = exams.map(e=>`<option value="${e}">${e}</option>`).join('');
+  renderMgtTopper();
+  populateMgtSchoolTopper();
+}
+['mgt-topper-class','mgt-topper-section','mgt-topper-exam'].forEach(id=>$('#'+id).addEventListener('change', ()=>{
+  if(id==='mgt-topper-exam') renderMgtTopper(); else populateMgtTopperExam();
+}));
+function renderMgtTopper(){
+  const cls = Number($('#mgt-topper-class').value)||1;
+  const sec = $('#mgt-topper-section').value;
+  const exam = $('#mgt-topper-exam').value;
+  const rows = computeToppers(cls, sec, exam).slice(0,10);
+  $('#mgt-topper-list').innerHTML = rows.map((r,i)=>`
+    <div class="topper-item"><div class="topper-rank">${i+1}</div><div style="flex:1;">${r.name}</div><div class="pw">${r.total} / ${r.max}</div></div>
+  `).join('') || '<p style="color:var(--text-dim);font-size:13px;">No marks recorded for this exam yet.</p>';
+}
+function populateMgtSchoolTopper(){
+  const names = allExamNames();
+  const sel = $('#mgt-schooltopper-exam');
+  const prevVal = sel.value;
+  sel.innerHTML = names.length ? names.map(e=>`<option value="${e}">${e}</option>`).join('') : '<option value="">No marks recorded yet</option>';
+  if(names.includes(prevVal)) sel.value = prevVal;
+  renderSchoolTopperCard('mgt-schooltopper-card', sel.value);
+}
+$('#mgt-schooltopper-exam').addEventListener('change', ()=> renderSchoolTopperCard('mgt-schooltopper-card', $('#mgt-schooltopper-exam').value));
+
+/* ================= CALENDAR COMPONENT ================= */
+let calState = {};
+function renderCalendar(containerId, opts){
+  opts = opts || {};
+  if(!calState[containerId]){
+    const now = new Date();
+    calState[containerId] = {year: now.getFullYear(), month: now.getMonth(), selected: null};
+  }
+  const st = calState[containerId];
+  if(opts.selected !== undefined) st.selected = opts.selected;
+  const first = new Date(st.year, st.month, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(st.year, st.month+1, 0).getDate();
+  const monthLabel = first.toLocaleString('en-US', {month:'long', year:'numeric'});
+  const todayKey = todayStr();
+  const dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let dowRow = dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  let dayCells = '';
+  for(let i=0;i<startDow;i++) dayCells += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${st.year}-${pad(st.month+1)}-${pad(d)}`;
+    const marker = opts.markerFn ? opts.markerFn(dateStr) : null;
+    let cls = 'cal-cell';
+    if(marker==='present') cls += ' present';
+    else if(marker==='absent') cls += ' absent';
+    if(dateStr===todayKey) cls += ' today';
+    if(opts.selectable) cls += ' clickable';
+    if(st.selected===dateStr) cls += ' selected';
+    dayCells += `<div class="${cls}" data-cal-date="${dateStr}">${d}</div>`;
+  }
+  $(`#${containerId}`).innerHTML = `
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button data-cal-prev>‹</button>
+        <span class="cal-title">${monthLabel}</span>
+        <button data-cal-next>›</button>
+      </div>
+      <div class="cal-grid">${dowRow}${dayCells}</div>
+      ${opts.markerFn ? `<div class="cal-legend"><span><i style="background:var(--green);"></i>Present</span><span><i style="background:var(--red);"></i>Absent</span></div>` : ''}
+    </div>`;
+  const wrap = $(`#${containerId}`);
+  wrap.querySelector('[data-cal-prev]').addEventListener('click', ()=>{
+    st.month--; if(st.month<0){ st.month=11; st.year--; }
+    renderCalendar(containerId, opts);
+  });
+  wrap.querySelector('[data-cal-next]').addEventListener('click', ()=>{
+    st.month++; if(st.month>11){ st.month=0; st.year++; }
+    renderCalendar(containerId, opts);
+  });
+  if(opts.selectable){
+    wrap.querySelectorAll('[data-cal-date]').forEach(cell=>cell.addEventListener('click', ()=>{
+      st.selected = cell.dataset.calDate;
+      if(opts.onSelect) opts.onSelect(st.selected);
+      renderCalendar(containerId, opts);
+    }));
+  }
+}
+
+/* ================= GENERIC EDITOR MODAL ================= */
+let opReturnSlot = null;
+let opRefreshFn = null;
+function openOpModal(editorId, title, refreshFnName){
+  const editor = document.getElementById(editorId);
+  const slot = document.getElementById(editorId + '-slot');
+  if(!editor || !slot) return;
+  document.getElementById('op-modal-body').appendChild(editor);
+  document.getElementById('op-modal-title').textContent = title || 'Edit';
+  document.getElementById('op-modal-bg').classList.add('open');
+  opReturnSlot = slot;
+  opRefreshFn = refreshFnName;
+}
+function closeOpModal(){
+  const modalBody = document.getElementById('op-modal-body');
+  const editor = modalBody.firstElementChild;
+  if(editor && opReturnSlot) opReturnSlot.appendChild(editor);
+  document.getElementById('op-modal-bg').classList.remove('open');
+  if(opRefreshFn && typeof window[opRefreshFn] === 'function') window[opRefreshFn]();
+  opReturnSlot = null; opRefreshFn = null;
+}
+$$('[data-open-editor]').forEach(b=>b.addEventListener('click', ()=>{
+  openOpModal(b.dataset.openEditor, b.dataset.editorTitle, b.dataset.refresh);
+}));
+$('#op-modal-done').addEventListener('click', closeOpModal);
+$('#op-modal-bg').addEventListener('click', e=>{ if(e.target.id==='op-modal-bg') closeOpModal(); });
+
+/* ================= READ-ONLY VIEWS (shown behind the Edit buttons) ================= */
+function renderDayWiseTimetable(containerId, key){
+  const rows = dailyTimetable[key] || [];
+  const byDay = {}; weekDays.forEach(d=>byDay[d]=[]);
+  rows.forEach(r=>{ if(byDay[r.day]) byDay[r.day].push(r); });
+  const html = weekDays.map(day=>{
+    const periods = byDay[day].slice().sort((a,b)=>a.period-b.period);
+    return `
+    <div class="tt-day-block">
+      <h4>${day}</h4>
+      ${periods.length ? `
+      <table><thead><tr><th>Period</th><th>Time</th><th>Subject</th></tr></thead>
+      <tbody>${periods.map(p=>`<tr><td>${p.period}</td><td>${p.time}</td><td>${p.subject}</td></tr>`).join('')}</tbody></table>` :
+      `<p style="color:var(--text-dim);font-size:12.5px;">No periods scheduled.</p>`}
+    </div>`;
+  }).join('');
+  const el = $(`#${containerId}`);
+  if(el) el.innerHTML = html;
+}
+function renderTimetableReadonly(prefix){
+  const cls = Number($(`#${prefix}-tt-class`).value)||1;
+  const sec = $(`#${prefix}-tt-section`).value;
+  const key = classSecKey(cls, sec);
+  renderDayWiseTimetable(`${prefix}-tt-readonly`, key);
+}
+function renderMgtTimetableReadonly(){ renderTimetableReadonly('mgt'); }
+function renderStfTimetableReadonly(){ renderTimetableReadonly('stf'); }
+
+function renderExamTTReadonly(prefix){
+  const cls = $(`#${prefix}-exam-class`).value || '1';
+  const rows = examTimetable[cls] || [];
+  const el = $(`#${prefix}-exam-readonly`);
+  if(!el) return;
+  el.innerHTML = rows.length
+    ? `<table><thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Time</th></tr></thead><tbody>${
+        rows.map(r=>`<tr><td>${r.exam}</td><td>${r.subject}</td><td>${r.date}</td><td>${r.time}</td></tr>`).join('')
+      }</tbody></table>`
+    : '<p style="color:var(--text-dim);font-size:13px;">No exams scheduled yet.</p>';
+}
+function renderMgtExamTTReadonly(){ renderExamTTReadonly('mgt'); }
+function renderStfExamTTReadonly(){ renderExamTTReadonly('stf'); }
+
+function renderHolidaysReadonlyFor(prefix){
+  const rows = [...holidays].sort((a,b)=>a.date.localeCompare(b.date));
+  const el = $(`#${prefix}-hol-readonly`);
+  if(!el) return;
+  el.innerHTML = rows.length
+    ? `<table><thead><tr><th>Date</th><th>Occasion</th></tr></thead><tbody>${
+        rows.map(h=>`<tr><td>${h.date}</td><td>${h.name}</td></tr>`).join('')
+      }</tbody></table>`
+    : '<p style="color:var(--text-dim);font-size:13px;">No holidays added yet.</p>';
+}
+function renderMgtHolidaysReadonly(){ renderHolidaysReadonlyFor('mgt'); }
+function renderStfHolidaysReadonly(){ renderHolidaysReadonlyFor('stf'); }
+
+function renderSyllabusReadonlyFor(prefix){
+  const cls = Number($(`#${prefix}-syl-class`).value)||1;
+  const sec = $(`#${prefix}-syl-section`).value;
+  const key = classSecKey(cls, sec);
+  const data = syllabus[key] || {};
+  const el = $(`#${prefix}-syl-readonly`);
+  if(!el) return;
+  el.innerHTML = Object.keys(data).map(subj=>{
+    const topics = data[subj];
+    const done = topics.filter(t=>t.status==='Completed').length;
+    const pct = topics.length ? Math.round(done/topics.length*100) : 0;
+    return `<div class="subj-block"><div class="subj-head"><span>${subj}</span><span>${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      ${topics.map(t=>`<div class="topic-row"><span>${t.topic}</span><span class="badge ${t.status.toLowerCase()}">${t.status}</span></div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function renderMgtSyllabusReadonly(){ renderSyllabusReadonlyFor('mgt'); }
+function renderStfSyllabusReadonly(){ renderSyllabusReadonlyFor('stf'); }
+
+/* ================= LEAVE REQUESTS ================= */
+function renderStuLeave(){
+  $('#stu-leave-staff').innerHTML = staff.map(s=>`<option value="${s.id}">${s.name} (${s.role})</option>`).join('');
+  const mine = leaveRequests.filter(l=>l.studentId===currentUser.id);
+  $('#stu-leave-list').innerHTML = mine.length ? mine.map(l=>{
+    const st = staff.find(x=>x.id===l.staffId);
+    return `
+    <div class="task-card">
+      <div class="task-head">
+        <div><div class="task-loc">${l.from} → ${l.to}</div><div class="task-title">${l.reason}</div><div style="color:var(--text-dim);font-size:12px;margin-top:4px;">To: ${st ? st.name : 'Staff'}</div></div>
+        <span class="badge ${l.status==='Approved'?'completed':l.status==='Rejected'?'open':'pending'}">${l.status}</span>
+      </div>
+      ${l.comment ? `<div style="font-size:12.5px;color:var(--text-dim);margin-top:6px;">Staff comment: ${l.comment}</div>` : ''}
+    </div>`;
+  }).join('') : '<p style="color:var(--text-dim);font-size:13px;">No leave requests yet.</p>';
+}
+$('#stu-leave-submit').addEventListener('click', ()=>{
+  const staffId = $('#stu-leave-staff').value;
+  const from = $('#stu-leave-from').value;
+  const to = $('#stu-leave-to').value;
+  const reason = $('#stu-leave-reason').value.trim();
+  if(!staffId){ showToast('Choose a staff member to send this to'); return; }
+  if(!from || !to || !reason){ showToast('Fill in from date, to date, and reason'); return; }
+  leaveRequests.unshift({id:newLeaveId(), studentId: currentUser.id, staffId, from, to, reason, status:'Pending', comment:'', createdAt: todayStr()});
+  $('#stu-leave-from').value=''; $('#stu-leave-to').value=''; $('#stu-leave-reason').value='';
+  showToast('Leave request submitted');
+  renderStuLeave();
+});
+
+function staffLeaveCardHtml(l){
+  const s = students.find(x=>x.id===l.studentId);
+  const toStaff = staff.find(x=>x.id===l.staffId);
+  return `
+  <div class="task-card" data-leave="${l.id}">
+    <div class="task-head">
+      <div><div class="task-loc">${s ? s.name : l.studentId}${s ? ' — Class '+s.cls+' '+s.section : ''}</div><div class="task-title">${l.from} → ${l.to} — ${l.reason}</div><div style="color:var(--text-dim);font-size:12px;margin-top:4px;">To: ${toStaff ? toStaff.name : 'Unassigned'}</div></div>
+      <span class="badge ${l.status==='Approved'?'completed':l.status==='Rejected'?'open':'pending'}">${l.status}</span>
+    </div>
+    <div class="mat-add-row">
+      <input type="text" placeholder="Comment (optional)" data-leave-comment="${l.id}" value="${l.comment||''}">
+    </div>
+    <div class="status-btns">
+      <button class="status-btn ${l.status==='Approved'?'active':''}" data-leave-status="${l.id}" data-val="Approved">Approve</button>
+      <button class="status-btn ${l.status==='Rejected'?'active':''}" data-leave-status="${l.id}" data-val="Rejected">Reject</button>
+      <button class="status-btn ${l.status==='Pending'?'active':''}" data-leave-status="${l.id}" data-val="Pending">Pending</button>
+    </div>
+  </div>`;
+}
+function wireLeaveCardHandlers(containerSel, rerender){
+  $$(`${containerSel} [data-leave-status]`).forEach(b=>b.addEventListener('click', ()=>{
+    const l = leaveRequests.find(x=>x.id===b.dataset.leaveStatus);
+    if(!l) return;
+    const commentInp = document.querySelector(`[data-leave-comment="${l.id}"]`);
+    l.status = b.dataset.val;
+    l.comment = commentInp ? commentInp.value.trim() : l.comment;
+    showToast(`Leave request ${l.status.toLowerCase()}`);
+    rerender();
+  }));
+}
+function renderStfLeave(){
+  const mine = leaveRequests.filter(l=>l.staffId===currentUser.id);
+  $('#stf-leave-list').innerHTML = mine.length ? mine.map(staffLeaveCardHtml).join('') : '<p style="color:var(--text-dim);font-size:13px;">No leave requests addressed to you yet.</p>';
+  wireLeaveCardHandlers('#stf-leave-list', renderStfLeave);
+}
+function renderMgtLeave(){
+  $('#mgt-leave-list').innerHTML = leaveRequests.length ? leaveRequests.map(staffLeaveCardHtml).join('') : '<p style="color:var(--text-dim);font-size:13px;">No leave requests yet.</p>';
+  wireLeaveCardHandlers('#mgt-leave-list', renderMgtLeave);
+}
+
+/* ================= SELF-ATTENDANCE (Staff & Management mark their own presence) ================= */
+function renderStfMyAttendance(){
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  renderCalendar('stf-myatt-calendar', { markerFn: d => attendance[currentUser.id][d] || null, selectable:false });
+  const marked = !!attendance[currentUser.id][todayStr()];
+  $('#stf-mark-btn').disabled = marked;
+  $('#stf-mark-btn').textContent = marked ? 'Already Marked Today' : 'Mark Today Present';
+}
+$('#stf-mark-btn').addEventListener('click', ()=>{
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  attendance[currentUser.id][todayStr()] = 'present';
+  showToast('Attendance marked for today');
+  renderStfMyAttendance();
+});
+function renderMgtMyAttendance(){
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  renderCalendar('mgt-myatt-calendar', { markerFn: d => attendance[currentUser.id][d] || null, selectable:false });
+  const marked = !!attendance[currentUser.id][todayStr()];
+  $('#mgt-mark-btn').disabled = marked;
+  $('#mgt-mark-btn').textContent = marked ? 'Already Marked Today' : 'Mark Today Present';
+}
+$('#mgt-mark-btn').addEventListener('click', ()=>{
+  if(!attendance[currentUser.id]) attendance[currentUser.id] = {};
+  attendance[currentUser.id][todayStr()] = 'present';
+  showToast('Attendance marked for today');
+  renderMgtMyAttendance();
+});
+
+/* ================= EXAM REMINDER POPUP (students) ================= */
+function checkExamReminders(){
+  const rows = (examTimetable[String(currentUser.cls)] || []).filter(r => r.date >= todayStr());
+  if(!rows.length) return;
+  const sorted = rows.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  $('#reminder-list').innerHTML = sorted.map(r=>{
+    const days = Math.round((new Date(r.date) - new Date(todayStr())) / 86400000);
+    const dayLabel = days<=0 ? 'Today' : days===1 ? 'Tomorrow' : `In ${days} days`;
+    return `<div class="reminder-item"><div class="r-days">${dayLabel} — ${r.date}</div><div><b>${r.subject}</b> (${r.exam})</div><div style="color:var(--text-dim);font-size:12px;">${r.time}</div></div>`;
+  }).join('');
+  $('#reminder-modal-bg').classList.add('open');
+}
+$('#reminder-close').addEventListener('click', ()=> $('#reminder-modal-bg').classList.remove('open'));
+$('#reminder-modal-bg').addEventListener('click', e=>{ if(e.target.id==='reminder-modal-bg') $('#reminder-modal-bg').classList.remove('open'); });
+
+/* ================= TERM-END NOTIFICATION (staff/management) ================= */
+// For each exam name, find its last (latest) scheduled date across all classes.
+// If that date has arrived, nudge staff to prepare the syllabus for the next term.
+function checkTermCompletion(){
+  const lastDateByExam = {};
+  Object.keys(examTimetable).forEach(cls=>{
+    (examTimetable[cls] || []).forEach(r=>{
+      if(!lastDateByExam[r.exam] || r.date > lastDateByExam[r.exam]) lastDateByExam[r.exam] = r.date;
+    });
+  });
+  const today = todayStr();
+  const completed = Object.keys(lastDateByExam).filter(exam => lastDateByExam[exam] <= today);
+  if(!completed.length) return;
+  // Only notify about the most recently completed exam so it doesn't spam old terms forever.
+  const exam = completed.sort((a,b)=>lastDateByExam[b].localeCompare(lastDateByExam[a]))[0];
+  const lastDate = lastDateByExam[exam];
+  $('#staff-notify-text').innerHTML = `<b>${exam}</b> wrapped up on <b>${lastDate}</b>. Please prepare and update the syllabus for the next term's exam in the Syllabus tab.`;
+  $('#staff-notify-modal-bg').classList.add('open');
+}
+$('#staff-notify-close').addEventListener('click', ()=> $('#staff-notify-modal-bg').classList.remove('open'));
+$('#staff-notify-modal-bg').addEventListener('click', e=>{ if(e.target.id==='staff-notify-modal-bg') $('#staff-notify-modal-bg').classList.remove('open'); });
+
+/* ================= PERSISTENT SHARED STORAGE (syncs data across roles/logins) ================= */
+function snapshotState(){
+  return {
+    students, staff, housekeeping, management,
+    sectionsByClass, classTeachers,
+    holidays, dailyTimetable, examTimetable, syllabus, attendance, marksData,
+    issues, issueSerial, serial,
+    leaveRequests, leaveSerial,
+  };
+}
+function applyState(s){
+  if(!s) return;
+  if(s.students) students = s.students;
+  if(s.staff) staff = s.staff;
+  if(s.housekeeping) housekeeping = s.housekeeping;
+  if(s.management) management = s.management;
+  if(s.sectionsByClass) sectionsByClass = s.sectionsByClass;
+  if(s.classTeachers) classTeachers = s.classTeachers;
+  if(s.holidays) holidays = s.holidays;
+  if(s.dailyTimetable) dailyTimetable = s.dailyTimetable;
+  if(s.examTimetable) examTimetable = s.examTimetable;
+  if(s.syllabus) syllabus = s.syllabus;
+  if(s.attendance) attendance = s.attendance;
+  if(s.marksData) marksData = s.marksData;
+  if(s.issues) issues = s.issues;
+  if(typeof s.issueSerial === 'number') issueSerial = s.issueSerial;
+  if(typeof s.serial === 'number') serial = s.serial;
+  if(s.leaveRequests) leaveRequests = s.leaveRequests;
+  if(typeof s.leaveSerial === 'number') leaveSerial = s.leaveSerial;
+}
+let saveTimer = null;
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 400);
+}
+async function saveNow(){
+  const payload = JSON.stringify(snapshotState());
+  try{
+    if(typeof window.storage !== 'undefined'){
+      await window.storage.set('school-db', payload, true);
+    } else {
+      localStorage.setItem('school-db', payload);
+    }
+  }catch(e){ console.warn('Save failed', e); }
+}
+async function loadState(){
+  let raw = null;
+  try{
+    if(typeof window.storage !== 'undefined'){
+      const res = await window.storage.get('school-db', true);
+      raw = res && res.value;
+    } else {
+      raw = localStorage.getItem('school-db');
+    }
+  }catch(e){ raw = null; }
+  if(!raw) return;
+  try{ applyState(JSON.parse(raw)); }
+  catch(e){ /* corrupted or no saved data yet — keep the seeded defaults */ }
+}
+(async function boot(){
+  await loadState();
+  renderDemoList();
+  const btn = $('#login-btn');
+  btn.disabled = false;
+  btn.textContent = 'Login';
+})();
+
+</script>
+</body>
+</html>

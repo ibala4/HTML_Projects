@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coin Catcher</title>
+<style>
+:root{--bg:#e6f1ff;--sky1:#b9dcff;--sky2:#eef7ff;--ink:#14243a;--mute:#5b6f88;--card:rgba(255,255,255,.92);--acc:#ff8a00;--accink:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1324;--sky1:#14284a;--sky2:#0d1a33;--ink:#eaf1ff;--mute:#8da2c4;--card:rgba(22,34,64,.94);--acc:#ffb020;--accink:#1b1200}}
+:root[data-theme="dark"]{--bg:#0b1324;--sky1:#14284a;--sky2:#0d1a33;--ink:#eaf1ff;--mute:#8da2c4;--card:rgba(22,34,64,.94);--acc:#ffb020;--accink:#1b1200}
+*{box-sizing:border-box}html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center}
+.game{width:100%;max-width:420px;padding:14px}
+.hud{display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;margin-bottom:10px;font-weight:700}
+.hud small{display:block;color:var(--mute);font-weight:500;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+.hud b{font-size:1.4rem}
+.wrap{position:relative;border-radius:22px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+canvas{display:block;width:100%;height:auto;touch-action:none;background:var(--sky2)}
+.ov{position:absolute;inset:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.35)}
+.ov.hide{display:none}
+.panel{background:var(--card);border-radius:20px;padding:22px 20px;text-align:center;width:100%;max-width:320px;margin:auto}
+.panel input{width:100%;padding:11px;margin:0 0 12px;font:inherit;text-align:center;border-radius:12px;border:1.5px solid var(--mute);background:var(--bg);color:var(--ink)}
+.panel h2{font-size:1rem;margin:18px 0 6px}
+.lb{list-style:none;margin:0;padding:0;text-align:left}.lb li{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1px solid rgba(128,128,128,.25)}
+.mut{font-size:.85rem;margin:0}
+.panel h1{margin:0 0 6px;font-size:1.7rem}
+.panel p{margin:0 0 14px;color:var(--mute);font-size:.95rem}
+.panel .big{font-size:2.6rem;line-height:1.1;margin:0 0 4px;color:var(--ink)}
+button{font:700 1.05rem system-ui,sans-serif;background:var(--acc);color:var(--accink);border:0;border-radius:999px;padding:12px 34px;cursor:pointer;transition:transform .12s}
+button:active{transform:scale(.94)}button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.panel>button{display:block;width:100%}
+.lg{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;align-items:center;font-size:.82rem;color:var(--ink)!important}
+.cn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-weight:800;font-size:.75rem;color:#2b2200;border:2px solid rgba(0,0,0,.35);margin-right:-4px}
+.alt{background:transparent;color:var(--ink);border:2px solid var(--acc);margin-top:10px}
+.panel>.lnk{background:none;color:var(--mute);font-weight:500;font-size:.9rem;text-decoration:underline;padding:8px;width:auto;margin:8px auto 0}
+.tab{position:absolute;top:8px;right:8px;z-index:5;padding:6px 14px;font-size:.85rem;background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.tip{text-align:center;color:var(--mute);font-size:.85rem;margin-top:10px}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+</style></head><body>
+<div class="game">
+  <div class="hud"><div><small>Score</small><b id="sc">0</b></div><div><small>My best</small><b id="bs">0</b></div><div><small>Lives</small><b id="lv">❤️❤️❤️</b></div></div>
+  <div class="wrap">
+    <canvas id="cv" width="360" height="520" aria-label="Coin Catcher game area"></canvas>
+    <button class="tab" id="tab" style="display:none">🏆 Scores</button>
+    <div class="ov" id="ov"><div class="panel" id="pn"></div></div>
+  </div>
+  <p class="tip">Drag or move your finger to steer · or use ← → keys<br>❤️ A bonus heart appears at 500, 1000, 1500… points if you have fewer than 3 lives. Catch it or skip it.</p>
+</div>
+<script>
+const W=360,H=520,cv=document.getElementById('cv'),cx=cv.getContext('2d');
+const $=id=>document.getElementById(id);
+let scores={},who='';
+try{scores=JSON.parse(localStorage.getItem('coincatcher_scores')||'{}')}catch(e){scores={}}
+try{who=localStorage.getItem('coincatcher_last')||''}catch(e){}
+const cleanName=x=>x.trim().replace(/\s+/g,' ').slice(0,14);
+const esc=x=>x.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function saveScores(){try{localStorage.setItem('coincatcher_scores',JSON.stringify(scores));localStorage.setItem('coincatcher_last',who)}catch(e){}}
+/* Same name (any capital/small letters) = same player. Score only replaces the old one if it is higher. */
+function record(name,sc){
+  const k=name.toLowerCase();let r=scores[k],isBest=false;
+  if(!r){r=scores[k]={name,best:sc,plays:0};isBest=sc>0}
+  else if(sc>r.best){r.best=sc;isBest=true}
+  r.plays++;saveScores();return{r,isBest};
+}
+function board(){
+  const l=Object.values(scores).sort((a,b)=>b.best-a.best).slice(0,5);
+  return l.length?`<ol class="lb">${l.map((r,i)=>`<li><span>${['🥇','🥈','🥉','4.','5.'][i]} ${esc(r.name)}</span><b>${r.best}</b></li>`).join('')}</ol>`:'<p class="mut">No scores yet. Be the first!</p>';
+}
+function setBest(){$('bs').textContent=(scores[who.toLowerCase()]||{}).best||0}
+let view='name';
+const show=h=>{$('pn').innerHTML=h;$('ov').classList.remove('hide');$('tab').style.display='none'};
+function showName(){
+  view='name';
+  show(`<h1>🪙 Coin Catcher</h1><p class="lg"><span class="cn" style="background:#ffd21f">5</span> Gold <span class="cn" style="background:#d5dbe3">3</span> Silver <span class="cn" style="background:#cd7f32">2</span> Bronze <span class="cn" style="background:#efe9d2">1</span> Coin</p><p>Catch the coins and dodge bombs 💣!</p><input id="nm" maxlength="14" placeholder="Enter your name" value="${esc(who)}" aria-label="Player name" autocomplete="off"><button id="go">Continue</button>`);
+  $('go').onclick=cont;$('nm').addEventListener('keydown',e=>{if(e.key==='Enter')cont()});$('nm').focus();
+}
+function cont(){const n=cleanName($('nm').value);if(!n){$('nm').style.borderColor='#e5483b';$('nm').focus();return}who=n;saveScores();setBest();showMenu()}
+function showMenu(){
+  view='menu';
+  show(`<h1>Hi, ${esc(who)}! 👋</h1><p>Your best score: <b>${(scores[who.toLowerCase()]||{}).best||0}</b></p><button id="go">▶ Play</button><button id="sb" class="alt">🏆 Score</button><button id="ch" class="lnk">Change name</button>`);
+  $('go').onclick=start;$('sb').onclick=()=>showScore(showMenu);$('ch').onclick=showName;$('go').focus();
+}
+function showScore(back){
+  view='score';
+  show(`<h1>🏆 Score</h1>${fullBoard()}<button id="bk" style="margin-top:14px">Back</button>`);
+  $('bk').onclick=back;$('bk').focus();
+}
+setBest();
+let st='idle',score,lives,items,texts,spawn,t0,px,flash,keys={},nextHeart=500,heartOut=false,lastPanel=[];
+const P={w:78,h:20,y:H-52};
+/* points: plain coin 1, bronze 2, silver 3, gold 5 */
+const VAL={c1:1,c2:2,c3:3,c5:5};
+const COIN={c1:['#efe9d2','#8a7f55'],c2:['#cd7f32','#6b3d12'],c3:['#d5dbe3','#6b7684'],c5:['#ffd21f','#a87400']};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function start(){
+  if(st==='play'||!who)return;
+  view='play';
+  score=0;lives=3;items=[];texts=[];spawn=0;flash=0;px=W/2;nextHeart=500;heartOut=false;st='play';$('tab').style.display='block';
+  $('ov').classList.add('hide');upd();t0=performance.now();requestAnimationFrame(loop);
+}
+function upd(){$('sc').textContent=score;$('lv').textContent=lives>0?'❤️'.repeat(lives):'💔'}
+function over(){
+  st='over';
+  const x=record(who,score);setBest();showOver(x.r,x.isBest,score);
+}
+function showOver(r,isBest,sc){
+  view='over';
+  show(`<div class="big">${isBest?'🏆':'💥'}</div><h1>Game over</h1><p><b>${esc(r.name)}</b> scored <b>${sc}</b><br>${isBest?'New best score! 🎉':'Best is still <b>'+r.best+'</b>'}</p><button id="go">Play again</button><button id="sb" class="alt">🏆 Score</button><button id="ch" class="lnk">Menu</button>`);
+  $('go').onclick=start;$('sb').onclick=()=>showScore(()=>showOver(r,isBest,sc));$('ch').onclick=showMenu;$('go').focus();
+}
+function loop(now){
+  if(st!=='play')return;
+  const dt=Math.min(.05,(now-t0)/1000);t0=now;
+  if(keys.ArrowLeft||keys.a)px-=400*dt;if(keys.ArrowRight||keys.d)px+=400*dt;
+  px=Math.max(P.w/2,Math.min(W-P.w/2,px));
+  spawn-=dt;
+  if(spawn<=0){
+    spawn=Math.max(.36,.85-score*.0012);
+    const r=Math.random(),type=r<.2?'bomb':r<.58?'c1':r<.78?'c2':r<.91?'c3':'c5';
+    items.push({x:20+Math.random()*(W-40),y:-20,type,vy:(150+Math.min(score*.6,230))*(.9+Math.random()*.4),rot:0});
+  }
+  while(score>=nextHeart&&!heartOut){
+    if(lives<3){items.push({x:30+Math.random()*(W-60),y:-20,type:'heart',vy:130});heartOut=true;texts.push({x:W/2,y:70,t:1.6,s:'❤️ Bonus heart!'})}
+    nextHeart+=500;
+  }
+  for(const it of items){
+    it.y+=it.vy*dt;
+    if(!it.dead&&it.y>P.y-14&&it.y<P.y+P.h&&Math.abs(it.x-px)<P.w/2+10){
+      it.dead=true;
+      if(it.type==='bomb'){lives--;flash=.35;texts.push({x:it.x,y:it.y,t:.8,s:'💥'})}
+      else if(it.type==='heart'){lives=Math.min(3,lives+1);heartOut=false;texts.push({x:it.x,y:it.y,t:.9,s:'+❤️'})}
+      else{const v=VAL[it.type];score+=v;texts.push({x:it.x,y:it.y,t:.7,s:'+'+v})}
+      upd();
+    }
+  }
+  items=items.filter(i=>!i.dead&&i.y<H+30);
+  if(heartOut&&!items.some(i=>i.type==='heart'))heartOut=false;
+  texts.forEach(t=>{t.t-=dt;t.y-=40*dt});texts=texts.filter(t=>t.t>0);
+  flash=Math.max(0,flash-dt);
+  draw();
+  if(lives<=0){draw();over();return}
+  requestAnimationFrame(loop);
+}
+function draw(){
+  const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,css('--sky1'));g.addColorStop(1,css('--sky2'));
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  cx.textAlign='center';cx.textBaseline='middle';cx.font='30px serif';
+  for(const it of items){
+    const c=COIN[it.type];
+    if(c){cx.fillStyle=c[0];cx.beginPath();cx.arc(it.x,it.y,16,0,6.283);cx.fill();cx.lineWidth=3;cx.strokeStyle=c[1];cx.stroke();cx.fillStyle=c[1];cx.font='bold 17px system-ui,sans-serif';cx.fillText(VAL[it.type],it.x,it.y+1)}
+    else{cx.font=(it.type==='heart'?'40px':'30px')+' serif';cx.fillText(it.type==='bomb'?'💣':'❤️',it.x,it.y)}
+  }
+  cx.fillStyle='#8b5a2b';cx.beginPath();cx.roundRect(px-P.w/2,P.y,P.w,P.h,[4,4,14,14]);cx.fill();
+  cx.fillStyle='#c98a4b';cx.fillRect(px-P.w/2,P.y,P.w,5);
+  cx.font='bold 20px system-ui,sans-serif';cx.fillStyle=css('--ink');
+  for(const t of texts){cx.globalAlpha=Math.min(1,t.t*2);cx.fillText(t.s,t.x,t.y);cx.globalAlpha=1}
+  if(flash>0){cx.fillStyle=`rgba(255,40,40,${flash})`;cx.fillRect(0,0,W,H)}
+}
+function steer(e){const r=cv.getBoundingClientRect();px=(e.clientX-r.left)*W/r.width}
+cv.addEventListener('pointermove',e=>{if(st==='play')steer(e)});
+cv.addEventListener('pointerdown',e=>{if(st==='play')steer(e)});
+addEventListener('keydown',e=>{
+  const t=e.target;if(t&&t.id==='nm')return;
+  keys[e.key]=true;
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'||(e.key===' '&&!(t&&t.tagName==='BUTTON')))e.preventDefault();
+  if((e.key==='Enter'||e.key===' ')&&(view==='menu'||view==='over')&&!(t&&t.tagName==='BUTTON'))start();
+});
+addEventListener('keyup',e=>{keys[e.key]=false});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&st==='play'){st='paused'}else if(!document.hidden&&st==='paused'){st='play';t0=performance.now();requestAnimationFrame(loop)}});
+function fullBoard(){
+  const l=Object.values(scores).sort((a,b)=>b.best-a.best).slice(0,20);
+  return l.length?`<ol class="lb" style="max-height:220px;overflow:auto">${l.map((r,i)=>`<li><span>${['🥇','🥈','🥉'][i]||(i+1)+'.'} ${esc(r.name)}${r.name.toLowerCase()===who.toLowerCase()?' (you)':''}</span><b>${r.best}</b></li>`).join('')}</ol>`:'<p class="mut">No scores yet.</p>';
+}
+$('tab').onclick=()=>{
+  if(st!=='play')return;st='viewing';$('tab').style.display='none';
+  $('pn').innerHTML=`<h1>🏆 Scores</h1><p>Now playing: <b>${esc(who)}</b> · score <b>${score}</b></p>${fullBoard()}<button id="cl" style="margin-top:14px">Resume</button>`;
+  $('ov').classList.remove('hide');
+  $('cl').onclick=()=>{$('ov').classList.add('hide');$('tab').style.display='block';st='play';t0=performance.now();requestAnimationFrame(loop)};
+  $('cl').focus();
+};
+showName();
+if(!cx.roundRect)cx.roundRect=function(x,y,w,h){this.rect(x,y,w,h)};
+</script></body></html>

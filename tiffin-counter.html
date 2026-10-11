@@ -1,0 +1,2636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BalaKowsi — Restaurant Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* Core palette — tiffin-counter identity: banana-leaf green depths, brushed-steel
+     tumbler neutrals, filter-coffee copper accent. Buttons/badges use a pill/token
+     shape throughout, echoing the physical numbered token you hand over at a real
+     tiffin counter to collect your order. */
+  --ink:#101d18; --surface:#17251f; --surface-raised:#1f322a; --surface-hover:#2a4137;
+  --border:#3a5047; --paper:#f4efe2; --paper-dim:#bdccc0; --muted:#82988a;
+  --brass:#c17a3d; --brass-bright:#e0985c;
+  --available:#4bb87a; --available-bg:rgba(75,184,122,.14);
+  --occupied:#e2585a; --occupied-bg:rgba(226,88,90,.14);
+  --reserved:#e0a13f; --reserved-bg:rgba(224,161,63,.14);
+  --cleaning:#8d7bd6; --cleaning-bg:rgba(141,123,214,.14);
+  --disabled:#6e8078; --disabled-bg:rgba(110,128,120,.16);
+  --placed:#4f96d6; --placed-bg:rgba(79,150,214,.14);
+  --preparing:#e0a13f; --preparing-bg:rgba(224,161,63,.14);
+  --prepared:#4bb87a; --prepared-bg:rgba(75,184,122,.14);
+  --served:#8d7bd6; --served-bg:rgba(141,123,214,.14);
+  --completed:#6e8078; --completed-bg:rgba(110,128,120,.16);
+  --cancelled:#e2585a; --cancelled-bg:rgba(226,88,90,.14);
+  --font-display:'Fraunces',Georgia,serif; --font-body:'Manrope',-apple-system,sans-serif; --font-mono:'Space Mono',monospace;
+  --radius:14px; --radius-sm:9px; --shadow:0 10px 30px rgba(4,10,7,.45); --sidebar-w:230px;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--font-body);font-size:15px;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;margin:0;letter-spacing:-.01em}
+.mono{font-family:var(--font-mono)}
+button{font-family:var(--font-body);cursor:pointer}
+input,select,textarea{font-family:var(--font-body)}
+::selection{background:var(--brass);color:var(--ink)}
+:focus-visible{outline:2px solid var(--brass-bright);outline-offset:2px}
+
+.hidden{display:none !important}
+
+/* ---- Login ---- */
+.login-wrap{min-height:100vh;display:flex}
+@media (max-width:760px){
+  .login-wrap{flex-direction:column}
+  .login-left{padding:32px 24px 16px;min-height:auto}
+  .hero-emblem{width:76px;height:76px;margin-bottom:12px}
+  .hero-title{font-size:26px}
+  .hero-sub{font-size:13px;margin-top:8px}
+  .hero-pills{margin-top:14px}
+  .login-right{padding:16px 24px 40px}
+  .login-form{width:100%;max-width:400px;padding:24px}
+}
+.text-input,input,select,textarea,button{font-size:16px}
+.login-left{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:radial-gradient(circle at 30% 15%, rgba(193,122,61,.14), transparent 60%), radial-gradient(circle at 80% 90%, rgba(75,184,122,.08), transparent 55%), var(--surface);border-right:1px solid var(--border)}
+.brand-hero{max-width:380px;text-align:center}
+.hero-emblem{width:104px;height:104px;margin-bottom:22px}
+.hero-title{font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--paper);letter-spacing:-.01em;font-style:italic}
+.hero-sub{color:var(--paper-dim);font-size:14.5px;margin-top:12px;line-height:1.5}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+.hero-pill{font-family:var(--font-mono);font-size:11px;letter-spacing:.03em;padding:6px 13px;border-radius:999px;background:var(--surface-raised);border:1px solid var(--border);color:var(--paper-dim)}
+.ticket-divider{border-top:1px dashed #b8ac8e;margin:10px 0}
+.ticket-total{display:flex;justify-content:space-between;font-weight:700;font-size:16px}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px}
+.login-form{width:340px;padding:32px}
+.field-label{display:block;font-size:12.5px;font-weight:600;color:var(--paper-dim);margin-top:14px;margin-bottom:6px}
+.text-input{width:100%;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-raised);color:var(--paper);font-size:16px}
+@media (min-width:600px){.text-input{font-size:14px}}
+.login-error{margin-top:14px;font-size:13px;color:var(--occupied);background:var(--occupied-bg);padding:8px 12px;border-radius:var(--radius-sm)}
+.login-hint{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
+
+/* ---- App shell ---- */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:999px;color:var(--paper-dim);text-decoration:none;font-size:14px;font-weight:500;transition:background .15s,color .15s;border:none;background:none;text-align:left;width:100%}
+.nav-link:hover{background:var(--surface-hover);color:var(--paper)}
+.nav-link.active{background:var(--surface-hover);color:var(--brass-bright)}
+.sidebar-brand-row{display:flex;align-items:center;gap:10px;padding:0 8px;margin-bottom:22px}
+.brand-mark{width:36px;height:36px;flex-shrink:0}
+.sidebar-brand{font-family:var(--font-display);font-size:18px;font-weight:700;line-height:1.15;font-style:italic}
+.sidebar-eyebrow{font-family:var(--font-mono);font-size:9.5px;color:var(--brass-bright);letter-spacing:.07em;margin-top:2px}
+.nav-group-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.08em;padding:14px 12px 6px}
+.nav-group-label:first-of-type{padding-top:0}
+.sidebar-footer{margin-top:auto;padding:14px 8px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--surface-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--brass-bright);flex-shrink:0}
+.main-area{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.topbar-user{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--paper-dim)}
+.role-chip{font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:999px;background:var(--surface-raised);color:var(--brass-bright);letter-spacing:.05em;border:1px solid var(--border)}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--paper-dim);padding:6px 12px;border-radius:999px;font-size:13px}
+.logout-btn:hover{border-color:var(--brass);color:var(--brass-bright)}
+.page{flex:1;overflow-y:auto;padding:24px}
+
+/* ---- Shared ---- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:999px;border:1px solid transparent;font-size:13.5px;font-weight:600;transition:filter .15s,transform .05s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--brass);color:var(--ink)}
+.btn-primary:hover{filter:brightness(1.12)}
+.btn-primary:disabled{background:var(--surface-raised);color:var(--muted);cursor:not-allowed}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--paper-dim)}
+.btn-ghost:hover{border-color:var(--brass);color:var(--brass-bright)}
+.btn-danger{background:transparent;border-color:var(--occupied);color:var(--occupied)}
+.btn-danger:hover{background:var(--occupied-bg)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;font-family:var(--font-mono);letter-spacing:.02em;text-transform:uppercase;border:1px solid currentColor}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state h3{color:var(--paper-dim);margin-bottom:6px}
+.toast-stack{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:1000}
+.toast{background:var(--surface-raised);border:1px solid var(--border);border-left:3px solid var(--brass);padding:12px 18px;border-radius:var(--radius-sm);box-shadow:var(--shadow);font-size:13.5px;max-width:360px;animation:slide-in .2s ease-out}
+.toast.error{border-left-color:var(--occupied)}
+@keyframes slide-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.grid-tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.combo-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px}
+.combo-card{flex:0 0 180px;background:var(--surface);border:1px solid var(--brass);border-radius:var(--radius);padding:14px;background-image:linear-gradient(160deg, rgba(193,122,61,.14), transparent 60%)}
+.grid-orders{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+select,input[type=text],input[type=number],input[type=password],textarea{padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-raised);color:var(--paper);font-size:13.5px}
+label.small{font-size:12px;color:var(--paper-dim)}
+.dropdown{position:absolute;right:0;top:calc(100% + 4px);background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);min-width:160px;z-index:20;overflow:hidden}
+.dropdown button{display:block;width:100%;text-align:left;padding:9px 12px;background:none;border:none;color:var(--paper-dim);font-size:13px}
+.dropdown button:hover{background:var(--surface-hover)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.stat-value{font-size:28px;font-weight:600;font-family:var(--font-display)}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
+.bar-track{flex:1;background:var(--surface-raised);border-radius:999px;height:14px;overflow:hidden}
+.bar-fill{height:100%;background:var(--brass);border-radius:999px}
+.order-danger-zone{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--occupied-bg);border:1px solid rgba(226,88,90,.25)}
+.danger-zone-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--occupied);text-transform:uppercase}
+.icon-btn-sm{width:24px;height:24px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--occupied);display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;font-size:11px;line-height:1}
+.icon-btn-sm:hover{background:var(--occupied-bg);border-color:var(--occupied)}
+.item-serve-btn{padding:2px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface-raised);color:var(--brass-bright);font-size:10.5px;font-weight:600;white-space:nowrap}
+.item-serve-btn:hover{border-color:var(--brass);background:var(--surface-hover)}
+.stat-card-v2{display:flex;align-items:center;gap:12px}
+.stat-icon{font-size:22px;width:38px;height:38px;border-radius:9px;background:var(--surface-raised);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.revenue-hero{display:flex;align-items:center;background:linear-gradient(135deg, var(--surface-raised), var(--surface));border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;gap:24px}
+.revenue-hero-block{flex:1}
+.revenue-hero-value{font-size:32px;font-weight:700;color:var(--brass-bright);margin-top:4px}
+.revenue-hero-divider{width:1px;align-self:stretch;background:var(--border)}
+@media (max-width:700px){
+  .revenue-hero{flex-direction:column;align-items:stretch;gap:14px}
+  .revenue-hero-divider{width:100%;height:1px}
+}
+.segmented-tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px}
+.segmented-tab{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;border:none;background:transparent;color:var(--paper-dim);font-size:12.5px;font-weight:600}
+.segmented-tab:hover{color:var(--paper)}
+.segmented-tab.active{background:var(--brass);color:var(--ink)}
+.segmented-tab-count{font-family:var(--font-mono);font-size:10.5px;opacity:0.75}
+.mi-form{display:flex;flex-direction:column;gap:10px}
+.mi-form select,.mi-form input[type=text],.mi-form input[type=number],.mi-form textarea{width:100%}
+.mi-form textarea{min-height:60px;resize:vertical}
+.mi-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mi-form-row label.small{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mi-form-row input,.mi-form-row select{width:100%;min-width:0}
+.veg-toggle-group{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:8px 0}
+.veg-radio{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--paper-dim);cursor:pointer}
+.veg-radio input{accent-color:var(--brass)}
+.veg-dot{width:12px;height:12px;border-radius:2px;display:inline-block;border:2px solid}
+.veg-dot.veg{border-color:var(--available);background:transparent}
+.veg-dot.nonveg{border-color:var(--occupied);background:transparent}
+.two-col-order{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.two-col-order>div{min-width:0}
+.two-col-admin{display:grid;grid-template-columns:340px 1fr;gap:24px}
+@media (max-width:980px){
+  .two-col-order{grid-template-columns:1fr}
+  .two-col-admin{grid-template-columns:1fr}
+}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,5,6,.6);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+.modal-card{background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:380px;width:100%;box-shadow:var(--shadow)}
+.modal-actions{display:flex;gap:10px;flex-direction:column}
+.modal-actions .btn{width:100%}
+@media (max-width:860px){
+  .sidebar{width:64px;padding:16px 8px}
+  .sidebar-brand,.sidebar-eyebrow,.nav-link span.label,.sidebar-footer{display:none}
+  .nav-link{justify-content:center}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+/* =========================================================
+   BalaKowsi — standalone client-only restaurant manager
+   No backend. All data lives in localStorage.
+   ========================================================= */
+
+const STORAGE_KEY = "tiffin_counter_state_v1";
+const MENU_CATALOG_VERSION = 2; // must be declared BEFORE loadState() runs
+
+/* ---------- Menu catalog generator ----------
+   Builds each category up to its target item count from a base list of real
+   dish names, then (if more are needed) prefixes those names with modifiers
+   ("Special ", "Family ", ...) to fill out the count without repeating names. */
+function expandNames(bases, target, modifiers) {
+  const out = [];
+  const used = new Set();
+  for (const b of bases) {
+    if (out.length >= target) break;
+    if (!used.has(b)) {
+      out.push(b);
+      used.add(b);
+    }
+  }
+  let modIdx = 0,
+    baseIdx = 0,
+    guard = 0;
+  while (out.length < target && guard < 5000) {
+    guard++;
+    const name = `${modifiers[modIdx % modifiers.length]}${bases[baseIdx % bases.length]}`;
+    baseIdx++;
+    if (baseIdx % bases.length === 0) modIdx++;
+    if (!used.has(name)) {
+      out.push(name);
+      used.add(name);
+    }
+  }
+  return out.slice(0, target);
+}
+
+const NON_VEG_KEYWORDS = ["chicken", "mutton", "fish", "egg", "prawn", "beef", "omelette", "kebab", "meat"];
+
+function buildMenuCatalog() {
+  const specs = [
+    {
+      name: "Desserts",
+      target: 30,
+      bases: ["Gulab Jamun","Rasgulla","Kheer","Halwa","Jalebi","Kulfi","Payasam","Mysore Pak","Rasmalai","Barfi","Ladoo","Peda","Sandesh","Falooda","Shrikhand","Basundi","Carrot Halwa","Sooji Halwa","Coconut Ladoo","Chocolate Barfi","Rava Kesari","Semiya Payasam","Badam Halwa","Anjeer Barfi","Motichoor Ladoo","Kaju Katli","Malpua","Doodh Peda","Gajar Halwa","Til Ladoo"],
+      modifiers: ["Royal ", "Special "],
+      price: [40, 150], prep: [2, 10], spicy: () => "NONE", vegDefault: true,
+    },
+    {
+      name: "Juices",
+      target: 60,
+      bases: ["Orange","Watermelon","Pineapple","Mango","Apple","Grape","Pomegranate","Papaya","Guava","Sweet Lime","Carrot","Beetroot","Muskmelon","Chikoo","Banana","Strawberry","Kiwi","Litchi","Sugarcane","Amla","Cucumber","Tomato","Dragon Fruit","Passion Fruit","Custard Apple"].map((f) => f + " Juice"),
+      modifiers: ["Mixed ", "Fresh ", "Chilled ", "Ginger ", "Mint ", "Masala "],
+      price: [30, 90], prep: [2, 6], spicy: () => "NONE", vegDefault: true,
+    },
+    {
+      name: "Beverages",
+      target: 65,
+      bases: ["Filter Coffee","Masala Chai","Ginger Tea","Cardamom Tea","Black Tea","Green Tea","Lemon Tea","Cold Coffee","Iced Tea","Buttermilk","Lassi","Sweet Lassi","Mango Lassi","Rose Milk","Badam Milk","Bournvita","Horlicks","Hot Chocolate","Cappuccino","Espresso","Latte","Mocha"],
+      modifiers: ["Special ", "Chilled ", "Hot ", "Extra Strong ", "Kulhad "],
+      price: [20, 80], prep: [2, 8], spicy: () => "NONE", vegDefault: true,
+    },
+    {
+      name: "Breakfast",
+      target: 80,
+      bases: ["Idly","Dosa","Masala Dosa","Rava Dosa","Onion Dosa","Uttapam","Pongal","Upma","Vada","Medu Vada","Poha","Idiyappam","Appam","Puttu","Chana Bhatura","Aloo Paratha","Paneer Paratha","Poori Sabzi","Vermicelli Upma","Semiya Kesari","Set Dosa","Paper Dosa","Ghee Roast","Podi Dosa","Egg Dosa","Omelette","Bread Omelette","Sandwich"],
+      modifiers: ["Mini ", "Special ", "Family ", "Jumbo ", "Extra Crispy "],
+      price: [40, 160], prep: [5, 20],
+      spicy: (i) => ["MILD", "MEDIUM", "MEDIUM", "NONE"][i % 4],
+    },
+    {
+      name: "Starters",
+      target: 40,
+      bases: ["Gobi Manchurian","Veg Manchurian","Paneer Manchurian","Baby Corn Manchurian","Mushroom Manchurian","Chicken 65","Chilli Chicken","Dragon Chicken","Chicken Manchurian","Chicken Lollipop","Pepper Chicken Dry","Ginger Chicken","Schezwan Chicken","Chicken Majestic","Mutton Chukka","Mutton Sukka","Prawn 65","Fish 65","Squid Fry","Chilli Fish","Chilli Prawns","Paneer 65","Baby Corn Fry","Crispy Corn","Veg Spring Roll","Chicken Spring Roll","Chilli Baby Corn","Kanava Chukka","Egg 65","Chilli Egg","Chicken Kebab","Paneer Chilli","Mushroom 65","Gobi 65","Onion Pakoda","Masala Papad","Chicken Wings","Fish Finger","Veg Cutlet","Chicken Cutlet"],
+      modifiers: ["Dry ", "Gravy ", "Spicy ", "Restaurant Style "],
+      price: [90, 260], prep: [10, 25],
+      spicy: (i) => ["MEDIUM", "HOT", "HOT", "MEDIUM"][i % 4],
+    },
+    {
+      name: "Lunch",
+      target: 90,
+      bases: ["Veg Thali","Chicken Biryani","Mutton Biryani","Veg Biryani","Paneer Butter Masala","Dal Tadka","Chole Bhature","Rajma Chawal","Curd Rice","Sambar Rice","Lemon Rice","Tomato Rice","Fried Rice","Chicken Fried Rice","Kadai Paneer","Palak Paneer","Chicken Curry","Fish Curry","Mutton Curry","Egg Curry","Butter Chicken","Kerala Parotta","Chapati Sabzi","Malabar Fish Curry","Prawn Curry","Mixed Veg Curry"],
+      modifiers: ["Special ", "Family Pack ", "Half ", "Full ", "Deluxe ", "Combo "],
+      price: [80, 320], prep: [10, 35],
+      spicy: (i) => ["MEDIUM", "HOT", "MEDIUM", "MILD"][i % 4],
+    },
+    {
+      name: "Dinner",
+      target: 80,
+      bases: ["Butter Naan","Garlic Naan","Tandoori Roti","Chicken Tikka","Paneer Tikka","Seekh Kebab","Tandoori Chicken","Malai Kofta","Veg Kolhapuri","Chicken Chettinad","Mutton Rogan Josh","Hyderabadi Biryani","Ghee Rice","Prawn Biryani","Egg Biryani","Dal Makhani","Shahi Paneer","Kadhai Chicken","Fish Fry","Chicken Roast","Beef Fry","Pepper Chicken","Andhra Chicken Curry","Kothu Parotta","Chicken 65 Dry","Grilled Fish","Paneer Bhurji","Veg Kurma"],
+      modifiers: ["Special ", "Royal ", "Tandoori Style ", "Chef Special ", "Signature "],
+      price: [90, 350], prep: [12, 40],
+      spicy: (i) => ["MEDIUM", "HOT", "MILD", "MEDIUM"][i % 4],
+    },
+  ];
+
+  const categories = [];
+  const items = [];
+  let categoryId = 1;
+  let itemId = 1;
+
+  specs.forEach((spec) => {
+    categories.push({ id: categoryId, name: spec.name });
+    const names = expandNames(spec.bases, spec.target, spec.modifiers);
+    const [priceMin, priceMax] = spec.price;
+    const [prepMin, prepMax] = spec.prep;
+
+    names.forEach((name, i) => {
+      const lower = name.toLowerCase();
+      const veg = spec.vegDefault !== undefined ? spec.vegDefault : !NON_VEG_KEYWORDS.some((kw) => lower.includes(kw));
+      items.push({
+        id: itemId++,
+        categoryId,
+        name,
+        description: `${name} — a ${spec.name.toLowerCase()} favourite at BalaKowsi.`,
+        price: priceMin + ((i * 7) % (priceMax - priceMin + 1)),
+        prepTime: prepMin + ((i * 3) % (prepMax - prepMin + 1)),
+        rating: Number((3.8 + (i % 6) * 0.15).toFixed(1)),
+        veg,
+        availableQty: 15 + (i % 25),
+        spicyLevel: spec.spicy ? spec.spicy(i) : "NONE",
+        available: true,
+      });
+    });
+
+    categoryId++;
+  });
+
+  return { categories, items, nextCategoryId: categoryId, nextItemId: itemId };
+}
+
+function seedState() {
+  const catalog = buildMenuCatalog();
+  return {
+    users: [
+      { username: "BK101M", password: "BK@1103", fullName: "Restaurant Manager", role: "MANAGER" },
+      { username: "BK101C", password: "BK@1103", fullName: "Counter Cashier", role: "CASHIER" },
+      { username: "employee1", password: "password123", fullName: "Anjali Sharma", role: "EMPLOYEE" },
+    ],
+    tables: [
+      { id: 1, tableNumber: 1, capacity: 4, status: "AVAILABLE", section: "NORMAL" },
+      { id: 2, tableNumber: 2, capacity: 4, status: "AVAILABLE", section: "NORMAL" },
+      { id: 3, tableNumber: 3, capacity: 6, status: "AVAILABLE", section: "NORMAL" },
+      { id: 4, tableNumber: 4, capacity: 2, status: "AVAILABLE", section: "NORMAL" },
+      { id: 5, tableNumber: 5, capacity: 8, status: "AVAILABLE", section: "NORMAL" },
+    ],
+    categories: catalog.categories,
+    items: catalog.items,
+    orders: [],
+    bills: [],
+    payments: [],
+    seq: { order: 1, bill: 1, nextIds: { table: 6, category: catalog.nextCategoryId, item: catalog.nextItemId, orderItem: 1, order: 1, bill: 1, payment: 1 } },
+    menuCatalogVersion: 2,
+  };
+}
+
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+
+/* Second copy of the data in IndexedDB, so tables/orders survive closing the app
+   even if the browser drops or blocks localStorage. */
+const IDB = {
+  open() { return new Promise((res, rej) => { try { const r = indexedDB.open("tiffin_db", 1); r.onupgradeneeded = () => r.result.createObjectStore("k"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }); },
+  async get() { const d = await this.open(); return new Promise((res, rej) => { const q = d.transaction("k").objectStore("k").get(STORAGE_KEY); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
+  async set(v) { const d = await this.open(); return new Promise((res, rej) => { const t = d.transaction("k", "readwrite"); t.objectStore("k").put(v, STORAGE_KEY); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
+};
+let idbReady = false;
+/* Local-server mode: when started with start-balakowsi.bat the app runs at http://localhost
+   and ALL data is read from / written to balakowsi-data.json next to the app. */
+const SERVER = location.protocol === "http:" && location.hostname === "localhost";
+let serverWriteOk = true;
+
+/* ---- Data file on your computer (Chrome / Edge): every change is also written to a real
+   .json file you choose, so closing the browser or clearing its data cannot lose it. ---- */
+const FS = !!(window.showSaveFilePicker && window.showOpenFilePicker);
+let fileHandle = null, fwTimer = null;
+const FTYPES = [{ description: "Data file", accept: { "application/json": [".json"] } }];
+async function hGet() { const d = await IDB.open(); return new Promise((r) => { const q = d.transaction("k").objectStore("k").get("handle"); q.onsuccess = () => r(q.result); q.onerror = () => r(null); }); }
+async function hSet(h) { const d = await IDB.open(); return new Promise((r) => { const t = d.transaction("k", "readwrite"); t.objectStore("k").put(h, "handle"); t.oncomplete = () => r(); t.onerror = () => r(); }); }
+function fileBar(msg, fn) {
+  let b = document.getElementById("fbar"); if (b) b.remove();
+  b = document.createElement("button"); b.id = "fbar"; b.textContent = msg;
+  b.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:9999;background:#c47c3e;color:#111;border:0;padding:10px;font:600 14px system-ui,sans-serif;cursor:pointer";
+  b.onclick = () => { b.remove(); if (fn) fn(); };
+  document.body.appendChild(b);
+}
+async function writeFile() {
+  if (!fileHandle) return;
+  try { const w = await fileHandle.createWritable(); await w.write(JSON.stringify(state)); await w.close(); }
+  catch (e) { fileBar("Data file could not be saved. Click here to reconnect it.", fsInit); }
+}
+async function loadFromHandle(h) {
+  const t = await (await h.getFile()).text();
+  if (t.trim()) {
+    const d = JSON.parse(t);
+    if (d && Array.isArray(d.orders) && Array.isArray(d.bills)) {
+      state = migrateState(d);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+      render();
+    }
+  } else { await writeFile(); }
+}
+async function fsInit() {
+  if (SERVER) return;
+  if (!FS) { fileBar("⚠ This browser cannot save a data file. Open this app in Chrome or Edge, and use Backup often."); return; }
+  try {
+    const h = await hGet();
+    if (!h) { fileBar("⚠ Your data is NOT saved to a file yet. Click here to connect your data file.", dfConnect); return; }
+    if ((await h.queryPermission({ mode: "readwrite" })) === "granted") { fileHandle = h; await loadFromHandle(h); }
+    else fileBar("Click here to reconnect your data file", async () => {
+      if ((await h.requestPermission({ mode: "readwrite" })) === "granted") { fileHandle = h; await loadFromHandle(h); showToast("Data file connected"); }
+    });
+  } catch (e) {}
+}
+async function dfConnect() {
+  if (!FS) { showToast("Data file needs Chrome or Edge on a computer", "error"); return; }
+  try {
+    let h;
+    if (confirm("Do you already have a data file?\n\nOK = open it\nCancel = create a new one")) {
+      [h] = await showOpenFilePicker({ types: FTYPES }); fileHandle = h; await hSet(h); await loadFromHandle(h);
+    } else {
+      h = await showSaveFilePicker({ suggestedName: "balakowsi-data.json", types: FTYPES }); fileHandle = h; await hSet(h); await writeFile();
+    }
+    showToast("Data file connected. Every change is saved to it.");
+  } catch (e) {}
+}
+const hadLS = (() => { try { return localStorage.getItem(STORAGE_KEY) !== null; } catch (e) { return false; } })();
+function storageWarn() {
+  const d = document.createElement("div");
+  d.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#b3261e;color:#fff;padding:10px 14px;font:14px system-ui,sans-serif;text-align:center";
+  d.textContent = "This view is blocking saved data, so changes are lost when you close it. Open the app from your own website link in a normal browser tab, and use Backup often.";
+  document.body.appendChild(d);
+}
+(async () => {
+  let lsOk = true;
+  try { localStorage.setItem("__t", "1"); localStorage.removeItem("__t"); } catch (e) { lsOk = false; }
+  try {
+    if (!hadLS) {
+      const v = await IDB.get();
+      if (v) { state = migrateState(JSON.parse(v)); try { localStorage.setItem(STORAGE_KEY, v); } catch (e) {} render(); }
+    }
+    await IDB.set(JSON.stringify(state));
+    idbReady = true;
+    fsInit();
+  } catch (e) { if (!lsOk) storageWarn(); }
+})();
+let state = loadState();
+let session = { user: null, page: "tables", takeOrder: { tableId: null, categoryId: "", veg: "", search: "", sortBy: "name", cart: [], customerName: "" }, menuAdminEdit: null };
+
+function loadState() {
+  if (SERVER) {
+    try {
+      const x = new XMLHttpRequest(); x.open("GET", "/api/data", false); x.send();
+      if (x.status === 200 && x.responseText.trim()) {
+        const d = JSON.parse(x.responseText);
+        if (d && Array.isArray(d.orders)) return migrateState(d);
+        throw new Error("bad data file");
+      }
+      if (x.status !== 200 && x.status !== 404) throw new Error("status " + x.status);
+    } catch (e) {
+      serverWriteOk = false;
+      alert("Could not read balakowsi-data.json, so saving is paused to protect your data.\nClose this window and start the app again.\n\n" + e);
+    }
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      console.log("[LOAD] tables in localStorage:", JSON.stringify(loaded.tables));
+      const result = migrateState(loaded);
+      console.log("[LOAD] tables after migrateState:", JSON.stringify(result.tables));
+      return result;
+    }
+  } catch (e) {
+    console.error("[LOAD] error", e);
+    // Never let a load problem overwrite real data: keep an untouched copy.
+    try { const r = localStorage.getItem(STORAGE_KEY); if (r) localStorage.setItem(STORAGE_KEY + "_unreadable_" + Date.now(), r); } catch (x) {}
+  }
+  return seedState();
+}
+
+/* Keeps existing browser data (tables/orders/bills) but brings older saves up to date
+   with new fields/roles/credentials introduced in later versions of this file. */
+function migrateState(loaded) {
+  const fresh = seedState();
+  const merged = Object.assign({}, fresh, loaded);
+  // Always adopt the current login credentials/roles rather than a stale saved copy.
+  merged.users = fresh.users;
+  // Make sure any id-sequence keys added later exist even in older saves.
+  merged.seq = merged.seq || fresh.seq;
+  merged.seq.nextIds = Object.assign({}, fresh.seq.nextIds, merged.seq.nextIds);
+  // One-time replacement of the old sample menu with the full catalog — only runs
+  // once per browser (won't clobber items a manager has since added/edited).
+  if (loaded.menuCatalogVersion !== MENU_CATALOG_VERSION) {
+    merged.categories = fresh.categories;
+    merged.items = fresh.items;
+    merged.seq.nextIds.category = fresh.seq.nextIds.category;
+    merged.seq.nextIds.item = fresh.seq.nextIds.item;
+    merged.menuCatalogVersion = MENU_CATALOG_VERSION;
+  }
+  // One-time cleanup: earlier versions of this app didn't check for duplicate table
+  // numbers within the same section, so some saved browsers ended up with the same
+  // "Table N" added twice in one hall.
+  merged.tables = dedupeTables(merged.tables);
+  return merged;
+}
+
+// Keeps only the first (oldest id) of each {tableNumber, section} pair, dropping
+// later duplicates — but never one that's currently OCCUPIED/RESERVED, to avoid
+// silently deleting a table mid-use. Called both at load time AND every time the
+// Tables page renders, so it self-heals even in a tab that was already open when
+// this fix shipped (i.e. it doesn't require the browser to actually reload).
+function dedupeTables(tables) {
+  // Backfill any table saved before it had an explicit section — this was the actual
+  // root cause of duplicates slipping through: the add-table form's uniqueness check
+  // compared raw `t.section` values, and an old seeded table with no section field at
+  // all (undefined) never matched the string "NORMAL", so the check silently missed it.
+  tables.forEach((t) => { if (!t.section) t.section = "NORMAL"; });
+  const seenTableKeys = new Set();
+  return [...tables].sort((a, b) => a.id - b.id).filter((t) => {
+    const key = `${t.tableNumber}|${t.section}`;
+    if (!seenTableKeys.has(key)) {
+      seenTableKeys.add(key);
+      return true;
+    }
+    return t.status !== "AVAILABLE";
+  });
+}
+
+function saveState() {
+  if (SERVER && serverWriteOk) {
+    try { const x = new XMLHttpRequest(); x.open("PUT", "/api/data", false); x.send(JSON.stringify(state)); if (x.status !== 200) throw new Error("status " + x.status); }
+    catch (e) { console.error("[SAVE] server failed", e); if (typeof showToast === "function") showToast("Could not save. Is the black start window still open?", "error"); }
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error("[SAVE] localStorage failed", e);
+  }
+  if (idbReady) IDB.set(JSON.stringify(state)).catch(() => {});
+  if (fileHandle) { clearTimeout(fwTimer); fwTimer = setTimeout(writeFile, 300); }
+}
+
+function nextId(kind) {
+  const id = state.seq.nextIds[kind]++;
+  saveState();
+  return id;
+}
+
+function genOrderNumber() {
+  const d = new Date();
+  const datePart = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  const n = state.seq.order++;
+  saveState();
+  return "B&K-" + datePart + "-" + String(n).padStart(4, "0");
+}
+
+function genBillNumber() {
+  const d = new Date();
+  const datePart = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+  const n = state.seq.bill++;
+  saveState();
+  return "BILL-" + datePart + "-" + String(n).padStart(4, "0");
+}
+
+/* ---------- Toasts ---------- */
+let toasts = [];
+function showToast(message, type) {
+  const id = Date.now() + Math.random();
+  toasts.push({ id, message, type: type || "info" });
+  renderToasts();
+  setTimeout(() => {
+    toasts = toasts.filter((t) => t.id !== id);
+    renderToasts();
+  }, 3800);
+}
+function renderToasts() {
+  let stack = document.getElementById("toast-stack");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.id = "toast-stack";
+    stack.className = "toast-stack";
+    document.body.appendChild(stack);
+  }
+  stack.innerHTML = toasts
+    .map((t) => `<div class="toast ${t.type === "error" ? "error" : ""}">${escapeHtml(t.message)}</div>`)
+    .join("");
+}
+
+/* ---------- Utilities ---------- */
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = String(str == null ? "" : str);
+  return div.innerHTML;
+}
+function money(n) {
+  return Number(n || 0).toFixed(2);
+}
+function findTable(id) {
+  return state.tables.find((t) => t.id === Number(id));
+}
+function findCategory(id) {
+  return state.categories.find((c) => c.id === Number(id));
+}
+function findItem(id) {
+  return state.items.find((i) => i.id === Number(id));
+}
+function findOrder(id) {
+  return state.orders.find((o) => o.id === Number(id));
+}
+function findBill(id) {
+  return state.bills.find((b) => b.id === Number(id));
+}
+function isCancellable(status) {
+  return status === "PLACED" || status === "PREPARING";
+}
+function todayBounds() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+/* ---------- Root render ---------- */
+const root = document.getElementById("root");
+
+function render() {
+  if (!session.user) {
+    renderLogin();
+  } else {
+    renderApp();
+  }
+}
+
+function navigate(page) {
+  session.page = page;
+  render();
+}
+
+/* ---------- Login ---------- */
+function renderLogin() {
+  root.innerHTML = `
+    <div class="login-wrap">
+      <div class="login-left">
+        <div class="brand-hero">
+          <svg class="hero-emblem" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- outer seal rings -->
+            <circle cx="70" cy="70" r="66" stroke="var(--brass)" stroke-width="1" opacity="0.45"/>
+            <circle cx="70" cy="70" r="58" stroke="var(--brass)" stroke-width="1.5"/>
+            <circle cx="70" cy="70" r="54" stroke="var(--brass)" stroke-width="0.75" opacity="0.6"/>
+            <!-- tick marks around the rim -->
+            <g stroke="var(--brass)" stroke-width="1" opacity="0.55">
+              <path d="M70 6v6M70 128v6M6 70h6M128 70h6"/>
+              <path d="M22.7 22.7l4.2 4.2M113 113l4.2 4.2M22.7 117.3l4.2-4.2M113 27l4.2-4.2"/>
+            </g>
+            <!-- laurel branches -->
+            <g stroke="var(--brass-bright)" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.9">
+              <path d="M40 96c-10-8-15-20-14-34"/>
+              <path d="M28 82c-4-2-8-2-11 0M27 71c-4-1-8 0-10 3M28 60c-4 0-7 2-9 5M31 50c-3 1-6 3-8 6"/>
+              <path d="M100 96c10-8 15-20 14-34"/>
+              <path d="M112 82c4-2 8-2 11 0M113 71c4-1 8 0 10 3M112 60c4 0 7 2 9 5M109 50c3 1 6 3 8 6"/>
+            </g>
+            <!-- monogram -->
+            <text x="70" y="80" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-size="34" font-weight="600" fill="var(--paper)">B<tspan fill="var(--brass-bright)" font-size="22">&amp;</tspan>K</text>
+            <path d="M50 92h40" stroke="var(--brass)" stroke-width="1" opacity="0.7"/>
+          </svg>
+          <h1 class="hero-title">BalaKowsi</h1>
+          <p class="hero-sub">Tables · Kitchen · Billing · Reports — run the whole counter from one screen.</p>
+          <div class="hero-pills">
+            <span class="hero-pill">🍽 Table-side ordering</span>
+            <span class="hero-pill">🧾 GST-ready billing</span>
+            <span class="hero-pill">📊 Live dashboard</span>
+          </div>
+        </div>
+      </div>
+      <div class="login-right">
+        <form id="login-form" class="login-form card">
+          <h2 style="margin-bottom:4px">Sign in</h2>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 22px">This runs entirely in your browser — no server needed.</p>
+          <label class="field-label">Username</label>
+          <input id="login-username" class="text-input" value="BK101M" autofocus required autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="username" />
+          <label class="field-label">Password</label>
+          <input id="login-password" class="text-input" type="password" required autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="current-password" />
+          <div id="login-error"></div>
+          <button type="submit" class="btn btn-primary" style="margin-top:16px;width:100%">Sign in</button>
+          <button type="button" id="forgot-password-link" class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12.5px">Forgot password?</button>
+          <p class="login-hint">Manager: <span class="mono">BK101M / BK@1103</span> &nbsp;·&nbsp; Cashier: <span class="mono">BK101C / BK@1103</span> &nbsp;·&nbsp; Staff: <span class="mono">employee1 / password123</span></p>
+        </form>
+
+        <form id="reset-form" class="login-form card hidden">
+          <h2 style="margin-bottom:4px">Reset password</h2>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 22px">Enter your username and choose a new password. Since this app runs locally with no server, there's no email step — this updates the password right away.</p>
+          <label class="field-label">Username</label>
+          <input id="reset-username" class="text-input" required autocapitalize="off" autocorrect="off" spellcheck="false" />
+          <label class="field-label">New password</label>
+          <input id="reset-password1" class="text-input" type="password" required autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="new-password" />
+          <label class="field-label">Confirm new password</label>
+          <input id="reset-password2" class="text-input" type="password" required autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="new-password" />
+          <div id="reset-error"></div>
+          <button type="submit" class="btn btn-primary" style="margin-top:16px;width:100%">Reset password</button>
+          <button type="button" id="back-to-signin-link" class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:12.5px">← Back to sign in</button>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("forgot-password-link").addEventListener("click", () => {
+    document.getElementById("login-form").classList.add("hidden");
+    document.getElementById("reset-form").classList.remove("hidden");
+    document.getElementById("reset-username").focus();
+  });
+  document.getElementById("back-to-signin-link").addEventListener("click", () => {
+    document.getElementById("reset-form").classList.add("hidden");
+    document.getElementById("login-form").classList.remove("hidden");
+  });
+  document.getElementById("reset-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const resetErrorEl = document.getElementById("reset-error");
+    const username = document.getElementById("reset-username").value.trim();
+    const pw1 = document.getElementById("reset-password1").value;
+    const pw2 = document.getElementById("reset-password2").value;
+    const user = state.users.find((u) => u.username === username);
+    if (!user) {
+      resetErrorEl.innerHTML = `<div class="login-error">No account found with that username</div>`;
+      return;
+    }
+    if (pw1.length < 6) {
+      resetErrorEl.innerHTML = `<div class="login-error">Password must be at least 6 characters</div>`;
+      return;
+    }
+    if (pw1 !== pw2) {
+      resetErrorEl.innerHTML = `<div class="login-error">Passwords don't match</div>`;
+      return;
+    }
+    user.password = pw1;
+    saveState();
+    showToast(`Password reset for ${user.username} — sign in with your new password`);
+    document.getElementById("reset-form").classList.add("hidden");
+    document.getElementById("login-form").classList.remove("hidden");
+    document.getElementById("login-username").value = username;
+    document.getElementById("login-password").value = "";
+    document.getElementById("login-password").focus();
+  });
+
+  document.getElementById("login-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value;
+    const user = state.users.find((u) => u.username === username && u.password === password);
+    const errorEl = document.getElementById("login-error");
+    if (!user) {
+      errorEl.innerHTML = `<div class="login-error">Invalid username or password</div>`;
+      return;
+    }
+    session.user = user;
+    session.page = "tables";
+    render();
+  });
+}
+
+function logout() {
+  session.user = null;
+  render();
+}
+
+/* ---------- App shell ---------- */
+const NAV_GROUPS = [
+  {
+    label: "FRONT OF HOUSE",
+    items: [
+      { page: "tables", label: "Tables", icon: "▦", roles: ["MANAGER", "EMPLOYEE", "CASHIER"] },
+      { page: "order", label: "Take Order", icon: "＋", roles: ["MANAGER", "EMPLOYEE", "CASHIER"] },
+      { page: "orders", label: "Kitchen / Orders", icon: "☰", roles: ["MANAGER", "EMPLOYEE", "CASHIER"] },
+      { page: "billing", label: "Billing & Payment", icon: "¤", roles: ["MANAGER", "EMPLOYEE", "CASHIER"] },
+    ],
+  },
+  {
+    label: "BACK OFFICE",
+    items: [
+      { page: "dashboard", label: "Dashboard", icon: "◈", roles: ["MANAGER", "EMPLOYEE", "CASHIER"] },
+      { page: "menu-admin", label: "Menu & Tables Admin", icon: "✎", roles: ["MANAGER", "EMPLOYEE", "CASHIER"] },
+    ],
+  },
+];
+const PAGE_TITLES = {
+  tables: "Tables",
+  order: "Take Order",
+  orders: "Kitchen / Orders",
+  billing: "Billing & Payments",
+  dashboard: "Dashboard",
+  "menu-admin": "Menu Administration",
+};
+
+function initialsOf(name) {
+  return (name || "")
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function renderApp() {
+  const role = session.user.role;
+  const isManager = role === "MANAGER";
+  const allAllowedPages = NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.roles.includes(role)).map((i) => i.page);
+  if (!allAllowedPages.includes(session.page)) {
+    session.page = allAllowedPages[0] || "tables";
+  }
+
+  root.innerHTML = `
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand-row">
+          <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="19" fill="var(--surface-raised)"/>
+            <circle cx="20" cy="20" r="19" stroke="var(--brass)" stroke-width="1.2"/>
+            <circle cx="20" cy="20" r="15.5" stroke="var(--brass)" stroke-width="0.6" opacity="0.6"/>
+            <text x="20" y="26" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-size="13" font-weight="600" fill="var(--paper)">B<tspan fill="var(--brass-bright)" font-size="9">&amp;</tspan>K</text>
+          </svg>
+          <div>
+            <div class="sidebar-brand">BalaKowsi</div>
+            <div class="sidebar-eyebrow">HOTEL &amp; RESTAURANT OPS</div>
+          </div>
+        </div>
+        ${NAV_GROUPS.map((group) => {
+          const visibleItems = group.items.filter((i) => i.roles.includes(role));
+          if (visibleItems.length === 0) return "";
+          return `
+          <div class="nav-group-label">${group.label}</div>
+          ${visibleItems
+            .map(
+              (n) => `
+            <button class="nav-link ${session.page === n.page ? "active" : ""}" data-nav="${n.page}">
+              <span aria-hidden="true">${n.icon}</span><span class="label">${n.label}</span>
+            </button>`
+            )
+            .join("")}`;
+        }).join("")}
+        <div class="sidebar-footer">
+          <div class="user-avatar">${initialsOf(session.user.fullName)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12.5px;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(session.user.fullName)}</div>
+            <div class="role-chip" style="margin-top:2px">${role}</div>
+          </div>
+        </div>
+      </aside>
+      <div class="main-area">
+        <header class="topbar">
+          <h1>${PAGE_TITLES[session.page] || "BalaKowsi"}</h1>
+          <div class="topbar-user">
+            <button class="logout-btn" id="df-btn" title="Save all data in a file on this computer">Data file</button>
+            <button class="logout-btn" id="bk-exp" title="Download all data as a file">Backup</button>
+            <button class="logout-btn" id="bk-imp" title="Load data from a backup file">Restore</button>
+            <input type="file" id="bk-file" accept=".json,application/json" hidden>
+            <button class="logout-btn" id="logout-btn">Log out</button>
+          </div>
+        </header>
+        <main class="page" id="page-content"></main>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll("[data-nav]").forEach((btn) => {
+    btn.addEventListener("click", () => navigate(btn.getAttribute("data-nav")));
+  });
+  document.getElementById("logout-btn").addEventListener("click", logout);
+  document.getElementById("df-btn").addEventListener("click", dfConnect);
+  document.getElementById("bk-exp").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(state)], { type: "application/json" }));
+    a.download = "balakowsi-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    a.click();
+    showToast("Backup downloaded");
+  });
+  document.getElementById("bk-imp").addEventListener("click", () => document.getElementById("bk-file").click());
+  document.getElementById("bk-file").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const d = JSON.parse(r.result);
+        if (!d || !Array.isArray(d.orders) || !Array.isArray(d.bills)) throw new Error("bad");
+        if (!confirm("Replace the data in this browser with this backup?")) return;
+        state = migrateState(d);
+        saveState();
+        render();
+        showToast("Backup restored");
+      } catch (x) { showToast("This is not a valid backup file", "error"); }
+    };
+    r.readAsText(f);
+  });
+
+  const pageEl = document.getElementById("page-content");
+  const renderers = {
+    tables: renderTablesPage,
+    order: renderOrderPage,
+    orders: renderOrdersPage,
+    billing: renderBillingPage,
+    dashboard: renderDashboardPage,
+    "menu-admin": renderMenuAdminPage,
+  };
+  (renderers[session.page] || renderTablesPage)(pageEl);
+  renderToasts();
+}
+
+/* ---------- Tables page ---------- */
+const TABLE_STATUSES = ["AVAILABLE", "OCCUPIED", "RESERVED", "CLEANING", "DISABLED"];
+const TABLE_COLOR_VAR = { AVAILABLE: "available", OCCUPIED: "occupied", RESERVED: "reserved", CLEANING: "cleaning", DISABLED: "disabled" };
+
+function renderTablesPage(el) {
+  const isManager = session.user.role === "MANAGER";
+  const counts = TABLE_STATUSES.reduce((acc, s) => {
+    acc[s] = state.tables.filter((t) => t.status === s).length;
+    return acc;
+  }, {});
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;gap:18px;flex-wrap:wrap">
+        ${TABLE_STATUSES.map(
+          (s) => `<div style="font-size:12.5px;color:var(--muted)"><span class="mono" style="color:var(--paper);font-weight:600">${counts[s] || 0}</span> ${s.toLowerCase()}</div>`
+        ).join("")}
+      </div>
+      ${isManager ? `<button class="btn btn-primary btn-sm" id="toggle-add-table">+ Add table</button>` : ""}
+    </div>
+    <div id="add-table-form"></div>
+    <div id="tables-grid" class="grid-tables"></div>
+  `;
+
+  if (isManager) {
+    document.getElementById("toggle-add-table").addEventListener("click", () => {
+      const formHost = document.getElementById("add-table-form");
+      if (formHost.innerHTML) {
+        formHost.innerHTML = "";
+        return;
+      }
+      formHost.innerHTML = `
+        <form id="new-table-form" class="card" style="display:flex;gap:12px;align-items:end;margin-bottom:20px;flex-wrap:wrap">
+          <div><label class="small">Table number</label><br/><input required type="number" min="1" id="new-table-number" style="width:110px" /></div>
+          <div><label class="small">Capacity</label><br/><input required type="number" min="1" id="new-table-capacity" value="4" style="width:110px" /></div>
+          <div><label class="small">Section</label><br/>
+            <select id="new-table-section" style="width:130px">
+              <option value="NORMAL">Open Hall</option>
+              <option value="AC_HALL">A/C Hall</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">Save</button>
+        </form>`;
+      document.getElementById("new-table-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const saveBtn = e.target.querySelector("button[type=submit]");
+        if (saveBtn.disabled) return;
+        saveBtn.disabled = true;
+        const num = Number(document.getElementById("new-table-number").value);
+        const section = document.getElementById("new-table-section").value;
+        // Table numbers only need to be unique WITHIN a section — Table 1 in the
+        // Open Hall and Table 1 in the A/C Hall are two different physical tables,
+        // not a conflict.
+        if (state.tables.some((t) => t.tableNumber === num && (t.section || "NORMAL") === section)) {
+          showToast(`Table ${num} already exists in that section`, "error");
+          saveBtn.disabled = false;
+          return;
+        }
+        state.tables.push({
+          id: nextId("table"),
+          tableNumber: num,
+          capacity: Number(document.getElementById("new-table-capacity").value),
+          section,
+          status: "AVAILABLE",
+        });
+        saveState();
+        showToast(`Table ${num} added`);
+        renderTablesPage(el);
+      });
+    });
+  }
+
+  renderTablesGrid();
+}
+
+function renderTablesGrid() {
+  const grid = document.getElementById("tables-grid");
+  if (!grid) return;
+  const isManager = session.user.role === "MANAGER";
+  const deduped = dedupeTables(state.tables);
+  if (deduped.length !== state.tables.length) {
+    state.tables = deduped;
+    saveState();
+  }
+  const sections = [
+    { key: "NORMAL", label: "Open Hall" },
+    { key: "AC_HALL", label: "A/C Hall" },
+  ];
+  const tableCard = (t) => {
+    const colorVar = TABLE_COLOR_VAR[t.status];
+    return `
+      <div class="card" style="border-left:4px solid var(--${colorVar});position:relative">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div class="mono" style="font-size:11px;color:var(--muted)">TABLE</div>
+            <div style="font-family:var(--font-display);font-size:32px;font-weight:700;line-height:1">${String(t.tableNumber).padStart(2, "0")}</div>
+          </div>
+          <span class="badge" style="color:var(--${colorVar});background:var(--${colorVar}-bg)"><span class="badge-dot"></span>${t.status}</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:8px">Seats ${t.capacity}</div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          ${
+            t.status === "AVAILABLE"
+              ? `<button class="btn btn-primary btn-sm" style="flex:1" data-select-table="${t.id}">Select table</button>`
+              : t.status === "RESERVED"
+              ? `<button class="btn btn-primary btn-sm" style="flex:1" data-enter-code="${t.id}">🔒 Enter code</button>`
+              : `<button class="btn btn-ghost btn-sm" style="flex:1" disabled>${t.status}</button>`
+          }
+          ${
+            isManager
+              ? `<div style="position:relative">
+                  <button class="btn btn-ghost btn-sm" data-menu-toggle="${t.id}">⋯</button>
+                  <div class="dropdown hidden" id="dropdown-${t.id}">
+                    ${["AVAILABLE", "RESERVED", "CLEANING", "DISABLED"].map((s) => `<button data-set-status="${t.id}|${s}">Set ${s.toLowerCase()}</button>`).join("")}
+                    <button style="color:var(--occupied)" data-delete-table="${t.id}">Delete table</button>
+                  </div>
+                </div>`
+              : ""
+          }
+        </div>
+      </div>`;
+  };
+
+  if (state.tables.length === 0) {
+    grid.innerHTML = `<div class="empty-state card"><h3>No tables yet</h3><p>Add your first table to start seating customers.</p></div>`;
+    return;
+  }
+
+  // A/C Hall and Open Hall tables are kept in clearly separate sections — table
+  // numbers can repeat across sections (Table 1 in each hall is a different table),
+  // so mixing them into one flat list sorted by number alone would be confusing.
+  grid.innerHTML = sections
+    .map((sec) => {
+      const secTables = state.tables.filter((t) => (t.section || "NORMAL") === sec.key).sort((a, b) => a.tableNumber - b.tableNumber);
+      if (secTables.length === 0) return "";
+      return `
+      <div style="grid-column:1/-1;margin-top:${sec.key === sections[0].key ? "0" : "18px"};margin-bottom:2px">
+        <div class="mono" style="font-size:11px;color:${sec.key === "AC_HALL" ? "var(--brass-bright)" : "var(--muted)"};letter-spacing:.06em">${sec.label.toUpperCase()} · ${secTables.length} TABLE${secTables.length === 1 ? "" : "S"}</div>
+      </div>
+      <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px">
+        ${secTables.map(tableCard).join("")}
+      </div>`;
+    })
+    .join("");
+
+  grid.querySelectorAll("[data-select-table]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const table = findTable(btn.getAttribute("data-select-table"));
+      if (table.status !== "AVAILABLE") {
+        showToast(`Table ${table.tableNumber} is not available`, "error");
+        renderTablesGrid();
+        return;
+      }
+      table.status = "OCCUPIED";
+      saveState();
+      showToast(`Table ${table.tableNumber} is now occupied — starting an order…`);
+      session.takeOrder.tableId = table.id;
+      navigate("order");
+    })
+  );
+
+  grid.querySelectorAll("[data-enter-code]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const table = findTable(btn.getAttribute("data-enter-code"));
+      showReservationCodeModal(table);
+    })
+  );
+
+  grid.querySelectorAll("[data-menu-toggle]").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute("data-menu-toggle");
+      document.querySelectorAll(".dropdown").forEach((d) => {
+        if (d.id !== `dropdown-${id}`) d.classList.add("hidden");
+      });
+      document.getElementById(`dropdown-${id}`).classList.toggle("hidden");
+    })
+  );
+
+  grid.querySelectorAll("[data-set-status]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const [id, status] = btn.getAttribute("data-set-status").split("|");
+      const table = findTable(id);
+      table.status = status;
+      if (status === "RESERVED") {
+        table.reservationCode = String(Math.floor(1000 + Math.random() * 9000));
+        saveState();
+        showModal({
+          title: `Table ${table.tableNumber} reserved`,
+          message: `Give this code to the customer — they'll need it to occupy the table: ${table.reservationCode}`,
+          actions: [{ label: "Got it", primary: true }],
+        });
+      } else {
+        delete table.reservationCode;
+        saveState();
+        showToast(`Table ${table.tableNumber} → ${status}`);
+      }
+      renderTablesGrid();
+    })
+  );
+
+  grid.querySelectorAll("[data-delete-table]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const table = findTable(btn.getAttribute("data-delete-table"));
+      if (table.status === "OCCUPIED") {
+        showToast("Cannot delete an occupied table", "error");
+        return;
+      }
+      if (!confirm(`Delete table ${table.tableNumber}?`)) return;
+      state.tables = state.tables.filter((t) => t.id !== table.id);
+      saveState();
+      showToast(`Table ${table.tableNumber} deleted`);
+      renderTablesGrid();
+    })
+  );
+
+  ensureGlobalDropdownCloser();
+}
+
+function showReservationCodeModal(table) {
+  let host = document.getElementById("modal-root");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "modal-root";
+    document.body.appendChild(host);
+  }
+  host.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-card">
+        <h3 style="margin-bottom:8px">Table ${table.tableNumber} is reserved</h3>
+        <p style="color:var(--paper-dim);font-size:13.5px;margin:0 0 14px;line-height:1.5">Enter the 4-digit code given to the customer to occupy this table.</p>
+        <input type="text" id="reservation-code-input" class="text-input" maxlength="4" inputmode="numeric" placeholder="0000" style="text-align:center;font-family:var(--font-mono);font-size:20px;letter-spacing:6px;margin-bottom:16px" autofocus />
+        <div id="reservation-code-error"></div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="reservation-code-submit">Unlock table</button>
+          <button class="btn btn-ghost" id="reservation-code-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+  const submit = () => {
+    const entered = document.getElementById("reservation-code-input").value.trim();
+    if (entered === table.reservationCode) {
+      table.status = "OCCUPIED";
+      delete table.reservationCode;
+      saveState();
+      closeModal();
+      showToast(`Table ${table.tableNumber} is now occupied — starting an order…`);
+      session.takeOrder.tableId = table.id;
+      navigate("order");
+    } else {
+      document.getElementById("reservation-code-error").innerHTML = `<div class="login-error" style="margin-bottom:12px">This table is reserved.</div>`;
+    }
+  };
+  document.getElementById("reservation-code-submit").addEventListener("click", submit);
+  document.getElementById("reservation-code-cancel").addEventListener("click", closeModal);
+  document.getElementById("reservation-code-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submit();
+  });
+}
+
+let _dropdownCloserAttached = false;
+function ensureGlobalDropdownCloser() {
+  if (_dropdownCloserAttached) return;
+  _dropdownCloserAttached = true;
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".dropdown").forEach((d) => d.classList.add("hidden"));
+  });
+}
+
+/* ---------- Take Order page ---------- */
+const SPICY_ICON = { NONE: "", MILD: "🌶", MEDIUM: "🌶🌶", HOT: "🌶🌶🌶", EXTRA_HOT: "🌶🌶🌶🌶" };
+
+function activeOrderForTable(tableId) {
+  return state.orders.find((o) => o.tableId === Number(tableId) && !["COMPLETED", "CANCELLED"].includes(o.status));
+}
+
+function unpaidBillForTable(tableId) {
+  return state.bills.find((b) => b.tableId === Number(tableId) && b.status === "UNPAID");
+}
+
+function tableSelectableForOrder(table) {
+  // The only table that should be off-limits for a NEW/add-on order is one that's
+  // stuck with an unpaid bill and no order currently in flight — that must be
+  // settled at Billing first. A table that was just selected (freshly OCCUPIED,
+  // no order yet) or mid-order is always fine.
+  if (unpaidBillForTable(table.id) && !activeOrderForTable(table.id)) return false;
+  return true;
+}
+
+function renderOrderPage(el) {
+  const to = session.takeOrder;
+
+  el.innerHTML = `
+    <div class="two-col-order">
+      <div>
+        <div class="card" style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div>
+            <label class="small">Table</label><br/>
+            <select id="ot-table">
+              <option value="">Choose a table…</option>
+              ${["NORMAL", "AC_HALL"]
+                .map((sec) => {
+                  const secTables = state.tables.filter((t) => (t.section || "NORMAL") === sec && tableSelectableForOrder(t));
+                  if (secTables.length === 0) return "";
+                  return `<optgroup label="${sec === "AC_HALL" ? "A/C Hall" : "Open Hall"}">
+                    ${secTables.map((t) => `<option value="${t.id}" ${String(t.id) === String(to.tableId) ? "selected" : ""}>Table ${t.tableNumber} — ${t.status}</option>`).join("")}
+                  </optgroup>`;
+                })
+                .join("")}
+            </select>
+            ${(() => {
+              const pending = state.tables.filter((t) => !tableSelectableForOrder(t) && !activeOrderForTable(t.id));
+              return pending.length > 0
+                ? `<div style="font-size:11.5px;color:var(--reserved);margin-top:4px">${pending.map((t) => "Table " + t.tableNumber).join(", ")} awaiting payment — settle at Billing first</div>`
+                : "";
+            })()}
+          </div>
+          <div>
+            <label class="small">Customer name</label><br/>
+            <input type="text" id="ot-customer" placeholder="Optional" value="${escapeHtml(to.customerName)}" style="width:160px" />
+          </div>
+          <span id="ot-existing-badge"></span>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <input type="text" id="ot-search" placeholder="Search menu…" value="${escapeHtml(to.search)}" style="flex:1;min-width:160px" />
+          <select id="ot-category">
+            <option value="">All categories</option>
+            ${state.categories.map((c) => `<option value="${c.id}" ${String(c.id) === String(to.categoryId) ? "selected" : ""}>${escapeHtml(c.name)}</option>`).join("")}
+          </select>
+          <select id="ot-veg">
+            <option value="" ${to.veg === "" ? "selected" : ""}>Veg & Non-veg</option>
+            <option value="true" ${to.veg === "true" ? "selected" : ""}>Veg only</option>
+            <option value="false" ${to.veg === "false" ? "selected" : ""}>Non-veg only</option>
+          </select>
+          <select id="ot-sort">
+            <option value="name" ${to.sortBy === "name" ? "selected" : ""}>Sort: Name</option>
+            <option value="price" ${to.sortBy === "price" ? "selected" : ""}>Sort: Price</option>
+            <option value="popularity" ${to.sortBy === "popularity" ? "selected" : ""}>Sort: Popularity</option>
+            <option value="prepTime" ${to.sortBy === "prepTime" ? "selected" : ""}>Sort: Prep time</option>
+          </select>
+        </div>
+
+        <div id="ot-combos"></div>
+
+        <div id="ot-items-grid" class="grid-items"></div>
+      </div>
+
+      <div style="position:sticky;top:16px">
+        <div id="ot-ticket"></div>
+        <button class="btn btn-primary" id="ot-place-btn" style="width:100%;margin-top:14px;padding:12px">Place order</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("ot-table").addEventListener("change", (e) => {
+    to.tableId = e.target.value;
+    renderOrderPage(el);
+  });
+  document.getElementById("ot-customer").addEventListener("input", (e) => (to.customerName = e.target.value));
+  document.getElementById("ot-search").addEventListener("input", (e) => {
+    to.search = e.target.value;
+    renderOrderItemsGrid();
+  });
+  document.getElementById("ot-category").addEventListener("change", (e) => {
+    to.categoryId = e.target.value;
+    renderOrderItemsGrid();
+  });
+  document.getElementById("ot-veg").addEventListener("change", (e) => {
+    to.veg = e.target.value;
+    renderOrderItemsGrid();
+  });
+  document.getElementById("ot-sort").addEventListener("change", (e) => {
+    to.sortBy = e.target.value;
+    renderOrderItemsGrid();
+  });
+  document.getElementById("ot-place-btn").addEventListener("click", handlePlaceOrder);
+
+  renderCombos();
+  renderOrderItemsGrid();
+  renderTicket();
+}
+
+const COMBO_DEFS = [
+  { name: "Breakfast Combo", icon: "🌅", items: [{ name: "Idly", qty: 2 }, { name: "Filter Coffee", qty: 1 }], discountPct: 10 },
+  { name: "South Indian Combo", icon: "🥞", items: [{ name: "Masala Dosa", qty: 1 }, { name: "Filter Coffee", qty: 1 }], discountPct: 10 },
+  { name: "Thali Combo", icon: "🍛", items: [{ name: "Veg Thali", qty: 1 }, { name: "Sweet Lassi", qty: 1 }], discountPct: 12 },
+  { name: "Tandoori Combo", icon: "🍗", items: [{ name: "Butter Naan", qty: 2 }, { name: "Butter Chicken", qty: 1 }], discountPct: 12 },
+  { name: "Juice & Sweet Combo", icon: "🥤", items: [{ name: "Watermelon Juice", qty: 1 }, { name: "Gulab Jamun", qty: 1 }], discountPct: 10 },
+];
+
+function resolveCombo(combo) {
+  const resolvedItems = combo.items.map((ci) => {
+    const item = state.items.find((i) => i.name === ci.name && i.available);
+    return item ? { item, qty: ci.qty } : null;
+  });
+  if (resolvedItems.some((r) => r === null)) return null;
+  const fullPrice = resolvedItems.reduce((sum, r) => sum + r.item.price * r.qty, 0);
+  const comboPrice = Math.round(fullPrice * (1 - combo.discountPct / 100));
+  return { ...combo, resolvedItems, fullPrice, comboPrice };
+}
+
+function renderCombos() {
+  const host = document.getElementById("ot-combos");
+  if (!host) return;
+  const combos = COMBO_DEFS.map(resolveCombo).filter(Boolean);
+  if (combos.length === 0) {
+    host.innerHTML = "";
+    return;
+  }
+  host.innerHTML = `
+    <div style="margin-bottom:16px">
+      <div class="mono" style="font-size:11px;color:var(--brass);letter-spacing:.06em;margin-bottom:8px">COMBO DEALS</div>
+      <div class="combo-strip">
+        ${combos
+          .map(
+            (c, idx) => `
+          <div class="combo-card">
+            <div style="font-size:20px">${c.icon}</div>
+            <div style="font-weight:600;font-size:13.5px;margin-top:4px">${escapeHtml(c.name)}</div>
+            <div style="font-size:11.5px;color:var(--muted);margin:4px 0 8px">${c.resolvedItems.map((r) => `${r.qty}× ${escapeHtml(r.item.name)}`).join(" + ")}</div>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:8px">
+              <span class="mono" style="font-size:16px;font-weight:700;color:var(--brass-bright)">₹${c.comboPrice}</span>
+              <span class="mono" style="font-size:11px;color:var(--muted);text-decoration:line-through">₹${c.fullPrice}</span>
+            </div>
+            <button class="btn btn-primary btn-sm" style="width:100%" data-add-combo="${idx}">Add combo</button>
+          </div>`
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+  host.querySelectorAll("[data-add-combo]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const combo = combos[Number(btn.getAttribute("data-add-combo"))];
+      const comboTag = `combo-${combo.name}-${Date.now()}`;
+      combo.resolvedItems.forEach((r) => {
+        // Apply the combo's discount to each item's own unit price, so what lands in
+        // the cart (and later the placed order) matches the discounted combo price
+        // shown on the card — not the item's full menu price. Every item added this
+        // way shares the same comboTag/comboName so bills can show it as one line.
+        const discountedUnitPrice = Math.round(r.item.price * (1 - combo.discountPct / 100));
+        for (let n = 0; n < r.qty; n++) addToCart(r.item.id, discountedUnitPrice, comboTag, combo.name);
+      });
+      showToast(`${combo.name} added — ₹${combo.comboPrice} (was ₹${combo.fullPrice})`);
+    })
+  );
+}
+
+function renderOrderItemsGrid() {
+  const to = session.takeOrder;
+  const grid = document.getElementById("ot-items-grid");
+  if (!grid) return;
+
+  let items = state.items.filter((i) => i.available);
+  if (to.categoryId) items = items.filter((i) => i.categoryId === Number(to.categoryId));
+  if (to.veg === "true") items = items.filter((i) => i.veg);
+  if (to.veg === "false") items = items.filter((i) => !i.veg);
+  if (to.search.trim()) items = items.filter((i) => i.name.toLowerCase().includes(to.search.trim().toLowerCase()));
+
+  const sorters = {
+    name: (a, b) => a.name.localeCompare(b.name),
+    price: (a, b) => a.price - b.price,
+    popularity: (a, b) => b.rating - a.rating,
+    prepTime: (a, b) => a.prepTime - b.prepTime,
+  };
+  items = [...items].sort(sorters[to.sortBy] || sorters.name);
+
+  const existing = activeOrderForTable(to.tableId);
+  document.getElementById("ot-existing-badge").innerHTML = existing
+    ? `<span class="badge" style="color:var(--preparing);background:var(--reserved-bg)">Adding to order ${existing.orderNumber}</span>`
+    : "";
+  document.getElementById("ot-customer").disabled = !!existing;
+
+  if (items.length === 0) {
+    grid.innerHTML = `<div class="empty-state card"><h3>No items match</h3><p>Try a different search or filter.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = items
+    .map(
+      (item) => `
+    <div class="card" style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <span title="${item.veg ? "Veg" : "Non-veg"}" style="width:14px;height:14px;border:1.5px solid var(--${item.veg ? "available" : "occupied"});display:inline-flex;align-items:center;justify-content:center">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--${item.veg ? "available" : "occupied"})"></span>
+        </span>
+        <span class="mono" style="font-size:11px;color:var(--muted)">★ ${Number(item.rating).toFixed(1)}</span>
+      </div>
+      <div style="font-family:var(--font-display);font-size:17px;font-weight:600">${escapeHtml(item.name)}</div>
+      <div style="font-size:12.5px;color:var(--muted);min-height:32px">${escapeHtml(item.description)}</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--paper-dim)">
+        <span>${item.prepTime} min</span><span>${SPICY_ICON[item.spicyLevel] || ""}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span class="mono" style="font-size:17px;font-weight:600;color:var(--brass-bright)">₹${item.price}</span>
+        <button class="btn btn-primary btn-sm" data-add-cart="${item.id}">Add</button>
+      </div>
+    </div>`
+    )
+    .join("");
+
+  grid.querySelectorAll("[data-add-cart]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      addToCart(Number(btn.getAttribute("data-add-cart")));
+    })
+  );
+}
+
+function addToCart(itemId, unitPrice, comboTag, comboName) {
+  const to = session.takeOrder;
+  const item = findItem(itemId);
+  const price = unitPrice != null ? unitPrice : item.price;
+  // Only merge with an existing cart line for the same item, AT THE SAME PRICE, AND
+  // the same combo membership — a combo-discounted unit and a full-price unit of the
+  // same item must stay separate lines, or the discount/combo grouping is lost.
+  const existing = to.cart.find((c) => c.itemId === itemId && c.price === price && (c.comboTag || null) === (comboTag || null));
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    to.cart.push({ itemId, name: item.name, price, quantity: 1, comboTag: comboTag || null, comboName: comboName || null });
+  }
+  renderTicket();
+}
+
+/* Groups a flat list of cart/order lines so combo purchases show as a single line
+   instead of being scattered as separate items — used by the ticket, unbilled
+   orders panel, and generated bills. Each returned group is either:
+     { isCombo:false, name, quantity, unitPrice, lineTotal, ...raw }   — a plain item
+     { isCombo:true, comboName, lines:[...], quantity, lineTotal }    — one combo */
+function groupLinesForDisplay(lines) {
+  const groups = [];
+  const comboIndex = {};
+  lines.forEach((line) => {
+    if (line.comboTag) {
+      let g = comboIndex[line.comboTag];
+      if (!g) {
+        g = { isCombo: true, comboTag: line.comboTag, comboName: line.comboName, lines: [], quantity: 0, lineTotal: 0 };
+        comboIndex[line.comboTag] = g;
+        groups.push(g);
+      }
+      g.lines.push(line);
+      g.quantity += line.quantity;
+      g.lineTotal += (line.price != null ? line.price : line.unitPrice) * line.quantity;
+    } else {
+      groups.push({ isCombo: false, ...line, lineTotal: (line.price != null ? line.price : line.unitPrice) * line.quantity });
+    }
+  });
+  return groups;
+}
+
+function updateCartQty(itemId, delta) {
+  const to = session.takeOrder;
+  to.cart = to.cart
+    .map((c) => (c.itemId === itemId ? { ...c, quantity: c.quantity + delta } : c))
+    .filter((c) => c.quantity > 0);
+  renderTicket();
+}
+
+function renderTicket() {
+  const to = session.takeOrder;
+  const host = document.getElementById("ot-ticket");
+  if (!host) return;
+
+  const table = to.tableId ? findTable(to.tableId) : null;
+  const existing = to.tableId ? activeOrderForTable(to.tableId) : null;
+  const total = to.cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+
+  host.innerHTML = `
+    <div style="background:var(--paper);color:#1c1c1a;padding:22px 20px;border-radius:4px;box-shadow:var(--shadow);background-image:repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(0,0,0,.04) 27px, rgba(0,0,0,.04) 28px)">
+      <div class="mono" style="font-size:11px;color:#8a6d10;letter-spacing:.08em">${existing ? `ADD-ON · ${existing.orderNumber}` : "NEW ORDER CHIT"}</div>
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:700;margin-top:4px">${table ? `Table ${table.tableNumber}` : "No table selected"}</div>
+      <div class="ticket-divider"></div>
+      ${
+        to.cart.length === 0
+          ? `<div style="color:#8a7c55;font-size:13px;padding:16px 0;text-align:center">Add items from the menu →</div>`
+          : `<div style="display:flex;flex-direction:column;gap:10px">
+              ${groupLinesForDisplay(to.cart)
+                .map((g) =>
+                  g.isCombo
+                    ? `
+                <div style="border:1px dashed #b8ac8e;border-radius:4px;padding:6px 8px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px;font-weight:700">
+                    <div>🎁 ${escapeHtml(g.comboName)}</div>
+                    <div class="mono">₹${g.lineTotal.toFixed(0)}</div>
+                  </div>
+                  ${g.lines.map((l) => `<div style="font-size:11.5px;color:#8a7c55;padding-left:14px">${l.quantity}× ${escapeHtml(l.name)}</div>`).join("")}
+                </div>`
+                    : `
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px">
+                  <div style="flex:1">${escapeHtml(g.name)}</div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <button data-qty="${g.itemId}|-1" style="width:20px;height:20px;border-radius:4px;border:1px solid #b8ac8e;background:transparent;color:#1c1c1a;font-size:13px;line-height:1;padding:0">−</button>
+                    <span class="mono" style="width:16px;text-align:center">${g.quantity}</span>
+                    <button data-qty="${g.itemId}|1" style="width:20px;height:20px;border-radius:4px;border:1px solid #b8ac8e;background:transparent;color:#1c1c1a;font-size:13px;line-height:1;padding:0">+</button>
+                  </div>
+                  <div class="mono" style="width:56px;text-align:right">₹${g.lineTotal.toFixed(0)}</div>
+                </div>`
+                )
+                .join("")}
+            </div>`
+      }
+      <div class="ticket-divider"></div>
+      <div class="ticket-total"><span>TOTAL</span><span class="mono">₹${total.toFixed(2)}</span></div>
+    </div>
+  `;
+
+  host.querySelectorAll("[data-qty]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const [itemId, delta] = btn.getAttribute("data-qty").split("|");
+      updateCartQty(Number(itemId), Number(delta));
+    })
+  );
+
+  const placeBtn = document.getElementById("ot-place-btn");
+  if (placeBtn) {
+    placeBtn.disabled = to.cart.length === 0 || !to.tableId;
+    placeBtn.textContent = existing ? "Add to order" : "Place order";
+  }
+}
+
+function handlePlaceOrder() {
+  const to = session.takeOrder;
+  if (!to.tableId) {
+    showToast("Choose a table first", "error");
+    return;
+  }
+  if (to.cart.length === 0) {
+    showToast("Add at least one item to the order", "error");
+    return;
+  }
+
+  const existing = activeOrderForTable(to.tableId);
+  if (!existing && !tableSelectableForOrder(findTable(to.tableId))) {
+    showToast("This table has an unpaid bill — settle it at Billing before starting a new order", "error");
+    return;
+  }
+  const newItems = to.cart.map((c) => {
+    const item = findItem(c.itemId);
+    return { id: nextId("orderItem"), itemId: c.itemId, itemName: item.name, quantity: c.quantity, unitPrice: c.price, status: "PLACED", comboTag: c.comboTag || null, comboName: c.comboName || null };
+  });
+
+  if (existing) {
+    existing.items.push(...newItems);
+    if (["PREPARED", "SERVED"].includes(existing.status)) existing.status = "PREPARING";
+    saveState();
+    showToast(`Added ${to.cart.length} item(s) to order ${existing.orderNumber}`);
+  } else {
+    const table = findTable(to.tableId);
+    if (table.status !== "AVAILABLE" && table.status !== "OCCUPIED") {
+      showToast(`Table ${table.tableNumber} is not available (status: ${table.status})`, "error");
+      return;
+    }
+    const order = {
+      id: nextId("order"),
+      orderNumber: genOrderNumber(),
+      tableId: table.id,
+      tableNumber: table.tableNumber,
+      customerName: to.customerName || null,
+      status: "PLACED",
+      items: newItems,
+      createdAt: new Date().toISOString(),
+    };
+    state.orders.push(order);
+    table.status = "OCCUPIED";
+    saveState();
+    showToast(`Order ${order.orderNumber} placed for table ${table.tableNumber}`);
+  }
+
+  to.cart = [];
+  to.customerName = "";
+  navigate("orders");
+}
+
+/* ---------- Orders / Kitchen board ---------- */
+const NEXT_STATUS = { PLACED: "PREPARING", PREPARING: "PREPARED" }; // used ONLY by the automatic kitchen timer — deliberately stops before SERVED
+const MANUAL_NEXT_STATUS = { PLACED: "PREPARING", PREPARING: "PREPARED", PREPARED: "SERVED" }; // used by staff-clicked buttons — serving is always a deliberate action
+const STATUS_ORDER = ["PLACED", "PREPARING", "PREPARED", "SERVED", "COMPLETED"];
+const STATUS_FILTERS = ["ALL", "PLACED", "PREPARING", "PREPARED", "SERVED", "COMPLETED", "CANCELLED"];
+const ORDER_COLOR_VAR = { PLACED: "placed", PREPARING: "preparing", PREPARED: "prepared", SERVED: "served", COMPLETED: "completed", CANCELLED: "cancelled" };
+let ordersFilter = "ALL";
+
+function orderStatusBadge(status) {
+  const v = ORDER_COLOR_VAR[status] || "muted";
+  return `<span class="badge" style="color:var(--${v});background:var(--${v}-bg)"><span class="badge-dot"></span>${status}</span>`;
+}
+
+function releaseTableIfNoActiveOrders(tableId) {
+  const active = state.orders.some((o) => o.tableId === Number(tableId) && !["COMPLETED", "CANCELLED"].includes(o.status));
+  if (!active) {
+    const table = findTable(tableId);
+    if (table) table.status = "AVAILABLE";
+  }
+}
+
+/* ---------- Generic modal ---------- */
+function showModal({ title, message, actions }) {
+  let host = document.getElementById("modal-root");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "modal-root";
+    document.body.appendChild(host);
+  }
+  host.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-card">
+        <h3 style="margin-bottom:8px">${escapeHtml(title)}</h3>
+        <p style="color:var(--paper-dim);font-size:13.5px;margin:0 0 20px;line-height:1.5">${escapeHtml(message)}</p>
+        <div class="modal-actions">
+          ${actions.map((a, i) => `<button class="btn ${a.primary ? "btn-primary" : "btn-ghost"}" data-modal-action="${i}">${escapeHtml(a.label)}</button>`).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+  host.querySelectorAll("[data-modal-action]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.getAttribute("data-modal-action"));
+      closeModal();
+      actions[idx].onClick?.();
+    });
+  });
+}
+function closeModal() {
+  const host = document.getElementById("modal-root");
+  if (host) host.innerHTML = "";
+}
+
+/* When an order's last active item gets cancelled (or the whole order is explicitly
+   cancelled), don't silently free the table — ask what's next. Table only goes back
+   to AVAILABLE if the staff explicitly says the visit is complete. */
+function handleOrderFullyCancelled(order) {
+  const table = findTable(order.tableId);
+  showModal({
+    title: "Order cancelled",
+    message: `All items on ${order.orderNumber} (Table ${order.tableNumber}) are cancelled. What's next for this table?`,
+    actions: [
+      {
+        label: "Order another item",
+        primary: true,
+        onClick: () => {
+          session.takeOrder.tableId = order.tableId;
+          navigate("order");
+        },
+      },
+      {
+        label: "Complete — free the table",
+        onClick: () => {
+          if (table) table.status = "AVAILABLE";
+          saveState();
+          showToast(`Table ${order.tableNumber} is now available`);
+          if (session.page === "orders") renderOrdersGrid();
+          else if (session.page === "tables") renderTablesGrid();
+        },
+      },
+    ],
+  });
+}
+
+function recalcOrderStatus(order) {
+  const active = order.items.filter((i) => i.status !== "CANCELLED");
+  if (active.length === 0) {
+    order.status = "CANCELLED";
+    return;
+  }
+  const allSame = active.every((i) => i.status === active[0].status);
+  order.status = allSame ? active[0].status : "PREPARING";
+}
+
+const TRASH_ICON = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5.5 4V2.5a1 1 0 011-1h3a1 1 0 011 1V4M6.5 7.5v4M9.5 7.5v4M3.5 4l.6 8.4a1 1 0 001 .9h5.8a1 1 0 001-.9L13 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function renderOrdersPage(el) {
+  const isManager = session.user.role === "MANAGER";
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+      <div id="orders-filter-bar"></div>
+      ${
+        isManager
+          ? `<div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" id="clear-completed-btn">${TRASH_ICON} Delete Completed</button>
+              <button class="btn btn-ghost btn-sm" id="clear-cancelled-btn">${TRASH_ICON} Delete Cancelled</button>
+            </div>`
+          : ""
+      }
+    </div>
+    <div id="orders-grid" class="grid-orders"></div>
+  `;
+  renderOrdersFilterBar();
+  renderOrdersGrid();
+
+  const bulkClear = (status, label) => {
+    const clearable = state.orders.filter((o) => o.status === status);
+    if (clearable.length === 0) {
+      showToast(`No ${label.toLowerCase()} records to clear`, "error");
+      return;
+    }
+    if (!confirm(`Delete all ${clearable.length} ${label.toLowerCase()} order record(s)? This also removes any bills/payments tied to them. This cannot be undone.`)) return;
+    clearable.forEach((o) => deleteOrderRecord(o.id, { silent: true }));
+    saveState();
+    showToast(`Cleared ${clearable.length} ${label.toLowerCase()} record(s)`);
+    renderOrdersGrid();
+  };
+  document.getElementById("clear-completed-btn")?.addEventListener("click", () => bulkClear("COMPLETED", "Completed"));
+  document.getElementById("clear-cancelled-btn")?.addEventListener("click", () => bulkClear("CANCELLED", "Cancelled"));
+}
+
+/* Deletes an order record permanently, along with any bill/payments that reference it.
+   Only meant for orders that are already COMPLETED or CANCELLED — i.e. done and dusted. */
+function deleteOrderRecord(orderId, opts) {
+  orderId = Number(orderId);
+  const order = findOrder(orderId);
+  const affectedBillIds = state.bills.filter((b) => (b.orderIds || [b.orderId]).includes(orderId)).map((b) => b.id);
+  state.payments = state.payments.filter((p) => !affectedBillIds.includes(p.billId));
+  state.bills = state.bills.filter((b) => !affectedBillIds.includes(b.id));
+  state.orders = state.orders.filter((o) => o.id !== orderId);
+
+  // If that was the table's last remaining order record and it's just sitting
+  // OCCUPIED with nothing left to settle, free it rather than leaving it stuck.
+  if (order) {
+    const table = findTable(order.tableId);
+    const stillHasOrders = state.orders.some((o) => o.tableId === order.tableId);
+    if (table && table.status === "OCCUPIED" && !stillHasOrders) {
+      table.status = "AVAILABLE";
+    }
+  }
+
+  if (!opts || !opts.silent) saveState();
+}
+
+const FILTER_COLOR_VAR = { ALL: null, PLACED: "placed", PREPARING: "preparing", PREPARED: "prepared", SERVED: "served", COMPLETED: "completed", CANCELLED: "cancelled" };
+
+function renderOrdersFilterBar() {
+  const bar = document.getElementById("orders-filter-bar");
+  bar.className = "segmented-tabs";
+  bar.innerHTML = STATUS_FILTERS.map((s) => {
+    const count = s === "ALL" ? state.orders.length : state.orders.filter((o) => o.status === s).length;
+    const colorVar = FILTER_COLOR_VAR[s];
+    return `<button class="segmented-tab ${ordersFilter === s ? "active" : ""}" data-filter="${s}">
+      ${colorVar ? `<span class="badge-dot" style="color:var(--${colorVar})"></span>` : ""}
+      ${s} <span class="segmented-tab-count">${count}</span>
+    </button>`;
+  }).join("");
+  bar.querySelectorAll("[data-filter]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      ordersFilter = btn.getAttribute("data-filter");
+      renderOrdersFilterBar();
+      renderOrdersGrid();
+    })
+  );
+}
+
+function renderOrdersGrid() {
+  const grid = document.getElementById("orders-grid");
+  if (!grid) return;
+
+  const orders = [...state.orders]
+    .filter((o) => ordersFilter === "ALL" || o.status === ordersFilter)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  if (orders.length === 0) {
+    grid.innerHTML = `<div class="empty-state card"><h3>No orders here</h3><p>Orders will show up as soon as a table places one.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = orders
+    .map((order) => {
+      const nextStatus = MANUAL_NEXT_STATUS[order.status];
+      return `
+      <div class="card order-card-v2" data-order-card="${order.id}">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div class="mono" style="font-size:11px;color:var(--muted)">${order.orderNumber}</div>
+            <div style="font-family:var(--font-display);font-size:19px;font-weight:600">Table ${order.tableNumber}</div>
+            ${order.customerName ? `<div style="font-size:12.5px;color:var(--muted)">${escapeHtml(order.customerName)}</div>` : ""}
+          </div>
+          ${orderStatusBadge(order.status)}
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          ${[...order.items]
+            .sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0))
+            .map((item) => {
+              const itemNext = MANUAL_NEXT_STATUS[item.status];
+              const canPrioritize = !["SERVED", "COMPLETED", "CANCELLED"].includes(item.status);
+              return `
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;opacity:${item.status === "CANCELLED" ? 0.45 : 1};${item.priority && canPrioritize ? "background:var(--reserved-bg);border-radius:6px;padding:4px 6px;margin:0 -6px" : ""}">
+              <span style="text-decoration:${item.status === "CANCELLED" ? "line-through" : "none"}">
+                ${item.priority && canPrioritize ? `<span title="Bring this first" style="margin-right:4px">⚡</span>` : ""}${item.quantity}× ${escapeHtml(item.itemName)}
+              </span>
+              <div style="display:flex;align-items:center;gap:6px">
+                ${orderStatusBadge(item.status)}
+                ${
+                  canPrioritize
+                    ? `<button class="btn-sm item-serve-btn" data-toggle-priority="${order.id}|${item.id}" title="${item.priority ? "Unmark priority" : "Bring this item first"}" style="${item.priority ? "border-color:var(--reserved);color:var(--reserved)" : ""}">⚡ ${item.priority ? "Priority" : "Serve first"}</button>`
+                    : ""
+                }
+                ${
+                  itemNext
+                    ? `<button class="btn-sm item-serve-btn" data-item-advance="${order.id}|${item.id}|${itemNext}" title="Mark this item ${itemNext.toLowerCase()}">${itemNext === "SERVED" ? "Serve" : "→ " + itemNext.toLowerCase()}</button>`
+                    : ""
+                }
+                ${
+                  isCancellable(item.status)
+                    ? `<button class="icon-btn-sm" data-cancel-item="${order.id}|${item.id}" title="Cancel this item">✕</button>`
+                    : ""
+                }
+              </div>
+            </div>`;
+            })
+            .join("")}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center;justify-content:flex-start">
+          ${nextStatus ? `<button class="btn btn-primary btn-sm" data-advance="${order.id}|${nextStatus}">Mark all ${nextStatus.toLowerCase()}</button>` : ""}
+          ${order.status === "SERVED" ? `<button class="btn btn-primary btn-sm" data-complete="${order.id}">Complete order</button>` : ""}
+          ${["PLACED", "PREPARING", "PREPARED"].includes(order.status) ? `<button class="btn btn-danger btn-sm" data-cancel-order="${order.id}">Cancel order</button>` : ""}
+          ${order.status === "COMPLETED" ? `<button class="btn btn-ghost btn-sm" data-goto-bill="${order.id}">Generate bill →</button>` : ""}
+          ${
+            session.user.role === "MANAGER" && order.status === "CANCELLED"
+              ? `<button class="btn btn-ghost btn-sm" data-delete-record="${order.id}" title="Delete just this record">${TRASH_ICON} Delete this record</button>`
+              : ""
+          }
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  grid.querySelectorAll("[data-toggle-priority]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const [orderId, itemId] = btn.getAttribute("data-toggle-priority").split("|");
+      const order = findOrder(orderId);
+      const item = order.items.find((i) => String(i.id) === String(itemId));
+      item.priority = !item.priority;
+      saveState();
+      showToast(item.priority ? `${item.itemName} flagged — bring it first` : `${item.itemName} priority cleared`);
+      renderOrdersGrid();
+    })
+  );
+
+  grid.querySelectorAll("[data-item-advance]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const [orderId, itemId, status] = btn.getAttribute("data-item-advance").split("|");
+      const order = findOrder(orderId);
+      const item = order.items.find((i) => String(i.id) === String(itemId));
+      item.status = status;
+      recalcOrderStatus(order);
+      saveState();
+      showToast(`${item.itemName} → ${status}`);
+      renderOrdersGrid();
+    })
+  );
+
+  grid.querySelectorAll("[data-cancel-item]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      btn.disabled = true;
+      const [orderId, itemId] = btn.getAttribute("data-cancel-item").split("|");
+      const order = findOrder(orderId);
+      const item = order.items.find((i) => String(i.id) === String(itemId));
+      if (!isCancellable(item.status)) {
+        showToast(`Item cannot be cancelled once it is ${item.status} or later`, "error");
+        return;
+      }
+      item.status = "CANCELLED";
+      recalcOrderStatus(order);
+      saveState();
+      showToast(`${item.itemName} cancelled`);
+      renderOrdersGrid();
+      if (order.status === "CANCELLED") handleOrderFullyCancelled(order);
+    })
+  );
+
+  grid.querySelectorAll("[data-advance]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const [orderId, status] = btn.getAttribute("data-advance").split("|");
+      const order = findOrder(orderId);
+      const targetIdx = STATUS_ORDER.indexOf(status);
+      order.items.forEach((i) => {
+        if (i.status === "CANCELLED") return;
+        if (STATUS_ORDER.indexOf(i.status) < targetIdx) i.status = status;
+      });
+      recalcOrderStatus(order);
+      saveState();
+      showToast(`Order ${order.orderNumber} → ${status}`);
+      renderOrdersGrid();
+    })
+  );
+
+  grid.querySelectorAll("[data-complete]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      btn.disabled = true;
+      const order = findOrder(btn.getAttribute("data-complete"));
+      order.status = "COMPLETED";
+      order.items.forEach((i) => {
+        if (i.status !== "CANCELLED") i.status = "COMPLETED";
+      });
+      saveState();
+      showToast(`Order ${order.orderNumber} completed`);
+      renderOrdersGrid();
+    })
+  );
+
+  grid.querySelectorAll("[data-cancel-order]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const order = findOrder(btn.getAttribute("data-cancel-order"));
+      if (!confirm(`Cancel order ${order.orderNumber}? All its items will be cancelled.`)) return;
+      btn.disabled = true;
+      order.items.forEach((i) => (i.status = "CANCELLED"));
+      order.status = "CANCELLED";
+      saveState();
+      showToast(`Order ${order.orderNumber} cancelled`);
+      renderOrdersGrid();
+      handleOrderFullyCancelled(order);
+    })
+  );
+
+  grid.querySelectorAll("[data-goto-bill]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const order = findOrder(btn.getAttribute("data-goto-bill"));
+      session.billingHighlightTableId = order.tableId;
+      navigate("billing");
+    })
+  );
+
+  grid.querySelectorAll("[data-delete-record]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const orderId = Number(btn.getAttribute("data-delete-record"));
+      const order = findOrder(orderId);
+
+      // If this order's bill also covers other orders that AREN'T being deleted,
+      // block it here — deleting would wipe billing history those still need.
+      const sharedBill = state.bills.find(
+        (b) => (b.orderIds || [b.orderId]).includes(orderId) && (b.orderIds || [b.orderId]).some((oid) => oid !== orderId)
+      );
+      if (sharedBill) {
+        showToast(`This order shares bill ${sharedBill.billNumber} with another order — use "Clear all" to remove them together`, "error");
+        return;
+      }
+
+      if (!confirm(`Delete the record for ${order.orderNumber} (Table ${order.tableNumber})? This also removes its bill/payment if any. This cannot be undone.`)) return;
+      deleteOrderRecord(orderId);
+      showToast(`Record ${order.orderNumber} deleted`);
+      renderOrdersGrid();
+    })
+  );
+}
+
+/* ---------- Billing page ---------- */
+const PAYMENT_METHODS = ["CASH", "UPI", "CREDIT_CARD", "DEBIT_CARD"];
+let billingUI = { gstPercentage: 5, discount: 0, payingBillId: null, method: "CASH", billsTab: "UNPAID", billDate: "" };
+
+function renderBillingPage(el) {
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <h3 style="margin-bottom:12px;font-size:15px;color:var(--paper-dim)">Completed orders awaiting a bill</h3>
+        <div class="card" style="margin-bottom:14px;display:flex;gap:12px">
+          <div><label class="small">GST %</label><br/><input type="number" id="bill-gst" value="${billingUI.gstPercentage}" style="width:70px" /></div>
+          <div><label class="small">Discount ₹</label><br/><input type="number" id="bill-discount" value="${billingUI.discount}" style="width:90px" /></div>
+        </div>
+        <div id="unbilled-orders"></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+          <h3 style="font-size:15px;color:var(--paper-dim)">Bills</h3>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <input type="date" id="bill-date-filter" value="${billingUI.billDate}" style="font-size:12.5px" title="Filter by the day the bill was created" />
+            ${billingUI.billDate ? `<button class="btn btn-ghost btn-sm" id="bill-date-clear">Clear</button>` : ""}
+            <button class="btn btn-sm ${billingUI.billsTab === "UNPAID" ? "btn-primary" : "btn-ghost"}" data-bills-tab="UNPAID">Unpaid</button>
+            <button class="btn btn-sm ${billingUI.billsTab === "PAID" ? "btn-primary" : "btn-ghost"}" data-bills-tab="PAID">Paid</button>
+          </div>
+        </div>
+        <div id="bill-date-revenue"></div>
+        <div id="bills-list"></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("bill-date-filter").addEventListener("change", (e) => {
+    billingUI.billDate = e.target.value;
+    renderBillsList();
+  });
+  const clearBtn = document.getElementById("bill-date-clear");
+  if (clearBtn) clearBtn.addEventListener("click", () => { billingUI.billDate = ""; renderBillingPage(el); });
+
+  document.getElementById("bill-gst").addEventListener("input", (e) => (billingUI.gstPercentage = Number(e.target.value)));
+  document.getElementById("bill-discount").addEventListener("input", (e) => (billingUI.discount = Number(e.target.value)));
+  document.querySelectorAll("[data-bills-tab]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      billingUI.billsTab = btn.getAttribute("data-bills-tab");
+      renderBillingPage(el);
+    })
+  );
+
+  renderUnbilledOrders();
+  renderBillsList();
+}
+
+function renderUnbilledOrders() {
+  const host = document.getElementById("unbilled-orders");
+  if (!host) return;
+  const billedOrderIds = new Set(state.bills.flatMap((b) => b.orderIds || [b.orderId]));
+  const orders = state.orders.filter((o) => o.status === "COMPLETED" && !billedOrderIds.has(o.id));
+
+  if (orders.length === 0) {
+    host.innerHTML = `<div class="empty-state card"><h3>Nothing to bill</h3><p>Complete an order from the Kitchen board first.</p></div>`;
+    return;
+  }
+
+  // Group unbilled completed orders by table — a table can rack up several separate
+  // orders through the visit, but they all get settled as ONE combined bill.
+  const byTable = {};
+  orders.forEach((o) => {
+    if (!byTable[o.tableId]) byTable[o.tableId] = [];
+    byTable[o.tableId].push(o);
+  });
+
+  host.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">
+    ${Object.entries(byTable)
+      .map(([tableId, tableOrders]) => {
+        const allItems = tableOrders.flatMap((o) => o.items.filter((i) => i.status !== "CANCELLED"));
+        const subtotal = allItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+        const orderNumbers = tableOrders.map((o) => o.orderNumber).join(", ");
+        const customerName = tableOrders.find((o) => o.customerName)?.customerName;
+        const highlighted = String(tableId) === String(session.billingHighlightTableId);
+        return `
+      <div class="card" style="border-color:${highlighted ? "var(--brass)" : "var(--border)"}">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+          <div>
+            <div class="mono" style="font-size:11px;color:var(--muted)">${escapeHtml(orderNumbers)}</div>
+            <div style="font-weight:600;font-family:var(--font-display);font-size:17px">Table ${tableOrders[0].tableNumber} ${customerName ? "· " + escapeHtml(customerName) : ""}</div>
+            ${tableOrders.length > 1 ? `<div style="font-size:11.5px;color:var(--brass-bright)">${tableOrders.length} orders merged into one bill</div>` : ""}
+          </div>
+          <button class="btn btn-primary btn-sm" data-generate-bill="${tableId}">Generate bill</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;padding-top:8px;border-top:1px solid var(--border)">
+          ${groupLinesForDisplay(allItems)
+            .map((g) =>
+              g.isCombo
+                ? `
+            <div style="font-size:13px;color:var(--paper-dim)">
+              <div style="display:flex;justify-content:space-between;font-weight:600">
+                <span>🎁 ${escapeHtml(g.comboName)}</span>
+                <span class="mono">₹${money(g.lineTotal)}</span>
+              </div>
+              ${g.lines.map((l) => `<div style="font-size:11.5px;color:var(--muted);padding-left:14px">${l.quantity}× ${escapeHtml(l.itemName)}</div>`).join("")}
+            </div>`
+                : `
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--paper-dim)">
+              <span>${g.quantity}× ${escapeHtml(g.itemName)}</span>
+              <span class="mono">₹${money(g.lineTotal)}</span>
+            </div>`
+            )
+            .join("")}
+          <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)">
+            <span>Subtotal</span><span class="mono">₹${money(subtotal)}</span>
+          </div>
+        </div>
+      </div>`;
+      })
+      .join("")}
+  </div>`;
+
+  host.querySelectorAll("[data-generate-bill]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const tableId = Number(btn.getAttribute("data-generate-bill"));
+      const tableOrders = state.orders.filter(
+        (o) => o.tableId === tableId && o.status === "COMPLETED" && !new Set(state.bills.flatMap((b) => b.orderIds || [b.orderId])).has(o.id)
+      );
+      const billableItems = tableOrders.flatMap((o) => o.items.filter((i) => i.status !== "CANCELLED"));
+      if (billableItems.length === 0) {
+        showToast("Cannot generate a bill with no billable items", "error");
+        return;
+      }
+      const subtotal = billableItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+      const gstAmount = Math.round(((subtotal * billingUI.gstPercentage) / 100) * 100) / 100;
+      const grandTotal = Math.round((subtotal + gstAmount - billingUI.discount) * 100) / 100;
+      if (grandTotal < 0) {
+        showToast("Discount cannot exceed the subtotal plus GST", "error");
+        return;
+      }
+      const table = findTable(tableId);
+      const bill = {
+        id: nextId("bill"),
+        billNumber: genBillNumber(),
+        orderIds: tableOrders.map((o) => o.id),
+        orderId: tableOrders[0].id, // kept for backward compatibility with older saved data
+        orderNumber: tableOrders.map((o) => o.orderNumber).join(", "),
+        tableId: tableId,
+        tableNumber: table.tableNumber,
+        customerName: tableOrders.find((o) => o.customerName)?.customerName || null,
+        items: billableItems.map((i) => ({ ...i })),
+        subtotal,
+        gstPercentage: billingUI.gstPercentage,
+        gstAmount,
+        discountAmount: billingUI.discount,
+        grandTotal,
+        status: "UNPAID",
+        createdAt: new Date().toISOString(),
+      };
+      state.bills.push(bill);
+      saveState();
+      showToast(`Bill ${bill.billNumber} generated for Table ${table.tableNumber} — total ₹${money(grandTotal)}`);
+      renderUnbilledOrders();
+      renderBillsList();
+    })
+  );
+}
+
+function renderBillsList() {
+  const host = document.getElementById("bills-list");
+  const revenueHost = document.getElementById("bill-date-revenue");
+  if (!host) return;
+  let bills = state.bills
+    .filter((b) => b.status === billingUI.billsTab || (billingUI.billsTab === "PAID" && b.status !== "UNPAID"))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  if (billingUI.billDate) {
+    bills = bills.filter((b) => b.createdAt.slice(0, 10) === billingUI.billDate);
+  }
+
+  if (revenueHost) {
+    if (billingUI.billDate) {
+      const paidThatDay = state.bills.filter((b) => b.status === "PAID" && b.createdAt.slice(0, 10) === billingUI.billDate);
+      const total = paidThatDay.reduce((sum, b) => sum + b.grandTotal, 0);
+      const dateLabel = new Date(billingUI.billDate + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+      revenueHost.innerHTML = `<div class="card" style="margin-bottom:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12.5px;color:var(--muted)">Revenue on ${dateLabel}</span>
+        <span class="mono" style="font-weight:700;color:var(--brass-bright)">₹${money(total)} <span style="color:var(--muted);font-weight:400">(${paidThatDay.length} paid bill${paidThatDay.length === 1 ? "" : "s"})</span></span>
+      </div>`;
+    } else {
+      revenueHost.innerHTML = "";
+    }
+  }
+
+  if (bills.length === 0) {
+    host.innerHTML = `<div class="empty-state card"><h3>${billingUI.billDate ? "No bills on that date" : billingUI.billsTab === "UNPAID" ? "No unpaid bills" : "No paid bills yet"}</h3></div>`;
+    return;
+  }
+
+  host.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">
+    ${bills
+      .map((bill) => {
+        const paidColorVar = bill.status === "PAID" ? "available" : "reserved";
+        return `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div class="mono" style="font-size:11px;color:var(--muted)">${bill.billNumber} · ${bill.orderNumber}</div>
+            <div style="font-weight:600">Table ${bill.tableNumber}</div>
+          </div>
+          <span class="badge" style="color:var(--${paidColorVar});background:var(--${paidColorVar}-bg)">${bill.status}</span>
+        </div>
+        <div style="margin-top:10px;font-size:13px;color:var(--paper-dim)">
+          ${groupLinesForDisplay(bill.items)
+            .map((g) =>
+              g.isCombo
+                ? `<div style="margin-bottom:3px">
+                    <div style="display:flex;justify-content:space-between"><span>🎁 ${escapeHtml(g.comboName)}</span><span class="mono">₹${money(g.lineTotal)}</span></div>
+                    ${g.lines.map((l) => `<div style="font-size:11px;color:var(--muted);padding-left:14px">${l.quantity}× ${escapeHtml(l.itemName)}</div>`).join("")}
+                  </div>`
+                : `<div style="display:flex;justify-content:space-between"><span>${g.quantity}× ${escapeHtml(g.itemName)}</span><span class="mono">₹${money(g.lineTotal)}</span></div>`
+            )
+            .join("")}
+          <div style="border-top:1px dashed var(--border);margin:8px 0"></div>
+          <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span class="mono">₹${money(bill.subtotal)}</span></div>
+          <div style="display:flex;justify-content:space-between"><span>GST (${bill.gstPercentage}%)</span><span class="mono">₹${money(bill.gstAmount)}</span></div>
+          ${bill.discountAmount > 0 ? `<div style="display:flex;justify-content:space-between"><span>Discount</span><span class="mono">−₹${money(bill.discountAmount)}</span></div>` : ""}
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:14.5px"><span>Grand total</span><span class="mono">₹${money(bill.grandTotal)}</span></div>
+        </div>
+        ${
+          bill.status === "UNPAID"
+            ? `<div style="margin-top:12px" id="pay-zone-${bill.id}">
+                ${
+                  billingUI.payingBillId === bill.id
+                    ? `<div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                          <select id="pay-method-${bill.id}">${PAYMENT_METHODS.map((m) => `<option value="${m}" ${billingUI.method === m ? "selected" : ""}>${m.replace("_", " ")}</option>`).join("")}</select>
+                          <label style="font-size:12px;color:var(--paper-dim);display:flex;align-items:center;gap:6px">Extra discount ₹
+                            <input type="number" id="pay-discount-${bill.id}" value="0" min="0" style="width:80px" />
+                          </label>
+                        </div>
+                        <div style="font-size:12.5px;color:var(--muted)">Amount due: <span class="mono" id="pay-due-${bill.id}" style="color:var(--brass-bright);font-weight:700">₹${money(bill.grandTotal)}</span></div>
+                        <div style="display:flex;gap:8px">
+                          <button class="btn btn-primary btn-sm" data-confirm-pay="${bill.id}">Confirm payment</button>
+                          <button class="btn btn-ghost btn-sm" data-cancel-pay="${bill.id}">Cancel</button>
+                        </div>
+                      </div>`
+                    : `<button class="btn btn-primary btn-sm" data-start-pay="${bill.id}">Receive payment</button>`
+                }
+              </div>`
+            : ""
+        }
+      </div>`;
+      })
+      .join("")}
+  </div>`;
+
+  host.querySelectorAll("[data-start-pay]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      billingUI.payingBillId = Number(btn.getAttribute("data-start-pay"));
+      renderBillsList();
+    })
+  );
+  host.querySelectorAll("[data-cancel-pay]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      billingUI.payingBillId = null;
+      renderBillsList();
+    })
+  );
+  host.querySelectorAll("select[id^=pay-method-]").forEach((sel) =>
+    sel.addEventListener("change", (e) => (billingUI.method = e.target.value))
+  );
+  host.querySelectorAll("input[id^=pay-discount-]").forEach((inp) =>
+    inp.addEventListener("input", () => {
+      const billId = Number(inp.id.replace("pay-discount-", ""));
+      const bill = findBill(billId);
+      const extra = Number(inp.value || 0);
+      const due = Math.max(0, bill.grandTotal - extra);
+      const dueEl = document.getElementById(`pay-due-${billId}`);
+      if (dueEl) dueEl.textContent = "₹" + money(due);
+    })
+  );
+  host.querySelectorAll("[data-confirm-pay]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const bill = findBill(btn.getAttribute("data-confirm-pay"));
+      const methodSel = document.getElementById(`pay-method-${bill.id}`);
+      const method = methodSel ? methodSel.value : billingUI.method;
+      const discountInp = document.getElementById(`pay-discount-${bill.id}`);
+      const extraDiscount = Math.min(Number(discountInp?.value || 0), bill.grandTotal);
+      const amountPaid = Math.round((bill.grandTotal - extraDiscount) * 100) / 100;
+
+      if (extraDiscount > 0) {
+        bill.discountAmount = Math.round((bill.discountAmount + extraDiscount) * 100) / 100;
+        bill.grandTotal = amountPaid;
+      }
+
+      state.payments.push({
+        id: nextId("payment"),
+        billId: bill.id,
+        billNumber: bill.billNumber,
+        method,
+        amount: amountPaid,
+        status: "SUCCESS",
+        paidAt: new Date().toISOString(),
+      });
+      bill.status = "PAID";
+
+      const orderIds = bill.orderIds || [bill.orderId];
+      orderIds.forEach((oid) => {
+        const order = findOrder(oid);
+        if (order) {
+          order.status = "COMPLETED";
+          order.items.forEach((i) => {
+            if (i.status !== "CANCELLED") i.status = "COMPLETED";
+          });
+        }
+      });
+      const table = findTable(bill.tableId);
+      if (table) table.status = "AVAILABLE";
+
+      saveState();
+      billingUI.payingBillId = null;
+      showToast(`Payment received for ${bill.billNumber} — table is now available`);
+      renderBillsList();
+      renderUnbilledOrders();
+    })
+  );
+}
+
+/* ---------- Dashboard page ---------- */
+function renderDashboardPage(el) {
+  const isManager = session.user.role === "MANAGER";
+  const { start, end } = todayBounds();
+  const yStart = new Date(start);
+  yStart.setDate(yStart.getDate() - 1);
+  const yEnd = new Date(end);
+  yEnd.setDate(yEnd.getDate() - 1);
+
+  const ordersToday = state.orders.filter((o) => {
+    const d = new Date(o.createdAt);
+    return d >= start && d <= end;
+  });
+  const totalTables = state.tables.length;
+  const availableTables = state.tables.filter((t) => t.status === "AVAILABLE").length;
+  const occupiedTables = state.tables.filter((t) => t.status === "OCCUPIED").length;
+  const reservedTables = state.tables.filter((t) => t.status === "RESERVED").length;
+  const pendingOrders = state.orders.filter((o) => o.status === "PLACED").length;
+  const preparingOrders = state.orders.filter((o) => o.status === "PREPARING").length;
+  const completedToday = ordersToday.filter((o) => o.status === "COMPLETED").length;
+  const revenueToday = state.bills
+    .filter((b) => b.status === "PAID" && new Date(b.createdAt) >= start && new Date(b.createdAt) <= end)
+    .reduce((sum, b) => sum + b.grandTotal, 0);
+  const revenueYesterday = state.bills
+    .filter((b) => b.status === "PAID" && new Date(b.createdAt) >= yStart && new Date(b.createdAt) <= yEnd)
+    .reduce((sum, b) => sum + b.grandTotal, 0);
+  const revenueDelta = revenueYesterday > 0 ? Math.round(((revenueToday - revenueYesterday) / revenueYesterday) * 100) : null;
+
+  const stat = (icon, label, value, colorVar) => `
+    <div class="card stat-card-v2" style="border-left:3px solid ${colorVar ? `var(--${colorVar})` : "var(--border)"}">
+      <div class="stat-icon">${icon}</div>
+      <div>
+        <div class="stat-label">${label}</div>
+        <div class="mono stat-value" style="color:${colorVar ? `var(--${colorVar})` : "var(--paper)"}">${value}</div>
+      </div>
+    </div>`;
+
+  const funnel = [
+    { label: "Pending", value: pendingOrders, colorVar: "placed" },
+    { label: "Preparing", value: preparingOrders, colorVar: "preparing" },
+    { label: "Completed today", value: completedToday, colorVar: "completed" },
+  ];
+  const maxFunnel = Math.max(1, ...funnel.map((f) => f.value));
+
+  const occSlices = [
+    { label: "Available", value: availableTables, colorVar: "available" },
+    { label: "Occupied", value: occupiedTables, colorVar: "occupied" },
+    { label: "Reserved", value: reservedTables, colorVar: "reserved" },
+    { label: "Other", value: Math.max(totalTables - availableTables - occupiedTables - reservedTables, 0), colorVar: "disabled" },
+  ].filter((s) => s.value > 0);
+  const totalOcc = occSlices.reduce((s, o) => s + o.value, 0) || 1;
+
+  el.innerHTML = `
+    ${
+      isManager
+        ? `
+    <div class="revenue-hero">
+      <div class="revenue-hero-block">
+        <div class="stat-label">Revenue today</div>
+        <div class="mono revenue-hero-value">₹${Math.round(revenueToday).toLocaleString("en-IN")}</div>
+        ${
+          revenueDelta !== null
+            ? `<div style="font-size:12px;color:${revenueDelta >= 0 ? "var(--available)" : "var(--occupied)"}">${revenueDelta >= 0 ? "▲" : "▼"} ${Math.abs(revenueDelta)}% vs yesterday</div>`
+            : `<div style="font-size:12px;color:var(--muted)">No data from yesterday to compare</div>`
+        }
+      </div>
+      <div class="revenue-hero-divider"></div>
+      <div class="revenue-hero-block">
+        <div class="stat-label">Revenue yesterday</div>
+        <div class="mono revenue-hero-value" style="color:var(--paper-dim)">₹${Math.round(revenueYesterday).toLocaleString("en-IN")}</div>
+      </div>
+    </div>`
+        : ""
+    }
+
+    <div class="stat-grid">
+      ${stat("🍽", "Total tables", totalTables)}
+      ${stat("🟢", "Available", availableTables, "available")}
+      ${stat("🔴", "Occupied", occupiedTables, "occupied")}
+      ${stat("🟠", "Reserved", reservedTables, "reserved")}
+      ${stat("📋", "Orders today", ordersToday.length)}
+      ${stat("⏳", "Pending orders", pendingOrders, "placed")}
+      ${stat("🔥", "Preparing", preparingOrders, "preparing")}
+      ${stat("✅", "Completed today", completedToday, "completed")}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+      <div class="card">
+        <h3 style="font-size:14.5px;margin-bottom:14px;color:var(--paper-dim)">Table occupancy</h3>
+        <div style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin-bottom:14px">
+          ${occSlices.map((s) => `<div style="width:${(s.value / totalOcc) * 100}%;background:var(--${s.colorVar})"></div>`).join("")}
+        </div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+          ${occSlices.map((s) => `<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--paper-dim)"><span style="width:8px;height:8px;border-radius:50%;background:var(--${s.colorVar})"></span>${s.label} (${s.value})</div>`).join("")}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:14.5px;margin-bottom:14px;color:var(--paper-dim)">Order funnel (today)</h3>
+        ${funnel
+          .map(
+            (f) => `
+          <div class="bar-row">
+            <span style="width:90px;color:var(--paper-dim)">${f.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${(f.value / maxFunnel) * 100}%;background:var(--${f.colorVar})"></div></div>
+            <span class="mono" style="width:24px;text-align:right">${f.value}</span>
+          </div>`
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Menu Admin page ---------- */
+const SPICY_LEVELS = ["NONE", "MILD", "MEDIUM", "HOT", "EXTRA_HOT"];
+let menuAdminEditId = null;
+let menuAdminItemFilter = "ALL";
+
+function renderMenuAdminPage(el) {
+  const isManager = session.user.role === "MANAGER";
+  el.innerHTML = `
+    <div class="two-col-admin">
+      <div>
+        <div class="card" style="margin-bottom:20px">
+          <h3 style="font-size:14.5px;margin-bottom:10px">Categories</h3>
+          ${
+            isManager
+              ? `<form id="new-category-form" style="display:flex;gap:8px;margin-bottom:12px">
+                  <input type="text" id="new-category-name" placeholder="New category name" style="flex:1;min-width:0" />
+                  <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                </form>`
+              : `<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Only managers can add categories.</div>`
+          }
+          <div id="category-list" style="display:flex;flex-direction:column;gap:4px"></div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size:14.5px;margin-bottom:4px" id="item-form-title">New menu item</h3>
+          ${!isManager ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Only managers can add new items. Editing/reactivating existing items is fine.</div>` : `<div style="margin-bottom:10px"></div>`}
+          <form id="item-form" class="mi-form">
+            <select id="mi-category" required><option value="">Category…</option>${state.categories.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("")}</select>
+            <input type="text" id="mi-name" placeholder="Item name" required />
+            <textarea id="mi-description" placeholder="Description"></textarea>
+            <div class="mi-form-row">
+              <label class="small">Price ₹<input type="number" id="mi-price" placeholder="0" required /></label>
+              <label class="small">Prep time (min)<input type="number" id="mi-preptime" placeholder="0" required /></label>
+            </div>
+            <div class="mi-form-row">
+              <label class="small">Available qty<input type="number" id="mi-qty" placeholder="0" /></label>
+              <label class="small">Spicy level<select id="mi-spicy">${SPICY_LEVELS.map((s) => `<option value="${s}">${s}</option>`).join("")}</select></label>
+            </div>
+            <div class="veg-toggle-group">
+              <span class="small" style="margin-right:4px">Type</span>
+              <label class="veg-radio"><input type="radio" name="mi-veg" id="mi-veg-yes" value="veg" checked /><span class="veg-dot veg"></span> Veg</label>
+              <label class="veg-radio"><input type="radio" name="mi-veg" id="mi-veg-no" value="nonveg" /><span class="veg-dot nonveg"></span> Non-veg</label>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button type="submit" class="btn btn-primary btn-sm" style="flex:1" id="item-form-submit" ${!isManager ? "disabled" : ""}>Create item</button>
+              <button type="button" class="btn btn-ghost btn-sm hidden" id="item-form-cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="font-size:14.5px;color:var(--paper-dim)">All items (<span id="item-count">${state.items.length}</span>)</h3>
+          <select id="admin-item-filter">
+            <option value="ALL">Show all</option>
+            <option value="AVAILABLE">Available only</option>
+            <option value="UNAVAILABLE">Unavailable only</option>
+          </select>
+        </div>
+        <div id="admin-items-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("new-category-form")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("new-category-name");
+    const name = input.value.trim();
+    if (!name) return;
+    if (state.categories.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+      showToast("Category already exists", "error");
+      return;
+    }
+    state.categories.push({ id: nextId("category"), name });
+    saveState();
+    input.value = "";
+    showToast("Category added");
+    renderMenuAdminPage(el);
+  });
+
+  document.getElementById("item-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const isManagerNow = session.user.role === "MANAGER";
+    if (!menuAdminEditId && !isManagerNow) {
+      showToast("Only managers can add new items", "error");
+      return;
+    }
+    const categoryId = Number(document.getElementById("mi-category").value);
+    if (!categoryId) {
+      showToast("Choose a category", "error");
+      return;
+    }
+    const payload = {
+      categoryId,
+      name: document.getElementById("mi-name").value.trim(),
+      description: document.getElementById("mi-description").value.trim(),
+      price: Number(document.getElementById("mi-price").value),
+      prepTime: Number(document.getElementById("mi-preptime").value),
+      availableQty: Number(document.getElementById("mi-qty").value || 0),
+      spicyLevel: document.getElementById("mi-spicy").value,
+      veg: document.getElementById("mi-veg-yes").checked,
+    };
+
+    if (menuAdminEditId) {
+      const item = findItem(menuAdminEditId);
+      Object.assign(item, payload);
+      showToast("Item updated");
+    } else {
+      state.items.push({ id: nextId("item"), ...payload, rating: 0, available: true });
+      showToast("Item created");
+    }
+    saveState();
+    resetItemForm();
+    renderAdminItemsList();
+  });
+
+  document.getElementById("item-form-cancel").addEventListener("click", resetItemForm);
+  document.getElementById("admin-item-filter").value = menuAdminItemFilter;
+  document.getElementById("admin-item-filter").addEventListener("change", (e) => {
+    menuAdminItemFilter = e.target.value;
+    renderAdminItemsList();
+  });
+
+  renderCategoryList();
+  renderAdminItemsList();
+}
+
+function resetItemForm() {
+  menuAdminEditId = null;
+  const form = document.getElementById("item-form");
+  if (form) form.reset();
+  const title = document.getElementById("item-form-title");
+  if (title) title.textContent = "New menu item";
+  const submitBtn = document.getElementById("item-form-submit");
+  if (submitBtn) {
+    submitBtn.textContent = "Create item";
+    submitBtn.disabled = session.user.role !== "MANAGER";
+  }
+  const cancelBtn = document.getElementById("item-form-cancel");
+  if (cancelBtn) cancelBtn.classList.add("hidden");
+}
+
+function renderCategoryList() {
+  const host = document.getElementById("category-list");
+  if (!host) return;
+  host.innerHTML = state.categories.map((c) => `<div style="font-size:13px;color:var(--paper-dim);padding:4px 0">${escapeHtml(c.name)}</div>`).join("");
+}
+
+function renderAdminItemsList() {
+  const host = document.getElementById("admin-items-list");
+  if (!host) return;
+  document.getElementById("item-count").textContent = state.items.length;
+
+  const visibleItems = state.items.filter((item) => {
+    if (menuAdminItemFilter === "AVAILABLE") return item.available;
+    if (menuAdminItemFilter === "UNAVAILABLE") return !item.available;
+    return true;
+  });
+
+  if (visibleItems.length === 0) {
+    host.innerHTML = `<div class="empty-state card"><h3>No items here</h3><p>Try a different filter.</p></div>`;
+    return;
+  }
+
+  host.innerHTML = visibleItems
+    .map((item) => {
+      const cat = findCategory(item.categoryId);
+      return `
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;opacity:${item.available ? 1 : 0.6}">
+        <div>
+          <div style="font-weight:600">${escapeHtml(item.name)} <span style="font-size:11px;color:var(--muted)">(${cat ? escapeHtml(cat.name) : "—"})</span></div>
+          <div style="font-size:12.5px;color:var(--muted)">₹${item.price} · ${item.prepTime} min · ${item.veg ? "Veg" : "Non-veg"} · <span style="color:${item.available ? "var(--available)" : "var(--occupied)"}">${item.available ? "Available" : "Unavailable"}</span></div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" data-edit-item="${item.id}">Edit</button>
+          ${
+            item.available
+              ? `<button class="btn btn-danger btn-sm" data-remove-item="${item.id}">Remove</button>`
+              : `<button class="btn btn-primary btn-sm" data-reactivate-item="${item.id}">Reactivate</button>`
+          }
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  host.querySelectorAll("[data-edit-item]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const item = findItem(btn.getAttribute("data-edit-item"));
+      menuAdminEditId = item.id;
+      document.getElementById("mi-category").value = item.categoryId;
+      document.getElementById("mi-name").value = item.name;
+      document.getElementById("mi-description").value = item.description || "";
+      document.getElementById("mi-price").value = item.price;
+      document.getElementById("mi-preptime").value = item.prepTime;
+      document.getElementById("mi-qty").value = item.availableQty;
+      document.getElementById("mi-spicy").value = item.spicyLevel;
+      document.getElementById("mi-veg-yes").checked = item.veg;
+      document.getElementById("mi-veg-no").checked = !item.veg;
+      document.getElementById("item-form-title").textContent = "Edit item";
+      const submitBtn = document.getElementById("item-form-submit");
+      submitBtn.textContent = "Update item";
+      submitBtn.disabled = false;
+      document.getElementById("item-form-cancel").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    })
+  );
+
+  host.querySelectorAll("[data-remove-item]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const item = findItem(btn.getAttribute("data-remove-item"));
+      if (!confirm(`Mark "${item.name}" unavailable?`)) return;
+      item.available = false;
+      saveState();
+      showToast(`${item.name} marked unavailable — find it again anytime via the "Reactivate" button here`);
+      renderAdminItemsList();
+    })
+  );
+
+  host.querySelectorAll("[data-reactivate-item]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const item = findItem(btn.getAttribute("data-reactivate-item"));
+      item.available = true;
+      saveState();
+      showToast(`${item.name} is available again`);
+      renderAdminItemsList();
+    })
+  );
+}
+
+/* ---------- Boot ---------- */
+
+// Kitchen "auto-cook" simulation: orders move themselves along PLACED -> PREPARING ->
+// PREPARED -> SERVED every ~6s, so you don't have to click through every stage by hand.
+// Staff can still override at any point (advance early, or cancel while eligible).
+// It deliberately stops at SERVED — completing + billing stays a deliberate staff action.
+function autoAdvanceTick() {
+  let changed = false;
+  state.orders.forEach((order) => {
+    const next = NEXT_STATUS[order.status];
+    if (!next) return;
+    const targetIdx = STATUS_ORDER.indexOf(next);
+    order.items.forEach((i) => {
+      if (i.status === "CANCELLED") return;
+      if (STATUS_ORDER.indexOf(i.status) < targetIdx) i.status = next;
+    });
+    recalcOrderStatus(order);
+    changed = true;
+  });
+  if (!changed) return;
+  saveState();
+  if (session.user && session.page === "orders") renderOrdersGrid();
+  if (session.user && session.page === "dashboard") renderDashboardPage(document.getElementById("page-content"));
+}
+setInterval(autoAdvanceTick, 6000);
+
+render();
+</script>
+</body>
+</html>
