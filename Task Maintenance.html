@@ -490,7 +490,7 @@ dialog::backdrop{backdrop-filter:none;background:rgba(0,0,0,.7)}
     <div class="fadd"><span class="fplus" aria-hidden="true">+</span><div class="fat"><b>Add a custom field</b><small>Create a field for this project</small></div><button type="button" class="fcfg" data-a="fconf" aria-expanded="false">Configure</button></div>
     <div id="nfpanel" hidden>
       <div class="two"><div><label for="nfn">Field name</label><input id="nfn" maxlength="30" placeholder="Priority"></div><div><label for="nft">Type</label><select id="nft"><option value="text">Text</option><option value="num">Number</option><option value="sel">Dropdown</option></select></div></div>
-      <div id="nfo" hidden><label for="nfop">Dropdown choices (separate with commas)</label><input id="nfop" placeholder="High, Medium, Low"></div>
+      <div id="nfo" hidden><label for="nfin">Dropdown choices</label><div id="nfchips"></div><input id="nfop" type="hidden"><p class="chhint">Type a choice and press <b>Enter</b> or <b>comma</b> to add it. Add as many as you need.</p></div>
       <p class="err" id="nferr" role="alert"></p>
       <button class="btn full" data-a="fadd">Add field</button>
     </div>
@@ -736,22 +736,42 @@ function renderFields(){
   const hc=`<div class="ffc lock${he?' edit':''}" data-k="hours"><div class="ffh"><span class="fic" aria-hidden="true">◷</span><span class="ffm"><b class="ffn">${esc(lab('hours'))}</b><small class="fft">Pinned first · always required</small></span><span class="flk">LOCKED</span>${eb('hours',lab('hours'),he)}</div><div class="ffe"${he?'':' hidden'}><label>Field name</label><input class="fl" data-k="hours" value="${esc(lab('hours'))}" maxlength="30" aria-label="Hours name"></div></div>`;
   const cards=f.map((x,i)=>{const ed=fEdit.has(x.k);
     return `<div class="ffc${x.on?'':' off'}${ed?' edit':''}" data-k="${x.k}"><div class="ffh"><span class="fgr" title="Drag to reorder" aria-hidden="true">⠿</span><b class="ffn">${esc(x.label)}</b>${eb(x.k,x.label,ed)}</div><small class="fft">${x.k==='desc'?'Long text':tl[x.type]}${x.custom?' · custom':''}</small>`+
-    `<div class="ffe"${ed?'':' hidden'}><label>Field name</label><input class="fl" data-k="${x.k}" value="${esc(x.label)}" maxlength="30" aria-label="Field name"><div class="fftools"><button type="button" data-a="fup" data-k="${x.k}" ${i===0?'disabled':''}>▲ Move up</button><button type="button" data-a="fdn" data-k="${x.k}" ${i===f.length-1?'disabled':''}>▼ Move down</button><button type="button" class="rmv" data-a="frem" data-k="${x.k}">Remove</button></div></div>`+
+    `<div class="ffe"${ed?'':' hidden'}><label>Field name</label><input class="fl" data-k="${x.k}" value="${esc(x.label)}" maxlength="30" aria-label="Field name">${x.custom&&x.type==='sel'?`<label>Dropdown choices</label><div data-chk="${x.k}"></div><p class="chhint" data-chh="${x.k}">Type a choice and press Enter or comma. Click × to remove one.</p>`:''}<div class="fftools"><button type="button" data-a="fup" data-k="${x.k}" ${i===0?'disabled':''}>▲ Move up</button><button type="button" data-a="fdn" data-k="${x.k}" ${i===f.length-1?'disabled':''}>▼ Move down</button><button type="button" class="rmv" data-a="frem" data-k="${x.k}">Remove</button></div></div>`+
     `<div class="ffs">${sw('fon',x.k,x.on,'Shown')}${x.type==='yn'?'<span class="ffno">No required setting</span>':sw('fmust',x.k,isMust(x),'Required')}</div></div>`}).join('');
   $('flist').innerHTML=hc+`<div class="ffg">${cards}</div>`+(f.length?'':'<p class="ro">All fields are removed. Add one back below, or add your own.</p>');
+  $('flist').querySelectorAll('[data-chk]').forEach(box=>{const fd=FIELDS().find(y=>y.k===box.dataset.chk),hint=$('flist').querySelector('[data-chh="'+box.dataset.chk+'"]');if(!fd)return;
+    const note=v=>{if(hint){hint.classList.toggle('warn',!v.length);hint.textContent=v.length?'Type a choice and press Enter or comma. Click \u00D7 to remove one.':'Add at least one choice, or this dropdown will be empty.'}};
+    chipsEditor(box,fd.opts||[],v=>{fd.opts=v;save();note(v)},true);note(fd.opts||[])});
   const r=U().removed||[];
   $('rlist').innerHTML=r.length?`<div class="frm"><h3 class="fh">Removed fields</h3><p class="fhint">Tap one to add it back to the form.</p><div class="rbk">${r.map(x=>`<button data-a="fback" data-k="${x.k}">➕ ${esc(x.label)}</button>`).join('')}</div></div>`:'';
   $('fact').textContent=f.filter(x=>x.on).length+' ACTIVE';
 }
-function openFields(){$('dtg').value=target();$('pgs').value=pageSize();$('nferr').textContent='';$('nfn').value='';$('nfop').value='';$('nft').value='text';$('nfo').hidden=true;$('nfpanel').hidden=true;const cb=document.querySelector('[data-a="fconf"]');if(cb)cb.setAttribute('aria-expanded','false');fEdit=new Set();renderFields();$('fldlg').showModal()}
+function openFields(){$('dtg').value=target();$('pgs').value=pageSize();$('nferr').textContent='';$('nfn').value='';NF.clear();$('nfop').value='';$('nft').value='text';$('nfo').hidden=true;$('nfpanel').hidden=true;const cb=document.querySelector('[data-a="fconf"]');if(cb)cb.setAttribute('aria-expanded','false');fEdit=new Set();renderFields();$('fldlg').showModal()}
 function moveField(k,d){const f=FIELDS(),i=f.findIndex(x=>x.k===k),j=i+d;if(i<0||j<0||j>=f.length)return;[f[i],f[j]]=[f[j],f[i]];save();renderFields();render()}
+function chipsEditor(box,init,onChange,blurAdd){
+  let vals=(init||[]).slice();
+  const inp=document.createElement('input');inp.className='chin';inp.type='text';inp.maxLength=40;inp.setAttribute('aria-label','Add a choice');
+  box.classList.add('chbox');box.textContent='';box.appendChild(inp);
+  const draw=()=>{[...box.querySelectorAll('.chip')].forEach(n=>n.remove());
+    vals.forEach((v,i)=>{const c=document.createElement('span'),x=document.createElement('button');c.className='chip';c.textContent=v;x.type='button';x.className='chx';x.setAttribute('aria-label','Remove '+v);x.textContent='\u00D7';
+      x.onclick=()=>{vals.splice(i,1);draw();onChange(vals.slice());inp.focus()};c.appendChild(x);box.insertBefore(c,inp)});
+    inp.placeholder=vals.length?'Add another\u2026':'Type a choice, press Enter'};
+  const add=t=>{let n=0;String(t).split(/[\n,;]+/).map(z=>z.trim()).filter(Boolean).forEach(z=>{if(!vals.some(v=>v.toLowerCase()===z.toLowerCase())){vals.push(z.slice(0,40));n++}});inp.value='';if(n){draw();onChange(vals.slice())}};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','||e.key===';'){e.preventDefault();add(inp.value)}else if(e.key==='Backspace'&&!inp.value&&vals.length){vals.pop();draw();onChange(vals.slice())}});
+  inp.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData).getData('text');if(/[\n,;]/.test(t)){e.preventDefault();add(t)}});
+  if(blurAdd)inp.addEventListener('blur',()=>{if(inp.value.trim())add(inp.value)});
+  box.addEventListener('click',e=>{if(e.target===box)inp.focus()});
+  draw();
+  return{get:()=>vals.slice(),commit:()=>{if(inp.value.trim())add(inp.value)},clear:()=>{vals=[];inp.value='';draw()}};
+}
+const NF=chipsEditor($('nfchips'),[],v=>{$('nfop').value=v.join(', ')});
 function addField(){
-  const name=$('nfn').value.trim(),type=$('nft').value,opts=$('nfop').value.split(',').map(x=>x.trim()).filter(Boolean);
+  NF.commit();const name=$('nfn').value.trim(),type=$('nft').value,opts=NF.get();
   if(!name){$('nferr').textContent='Enter a name for the field.';return}
   if(FIELDS().some(f=>f.label.toLowerCase()===name.toLowerCase())){$('nferr').textContent='A field with this name already exists.';return}
   if(type==='sel'&&!opts.length){$('nferr').textContent='Enter at least one dropdown choice.';return}
   FIELDS().push({k:'c'+Date.now().toString(36),label:name,type,on:true,custom:1,opts:type==='sel'?opts:undefined});
-  $('nfn').value='';$('nfop').value='';$('nferr').textContent='';save();renderFields();render();
+  $('nfn').value='';NF.clear();$('nfop').value='';$('nferr').textContent='';save();renderFields();render();
 }
 
 /* ---------- add / edit ---------- */
@@ -1036,7 +1056,7 @@ document.addEventListener('click',e=>{
   else if(a==='copycsv')copyText(csvText).then(ok=>{$('rmsg').textContent=ok?'Copied! Paste it into Excel or Notepad.':'Could not copy automatically. Select the table and copy it.'});
   else if(a==='dlcsv')download();else if(a==='dlpdf')downloadPdf();
   else if(a==='bkcopy')backup();else if(a==='restore')restore();
-  else if(a==='theme'){const n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('taskmaint_theme',n)}catch(x){}}
+  else if(a==='theme'){const n=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=n;try{localStorage.setItem('taskmaint_theme',n)}catch(x){}}
   else if(a==='delspec')delSpec();
   else if(a==='delall'){const n=T().length+Object.keys(A()).length;if(!n){sayD('You have nothing to delete.');return}if(confirm('Delete ALL your tasks and attendance ('+n+' records)? This cannot be undone.')){U().tasks=[];U().att={};save();render();sayD('Everything deleted.')}}
   else if(a==='tab'){view=b.dataset.t;if(view==='cal'&&!selDay){const n=new Date();selDay=iso(n);calY=n.getFullYear();calM=n.getMonth()}render()}
@@ -1443,7 +1463,7 @@ body.hide-notes #list .l3{display:none}
  function app(){return typeof me!=='undefined'&&me&&$('app')&&!$('app').hidden}
  function go(s){var e=document.querySelector(s);if(e)e.click()}
  function vis(b){return !b.hidden&&getComputedStyle(b).display!=='none'}
- function dark(){var d=document.documentElement.dataset.theme;return d==='dark'||(!d&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+ function dark(){return document.documentElement.dataset.theme!=='light'}
  function split(t){var m=/^(\S+)\s+(.+)$/.exec(t);return m&&!/^[A-Za-z0-9]/.test(m[1])?{i:m[1],l:m[2]}:{i:'',l:t}}
  function newLeave(v,lt){return function(){go('.addsm,[data-a="add"]');go('[data-a="att"][data-v="'+v+'"]');if(lt)go('[data-a="lt"][data-v="'+lt+'"]')}}
  function sortTo(m,d){return function(){if(m)SORT.m=m;if(d)SORT.d=d;try{localStorage.setItem('tm_sort',JSON.stringify(SORT))}catch(e){}render()}}
@@ -1670,7 +1690,7 @@ body.hide-notes #list .l3{display:none}
 <style>
 /* Form fields: matched to the shared design */
 #fldlg.fwiz{--fa:#8450c3;--fs:#f7f3fc;--fs2:#eee4fa;--fb:#ece6f7;--fbg:#fff;--flk:#f6f0fd;--flb:#e5d8f6;--ftg:#e6e1ee;--fdash:#d9cdef;width:min(580px,94vw);background:var(--fbg);box-shadow:0 24px 60px rgba(40,20,80,.28)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #fldlg.fwiz{--fa:var(--acc);--fs:var(--soft);--fs2:var(--card);--fb:var(--line);--fbg:var(--card);--flk:var(--soft);--flb:var(--line);--ftg:var(--line);--fdash:var(--line)}}
+:root:not([data-theme="light"]) #fldlg.fwiz{--fa:var(--acc);--fs:var(--soft);--fs2:var(--card);--fb:var(--line);--fbg:var(--card);--flk:var(--soft);--flb:var(--line);--ftg:var(--line);--fdash:var(--line)}
 :root[data-theme="dark"] #fldlg.fwiz{--fa:var(--acc);--fs:var(--soft);--fs2:var(--card);--fb:var(--line);--fbg:var(--card);--flk:var(--soft);--flb:var(--line);--ftg:var(--line);--fdash:var(--line)}
 #fldlg .fhd{padding:20px 24px;border-bottom:1px solid var(--fb)}
 #fldlg .fico{width:42px;height:42px;border-radius:12px;background:var(--fs);color:var(--fa);font-size:1.15rem}
@@ -1727,7 +1747,7 @@ body.hide-notes #list .l3{display:none}
 </script><style>
 /* Hours chart: Time insights design */
 #tmcdlg.tcd{--tb:#fff;--th:#f1f8f6;--tc:#f7fbfa;--tbd:#d8e8e4;--tt:#0f2f2a;--tm:#69867f;--ta:#12957d;--tai:#fff;--tp:#eaf4f1;color-scheme:light;width:min(940px,96vw);max-height:94vh;padding:0;border:0;border-radius:26px;overflow:hidden;background:var(--tb);color:var(--tt);box-shadow:0 30px 80px rgba(8,30,28,.4)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #tmcdlg.tcd{--tb:#0d1a20;--th:#14262c;--tc:#111f26;--tbd:#1e3239;--tt:#e8f4f2;--tm:#7b9895;--ta:#7ee2c4;--tai:#06302a;--tp:#15262d;color-scheme:dark}}
+:root:not([data-theme="light"]) #tmcdlg.tcd{--tb:#0d1a20;--th:#14262c;--tc:#111f26;--tbd:#1e3239;--tt:#e8f4f2;--tm:#7b9895;--ta:#7ee2c4;--tai:#06302a;--tp:#15262d;color-scheme:dark}
 :root[data-theme="dark"] #tmcdlg.tcd{--tb:#0d1a20;--th:#14262c;--tc:#111f26;--tbd:#1e3239;--tt:#e8f4f2;--tm:#7b9895;--ta:#7ee2c4;--tai:#06302a;--tp:#15262d;color-scheme:dark}
 #tmcdlg select option{background:var(--tb);color:var(--tt)}
 #tmcdlg select option:checked{background:var(--ta);color:var(--tai)}
@@ -1787,7 +1807,7 @@ body.hide-notes #list .l3{display:none}
 <style>
 /* login: new design */
 #login{position:relative;min-height:100vh;display:grid;place-items:center;padding:24px;overflow:hidden;background:linear-gradient(135deg,#f3efff,#fdeffa)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #login{background:linear-gradient(135deg,#0c0922,#1a0f3a 55%,#2b0f3c)}}
+:root:not([data-theme="light"]) #login{background:linear-gradient(135deg,#0c0922,#1a0f3a 55%,#2b0f3c)}
 :root[data-theme="dark"] #login{background:linear-gradient(135deg,#0c0922,#1a0f3a 55%,#2b0f3c)}
 #login[hidden]{display:none!important}
 #login .lgbg i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:lgdrift 14s ease-in-out infinite alternate}
@@ -1852,6 +1872,7 @@ canvas.crk{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z
  function celebrate(){
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var nm='';try{nm=U().name}catch(e){}
+  var hi=$('hi');if(hi){hi.classList.add('tmgreet');setTimeout(function(){hi.classList.remove('tmgreet')},3900)}
   var w=document.createElement('div');w.className='wlc';w.setAttribute('role','status');w.textContent='\uD83C\uDF89 Welcome'+(nm?', '+nm:'')+'!';document.body.appendChild(w);
   requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});
   setTimeout(function(){w.classList.remove('on');setTimeout(function(){w.remove()},500)},2600);
@@ -1881,12 +1902,13 @@ canvas.crk{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z
 })();
 </script>
 <style>
-/* click feedback: a quick colour blink and ripple */
+/* click feedback: the text blinks red, blue, green, orange, purple, plus a soft ripple */
 @keyframes tmrip{0%{transform:scale(1);opacity:.7}100%{transform:scale(11);opacity:0}}
-@keyframes tmblk{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--bc) 70%,transparent)}60%{box-shadow:0 0 0 7px color-mix(in srgb,var(--bc) 28%,transparent)}100%{box-shadow:0 0 0 13px transparent}}
+@keyframes tmtxt{0%{color:#ef4444}20%{color:#3b82f6}40%{color:#22c55e}60%{color:#f59e0b}80%{color:#a855f7}100%{color:#ef4444}}
 .tmrip{position:fixed;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;pointer-events:none;z-index:2147483640;animation:tmrip .6s ease-out forwards}
-.tmblk{animation:tmblk .55s ease-out}
-@media(prefers-reduced-motion:reduce){.tmrip{display:none}.tmblk{animation:none}}
+.tmtxt,.tmtxt *{animation:tmtxt .9s linear 2;-webkit-text-fill-color:currentColor}
+header h1.tmgreet,#hi.tmgreet{background:none;-webkit-text-fill-color:currentColor;animation:tmtxt 1.2s linear 3}
+@media(prefers-reduced-motion:reduce){.tmrip{display:none}.tmtxt,.tmtxt *,#hi.tmgreet{animation:none}}
 </style>
 <script>
 /* click feedback: every action blinks a colour */
@@ -1900,8 +1922,19 @@ canvas.crk{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z
   var c=COL[n++%COL.length],r=t.getBoundingClientRect(),x=e.detail===0?r.left+r.width/2:e.clientX,y=e.detail===0?r.top+r.height/2:e.clientY;
   var host=t.closest('dialog[open]')||document.body,d=document.createElement('span');
   d.className='tmrip';d.style.left=x+'px';d.style.top=y+'px';d.style.background=c;host.appendChild(d);setTimeout(function(){d.remove()},650);
-  t.style.setProperty('--bc',c);t.classList.remove('tmblk');void t.offsetWidth;t.classList.add('tmblk');setTimeout(function(){t.classList.remove('tmblk')},600);
+  t.classList.remove('tmtxt');void t.offsetWidth;t.classList.add('tmtxt');clearTimeout(t._tb);t._tb=setTimeout(function(){t.classList.remove('tmtxt')},1900);
  },true);
 })();
 </script>
+<style>
+/* dropdown choices: type a value, press Enter or comma, it becomes a chip */
+.chbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px solid var(--fb,var(--line));border-radius:12px;background:var(--fbg,var(--bg));min-height:46px;cursor:text}
+.chbox:focus-within{border-color:var(--fa,var(--acc))}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 6px 5px 12px;border-radius:999px;background:var(--fs,var(--soft));color:var(--ink);font-size:.8rem;font-weight:600;max-width:100%}
+.chx{border:0;background:none;color:var(--mute);width:20px;height:20px;border-radius:50%;cursor:pointer;line-height:1;font-size:1.05rem;padding:0;margin:0;display:grid;place-items:center}
+.chx:hover{background:var(--line);color:var(--ink)}
+.chbox input.chin{flex:1;min-width:130px;width:auto;border:0!important;background:transparent!important;padding:6px 4px!important;margin:0!important;box-shadow:none!important;outline:none;color:var(--ink);font:inherit;font-size:.86rem}
+.chhint{margin:6px 2px 0;font-size:.7rem;color:var(--mute);line-height:1.4}.chhint.warn{color:var(--bad)}
+#fldlg .ffe .chbox{margin-top:2px}
+</style>
 </body></html>
