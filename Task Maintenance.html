@@ -459,13 +459,18 @@ dialog::backdrop{backdrop-filter:none;background:rgba(0,0,0,.7)}
   <button class="btn alt full" data-a="close">Close</button>
 </dialog>
 
-<dialog id="ndlg"><div class="dh"><h2>📝 Notes</h2></div>
-  <label for="nt">Title (optional)</label><input id="nt" maxlength="60" placeholder="Meeting points">
-  <label for="nx">Note</label><textarea id="nx" placeholder="Write your note"></textarea>
-  <p class="err" id="nerr" role="alert"></p>
-  <button class="btn full" id="nsave" data-a="notesave">Add note</button><button class="btn alt full" id="ncancel" data-a="notecancel" hidden>Cancel edit</button>
-  <div id="nlist"></div>
-  <button class="btn alt full" data-a="close">Close</button></dialog>
+<dialog id="ndlg" class="nwiz"><div class="nhd"><span class="nico" aria-hidden="true">✎</span><div class="nht"><small>WORKSPACE</small><h2>Notes</h2></div><button type="button" class="nxb" data-a="close" aria-label="Close">×</button></div>
+  <div class="nbody" tabindex="-1" autofocus>
+    <section class="ncomp"><h3 id="nph">Write a note</h3><p class="nsub" id="nps">Capture a thought or meeting takeaway.</p>
+      <label class="nlab" for="nt">Title <i>· OPTIONAL</i></label><input id="nt" maxlength="60" placeholder="Meeting points">
+      <label class="nlab" for="nx">Note</label><div class="nxw"><textarea id="nx" placeholder="Write your note…"></textarea><p class="nxh">Your note will be saved with today’s work log.</p></div>
+      <p class="ncnt" id="ncnt">0 characters</p>
+      <p class="err" id="nerr" role="alert"></p>
+      <button type="button" class="btn full" id="nsave" data-a="notesave"><b>+</b> Add note</button><button type="button" class="btn alt full" id="ncancel" data-a="notecancel" hidden>Cancel edit</button>
+      <p class="nfoot">Notes are private to your workspace.</p></section>
+    <section class="nlistw"><div class="nlh"><h3>Your notes</h3><span class="nchip" id="ncount">0 NOTES</span></div><p class="nsub">Notes you’ve added will appear here.</p><div class="nlcard" id="nlist"></div></section>
+  </div>
+  <div class="nft"><span>Autosaved when added</span><button type="button" class="nclose" data-a="close">Close</button></div></dialog>
 
 <dialog id="fdlg" class="big"><div class="dh"><h2>📋 Default values</h2></div>
   <p class="ro">These fill the Sprint, Task ID and Iteration lists in Add task. Edit them here only.</p>
@@ -593,7 +598,7 @@ const leaveViewHTML=()=>{const att=A(),kd=o=>o.a.s==='H'?'holiday':o.a.k==='unpl
 /* ---------- main page ---------- */
 function render(){
   const u=U(),t=T(),now=new Date(),today=iso(now),day=dayTotals();
-  $('hi').innerHTML=`<span class="avt">${avOf(u.name)}</span><span>Hi, ${esc(u.name)} 👋<small>${t.length} task${t.length===1?'':'s'} saved</small></span>`;
+  $('hi').innerHTML=`<span class="avt">${avOf(u.name)}</span><span>Hi, ${esc((u.profile&&u.profile.first)||u.name)} 👋${statusPills()}<small>${t.length} task${t.length===1?'':'s'} saved</small></span>`;
   const m1=monday(now),m2=new Date(m1);m2.setDate(m2.getDate()+6);
   const pre=today.slice(0,8);
   applyLabels();
@@ -1003,10 +1008,15 @@ function editDef(id){const d=D().find(x=>x.id===id);if(!d)return;defEdit=id;$('d
 function delDef(id){const d=D().find(x=>x.id===id);if(!d||!confirm('Delete default '+d.taskId+'? It will no longer appear in the Add task lists.'))return;
   delete C()[ck(d.taskId)];U().defaults=D().filter(x=>x.id!==id);if(defEdit===id)clearDef();save();renderDefs();render()}
 /* ---------- notes ---------- */
+function statusPills(){const t=String(((U().profile||{}).status)||U().status||'').trim();return t?`<span class="hst" title="Your status">${esc(t)}</span>`:''}
+const NEMPTY='<div class="nempty"><span class="nei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true"><rect x="12" y="6" width="32" height="42" rx="5" stroke="currentColor" stroke-width="2.4" opacity=".55"/><path d="M19 17h18M19 25h18M19 33h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><circle cx="42" cy="42" r="9" fill="currentColor"/><path d="M42 38v8M38 42h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span><b>Nothing written yet</b><p>Add a note to start collecting your thoughts and meeting points.</p><button type="button" class="nnew" data-a="newnote">+ New note</button></div>';
+function cnt(){const n=$('nx').value.length;$('ncnt').textContent=n+(n===1?' character':' characters')}
 function renderNotes(){
   const l=[...N()].sort((a,b)=>b.upd-a.upd);
-  $('nlist').innerHTML=l.length?l.map(n=>`<div class="note"><div class="nh"><b>${esc(n.title||'Note')}</b><span class="ia"><button data-a="noteedit" data-id="${n.id}" aria-label="Edit note">✏️</button><button data-a="notedel" data-id="${n.id}" aria-label="Delete note">🗑️</button></span></div><p>${esc(n.text)}</p><small>${new Date(n.upd).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</small></div>`).join(''):'<div class="empty" style="margin-top:10px"><span class="big">🦉</span>No notes yet.</div>';
-  $('nsave').textContent=noteEdit?'Update note':'Add note';$('ncancel').hidden=!noteEdit;
+  $('nlist').innerHTML=l.length?l.map(n=>`<div class="note"><div class="nh"><b>${esc(n.title||'Note')}</b><span class="ia"><button data-a="noteedit" data-id="${n.id}" aria-label="Edit note">✏️</button><button data-a="notedel" data-id="${n.id}" aria-label="Delete note">🗑️</button></span></div><p>${esc(n.text)}</p><small>${new Date(n.upd).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})}</small></div>`).join(''):NEMPTY;
+  $('ncount').textContent=l.length+(l.length===1?' NOTE':' NOTES');
+  $('nph').textContent=noteEdit?'Edit note':'Write a note';$('nps').textContent=noteEdit?'Change the title or the text, then update the note.':'Capture a thought or meeting takeaway.';
+  $('nsave').innerHTML=noteEdit?'Update note':'<b>+</b> Add note';$('ncancel').hidden=!noteEdit;cnt();
 }
 function clearNote(){noteEdit=null;$('nt').value='';$('nx').value='';$('nerr').textContent=''}
 function openNotes(){clearNote();renderNotes();$('ndlg').showModal()}
@@ -1021,6 +1031,7 @@ function editNote(id){const n=N().find(y=>y.id===id);if(!n)return;noteEdit=id;$(
 function delNote(id){const n=N().find(y=>y.id===id);if(!n||!confirm('Delete this note?'))return;U().notes=N().filter(y=>y.id!==id);if(noteEdit===id)clearNote();save();renderNotes()}
 
 /* ---------- events ---------- */
+$('nx').addEventListener('input',cnt);
 $('sk').onchange=()=>{const d=$('sk').value==='date';$('sv').hidden=d;$('sdw').hidden=!d;$('sv').value='';$('sd').value='';dsync('sd')};
 ['fdt','rf','rt','sd'].forEach(mkDate);
 $('pf').addEventListener('change',e=>{
@@ -1360,6 +1371,8 @@ load();$('nm').value=DB.last||'';show();
   <div class="two"><div><label for="pfn">First name</label><input id="pfn" maxlength="40" autocomplete="given-name"></div><div><label for="pln">Last name</label><input id="pln" maxlength="40" autocomplete="family-name"></div></div>
   <label for="pem">Email</label><input id="pem" type="email" maxlength="80" autocomplete="email" placeholder="name@example.com">
   <label for="pphn">Phone number</label><input id="pphn" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="+91 98765 43210">
+  <label for="pst">Status <small style="display:inline;font-weight:500;color:var(--mute)">(shows next to your name)</small></label><input id="pst" maxlength="40" placeholder="e.g. Available">
+  <div class="pstc"><button type="button" data-st="Available">Available</button><button type="button" data-st="In a meeting">In a meeting</button><button type="button" data-st="Busy">Busy</button><button type="button" data-st="Work from home">Work from home</button><button type="button" data-st="On leave">On leave</button></div>
   <label for="ppr">Project name</label><input id="ppr" maxlength="60">
   <div class="two"><div><label for="prl">Role / Designation</label><input id="prl" maxlength="50"></div><div><label for="ptm">Team / Company</label><input id="ptm" maxlength="50"></div></div>
   <div class="two"><div><label for="pid">Employee ID</label><input id="pid" maxlength="30"></div><div><label for="plc">Location</label><input id="plc" maxlength="50"></div></div>
@@ -1370,7 +1383,7 @@ load();$('nm').value=DB.last||'';show();
 <script>
 /* profile: name, contact, photo and basic details (all optional) */
 (function(){
- var $=function(i){return document.getElementById(i)},F={first:'pfn',last:'pln',email:'pem',phone:'pphn',project:'ppr',role:'prl',team:'ptm',empid:'pid',loc:'plc',about:'pab'},tmp;
+ var $=function(i){return document.getElementById(i)},F={first:'pfn',last:'pln',status:'pst',email:'pem',phone:'pphn',project:'ppr',role:'prl',team:'ptm',empid:'pid',loc:'plc',about:'pab'},tmp;
  function ok(){return typeof me!=='undefined'&&me&&typeof DB!=='undefined'&&DB.users&&DB.users[me]}
  function pr(){return ok()&&DB.users[me].profile||{}}
  function put(el,photo,name){el.textContent='';if(photo){var i=new Image();i.alt='';i.src=photo;el.appendChild(i)}else el.textContent=avOf(name)}
@@ -1380,9 +1393,9 @@ load();$('nm').value=DB.last||'';show();
  var qa=document.querySelector('.qa');if(qa)qa.insertAdjacentHTML('afterbegin','<button data-p="open">👤 Profile</button>');
  function showPhoto(){var p=pr(),ph=tmp===undefined?p.photo:tmp;put($('pav'),ph,DB.users[me].name);$('pup').hidden=!!ph;$('pad').hidden=$('pch').hidden=$('prm').hidden=!ph}
  function has(){return Object.keys(pr()).length>0}
- function form(){var p=pr();tmp=undefined;for(var k in F)$(F[k]).value=p[k]||'';$('perr').textContent='';showPhoto();$('pview').hidden=true;$('pform').hidden=false}
+ function form(){var p=pr();tmp=undefined;for(var k in F)$(F[k]).value=p[k]||'';if(!p.status&&U().status)$('pst').value=U().status;$('perr').textContent='';showPhoto();$('pview').hidden=true;$('pform').hidden=false}
  function view(){var p=pr(),u=DB.users[me],nm=((p.first||'')+' '+(p.last||'')).trim()||u.name,sub=[p.role,p.team].filter(Boolean).join(' · '),
-  L=[['📧 Email',p.email],['📞 Phone',p.phone],['🗂️ Project',p.project],['💼 Role',p.role],['🏢 Team / Company',p.team],['🆔 Employee ID',p.empid],['📍 Location',p.loc],['📝 About',p.about]].filter(function(r){return r[1]});
+  L=[['📌 Status',p.status||U().status],['📧 Email',p.email],['📞 Phone',p.phone],['🗂️ Project',p.project],['💼 Role',p.role],['🏢 Team / Company',p.team],['🆔 Employee ID',p.empid],['📍 Location',p.loc],['📝 About',p.about]].filter(function(r){return r[1]});
   $('pview').innerHTML='<div class="pv"><span class="avt pbig" id="pvav"></span><div><h3>'+esc(nm)+'</h3>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div></div>'+(L.length?L.map(function(r){return '<div class="prow"><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></div>'}).join(''):'<p class="ro">No details added yet.</p>')+'<button type="button" class="btn full" data-p="edit" style="margin-top:12px">✏️ Edit profile</button><button type="button" class="btn alt full" data-a="close">Close</button>';
   put($('pvav'),p.photo,u.name);$('pform').hidden=true;$('padj').hidden=true;$('pview').hidden=false}
  function open(){if(!ok())return;if(has())view();else form();$('pdlg').showModal()}
@@ -1405,7 +1418,7 @@ var im,Z=1,ox=0,oy=0,S=240,bs=1,dr=null;
   if(v.phone&&(!/^[+()\-.\s\d]+$/.test(v.phone)||v.phone.replace(/\D/g,'').length<6)){$('perr').textContent='Please enter a valid phone number, or leave it empty.';return}
   var p={};for(var k in v)if(v[k])p[k]=v[k];
   var ph=tmp===undefined?pr().photo:tmp;if(ph)p.photo=ph;
-  DB.users[me].profile=p;save_();if(typeof render==='function')render();view();
+  DB.users[me].profile=p;delete DB.users[me].status;save_();if(typeof render==='function')render();view();
   if(typeof toast==='function')try{toast('Profile saved')}catch(e){}
  }
  function save_(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){alert('Could not save: browser storage is full. Try a smaller photo.')}}
@@ -1937,4 +1950,52 @@ header h1.tmgreet,#hi.tmgreet{background:none;-webkit-text-fill-color:currentCol
 .chhint{margin:6px 2px 0;font-size:.7rem;color:var(--mute);line-height:1.4}.chhint.warn{color:var(--bad)}
 #fldlg .ffe .chbox{margin-top:2px}
 </style>
-</body></html>
+<style>
+/* Notes: workspace design */
+#ndlg.nwiz{--fa:#8450c3;--fs:#f7f3fc;--fs2:#eee4fa;--fb:#e6dff3;--fbg:#fff;--fin:#fff;width:min(1040px,96vw);max-height:92vh;padding:0;border:0;border-radius:26px;overflow:hidden;background:var(--fbg);color:var(--ink);box-shadow:0 30px 80px rgba(40,20,80,.3)}
+:root:not([data-theme="light"]) #ndlg.nwiz{--fa:var(--acc);--fs:var(--soft);--fs2:var(--card);--fb:var(--line);--fbg:var(--card);--fin:var(--bg);color-scheme:dark}
+#ndlg::backdrop{background:rgba(8,6,24,.62)}
+#ndlg.nwiz[open]{display:flex;flex-direction:column}
+#ndlg .nhd{display:flex;align-items:center;gap:18px;padding:26px 38px;border-bottom:1px solid var(--fb)}
+#ndlg .nico{flex:none;width:58px;height:58px;border-radius:18px;background:var(--fs);color:var(--fa);display:grid;place-items:center;font-size:1.4rem}
+#ndlg .nht{flex:1;min-width:0}#ndlg .nht small{display:block;font-size:.68rem;letter-spacing:.2em;color:var(--mute);font-weight:700}#ndlg .nht h2{margin:4px 0 0;font-size:1.7rem;color:var(--ink)}
+#ndlg .nxb{flex:none;width:52px;height:50px;border:0;border-radius:15px;background:var(--fs);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer}#ndlg .nxb:focus{outline:none}#ndlg .nxb:focus-visible{outline:2px solid var(--fa)}
+#ndlg .nbody{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1fr);gap:38px;padding:34px 38px}#ndlg .nbody:focus{outline:none}
+#ndlg .ncomp{background:var(--fs);border-radius:24px;padding:32px 34px;align-self:start}
+#ndlg .ncomp h3,#ndlg .nlistw h3{margin:0;font-size:1.4rem;color:var(--ink)}
+#ndlg .nsub{margin:7px 0 26px;font-size:.9rem;color:var(--mute)}#ndlg .nlistw .nsub{margin-bottom:22px}
+#ndlg .nlab{display:block;margin:0 0 9px;font-size:.74rem;letter-spacing:.08em;font-weight:600;color:var(--ink);text-transform:uppercase}#ndlg .nlab i{font-style:normal;color:var(--mute);font-weight:500}
+#ndlg .ncomp input#nt{width:100%;margin:0 0 22px;padding:15px 18px;border:1.5px solid var(--fb);border-radius:14px;background:var(--fin);color:var(--ink);font:inherit;font-size:.95rem;box-shadow:none}
+#ndlg .nxw{border:1.5px solid var(--fb);border-radius:14px;background:var(--fin)}
+#ndlg .ncomp input#nt:focus,#ndlg .nxw:focus-within{outline:none;border-color:var(--fa)}
+#ndlg .nxw textarea{display:block;width:100%;min-height:118px;margin:0;padding:16px 18px 6px;border:0!important;background:transparent!important;color:var(--ink);font:inherit;font-size:.95rem;resize:vertical;box-shadow:none!important;outline:none}
+#ndlg .nxh{margin:0 18px 14px;padding-top:12px;border-top:1px solid var(--fb);font-size:.82rem;color:var(--mute)}
+#ndlg .ncnt{margin:10px 0 20px;font-size:.76rem;color:var(--mute)}
+#ndlg .err{min-height:1.1em;margin:0 0 8px;font-size:.82rem;color:var(--bad)}
+#ndlg #nsave{display:flex;align-items:center;justify-content:center;gap:10px;margin:0;padding:17px 20px;border:0;border-radius:15px;background:var(--fa);color:#fff;font-size:.98rem;font-weight:700;cursor:pointer;width:100%}#ndlg #nsave b{font-weight:500;font-size:1.1rem}
+#ndlg #ncancel{margin:10px 0 0;padding:14px;border-radius:15px;background:transparent;border:1.5px solid var(--fb);color:var(--ink);width:100%}
+#ndlg .nfoot{margin:24px 0 0;font-size:.78rem;color:var(--mute)}
+#ndlg .nlh{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#ndlg .nchip{padding:9px 18px;border-radius:999px;background:var(--fs);color:var(--fa);font-size:.7rem;letter-spacing:.08em;font-weight:800}
+#ndlg .nlcard{display:flex;flex-direction:column;gap:12px;min-height:380px;max-height:480px;overflow:auto;border:1.5px solid var(--fb);border-radius:24px;padding:16px;background:var(--fbg)}
+#ndlg .nempty{margin:auto;text-align:center;padding:30px 20px}
+#ndlg .nei{width:108px;height:108px;border-radius:50%;background:var(--fs);display:inline-grid;place-items:center;margin-bottom:20px;color:var(--fa)}
+#ndlg .nempty b{display:block;font-size:1.1rem;color:var(--ink)}#ndlg .nempty p{margin:10px auto 22px;max-width:260px;font-size:.88rem;line-height:1.55;color:var(--mute)}
+#ndlg .nnew{border:0;border-radius:12px;background:var(--fs);color:var(--fa);padding:13px 24px;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
+#ndlg .note{margin:0;padding:16px 18px;border:0;border-radius:16px;background:var(--fs)}
+#ndlg .note .nh b{font-size:.98rem;color:var(--ink)}#ndlg .note p{margin:8px 0;font-size:.92rem;color:var(--ink)}#ndlg .note small{font-size:.74rem;color:var(--mute)}
+#ndlg .nft{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 38px;border-top:1px solid var(--fb);background:var(--fbg)}
+#ndlg .nft span{font-size:.78rem;color:var(--mute)}
+#ndlg .nclose{border:0;border-radius:13px;background:var(--fs);color:var(--ink);padding:13px 34px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+@media(max-width:820px){#ndlg.nwiz{width:100vw;max-height:100dvh;height:100dvh;border-radius:0}#ndlg .nhd,#ndlg .nft{padding-left:18px;padding-right:18px}#ndlg .nhd{padding-top:18px;padding-bottom:18px}#ndlg .nico{width:48px;height:48px}#ndlg .nht h2{font-size:1.45rem}
+ #ndlg .nbody{grid-template-columns:1fr;gap:26px;padding:18px}#ndlg .ncomp{padding:22px 20px}#ndlg .nlcard{min-height:240px}}
+/* Default values status, shown after the greeting */
+#pdlg .pstc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}#pdlg .pstc button{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:.74rem;font-weight:600;padding:5px 12px;border-radius:999px;cursor:pointer;width:auto;margin:0}#pdlg .pstc button:hover{border-color:var(--acc);background:var(--soft)}
+#hi .hst{display:inline-block;cursor:pointer;margin-left:10px;padding:3px 11px;border-radius:999px;background:var(--soft);color:var(--acc);-webkit-text-fill-color:currentColor;font-size:.52em;font-weight:700;letter-spacing:.02em;vertical-align:middle;cursor:pointer;white-space:nowrap}
+#hi .hst:hover{filter:brightness(1.15)}#hi .hst:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.stp{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--acc);font-size:.78rem;font-weight:700;white-space:nowrap}
+</style>
+<script>
+document.addEventListener('click',function(e){var c=e.target.closest('#pdlg [data-st]');if(c){var i=document.getElementById('pst');i.value=c.dataset.st;i.focus()}});
+document.addEventListener('click',function(e){if(e.target.closest('[data-a="newnote"]')){clearNote();renderNotes();document.getElementById('nx').focus()}});
+</script></body></html>
