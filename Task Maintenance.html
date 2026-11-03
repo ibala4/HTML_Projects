@@ -476,7 +476,7 @@ dialog::backdrop{backdrop-filter:none;background:rgba(0,0,0,.7)}
 <dialog id="fdlg" class="big"><div class="dh"><h2>📋 Default values</h2></div>
   <p class="ro">These fill the Sprint, Task ID and Iteration lists in Add task. Edit them here only.</p>
   <div class="two"><div><label for="dsp">Sprint</label><input id="dsp" maxlength="30" placeholder="Sprint 12"></div><div><label for="dti">Task ID</label><input id="dti" maxlength="30" placeholder="T-101"></div></div>
-  <div class="two"><div><label for="dit">Iteration</label><input id="dit" maxlength="30" placeholder="Iteration 1"></div><div><label for="dds">Description</label><input id="dds" maxlength="200" placeholder="What is this task?"></div></div>
+  <div class="two"><div><label for="dit">Iteration</label><input id="dit" maxlength="30" placeholder="Iteration 1"></div><div><label for="dds">Description</label><input id="dds" maxlength="1000" placeholder="What is this task?"></div></div>
   <p class="err" id="derr" role="alert"></p>
   <button class="btn full" id="dsave" data-a="defsave">Add default</button><button class="btn alt full" id="dcancel" data-a="defcancel" hidden>Cancel edit</button>
   <div id="dlist"></div>
@@ -577,8 +577,9 @@ const card=(x,no,day,last)=>{
   return `<article class="task" style="--sc:${x.sprint?hue(x.sprint):'var(--acc)'}"><div class="l1"><span class="no">${no}</span><span class="ds" title="${esc(x.desc)}">${main}</span><span class="hrs">${H(x.hours)}</span></div><div class="l2">${chips}${jst}<span>${fmt(x.date)}</span>${last?`<span class="day ${dayCls(day[x.date]).replace('c-','t-')}" title="Daily target ${H(target())}">Spent that day ${H(day[x.date])}</span>`:''}<span class="ia"><button data-a="edit" data-id="${x.id}" aria-label="Edit ${esc(x.defect)}" title="Edit">✏️</button><button data-a="rm" data-id="${x.id}" aria-label="Delete ${esc(x.defect)}" title="Delete">🗑️</button></span></div>${nt}</article>`;
 };
 
-let SORT={m:'at',d:'asc'},SHOWLV=true;
-try{const _s=JSON.parse(localStorage.getItem('tm_sort')||'null');if(_s&&['at','date','defect','sprint','hours'].includes(_s.m))SORT={m:_s.m,d:_s.d==='desc'?'desc':'asc'};SHOWLV=localStorage.getItem('tm_showlv')!=='0'}catch(e){}
+const byDate=(a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.at-b.at);   /* date order first, then the order saved */
+let SORT={m:'date',d:'asc'},SHOWLV=true;
+try{const _s=JSON.parse(localStorage.getItem('tm_sort')||'null');if(_s&&['at','date','defect','sprint','hours'].includes(_s.m))SORT={m:_s.m==='at'?'date':_s.m,d:_s.d==='desc'?'desc':'asc'};SHOWLV=localStorage.getItem('tm_showlv')!=='0'}catch(e){}
 const cmpFor=()=>{const m=SORT.m,dr=SORT.d==='desc'?-1:1,tx=(a,b)=>String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});
   return (a,b)=>{if(m==='at')return dr*(a.at-b.at);
     if(m==='date'){const c=a.date<b.date?-1:a.date>b.date?1:0;return c?dr*c:a.at-b.at}
@@ -639,7 +640,7 @@ function render(){
   applyLabels();
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===view));
   $('tview').hidden=view!=='tasks';$('cview').hidden=view!=='cal';$('sview').hidden=view!=='sprints';$('jview').hidden=view!=='jira';$('lvview').hidden=view!=='leave';$('snview').hidden=view!=='sanity';
-  const ord={};[...t].sort((a,b)=>a.at-b.at).forEach((x,i)=>ord[x.id]=i+1);   /* saved order: 1st, 2nd, 3rd... */
+  const ord={};[...t].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);   /* saved order: 1st, 2nd, 3rd... */
   if(view==='cal'){$('cview').innerHTML=calHTML(ord,day);return}
   if(view==='sprints'){$('sview').innerHTML=sprintHTML();return}
   if(view==='jira'){$('jview').innerHTML=jiraHTML(ord);return}
@@ -648,7 +649,7 @@ function render(){
   const cur=$('qs').value,sp=sprints();
   $('qs').innerHTML='<option value="">All '+esc(lab('sprint'))+'</option>'+sp.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');$('qs').value=sp.includes(cur)?cur:'';
   const q=$('q').value.trim().toLowerCase(),f=$('qs').value;
-  const rows=t.filter(x=>(!q||[x.defect,x.desc,x.sprint||'',x.taskId||'',x.iter||'',x.notes||'',...Object.values(x.x||{})].join(' ').toLowerCase().includes(q))&&(!f||x.sprint===f)).sort((a,b)=>a.at-b.at);
+  const rows=t.filter(x=>(!q||[x.defect,x.desc,x.sprint||'',x.taskId||'',x.iter||'',x.notes||'',...Object.values(x.x||{})].join(' ').toLowerCase().includes(q))&&(!f||x.sprint===f)).sort(byDate);
   /* leave / holiday entries are listed with the tasks, in the order they were saved */
   const att=A(),lvs=[].concat(Object.keys(att).filter(d=>att[d]&&(att[d].s==='A'||att[d].s==='H')).map(d=>({lv:1,date:d,a:att[d],at:0}))).slice(0,0);   /* leave and holidays now live in the Leave tab */
   const all=rows.concat(lvs).sort(cmpFor());
@@ -678,7 +679,7 @@ function calHTML(ord,day){
   const n=t.filter(x=>x.date.startsWith(pre)).length;
   let detail='';
   if(selDay){
-    const dt=t.filter(x=>x.date===selDay).sort((a,b)=>a.at-b.at),h=day[selDay]||0,a=att[selDay];
+    const dt=t.filter(x=>x.date===selDay).sort(byDate),h=day[selDay]||0,a=att[selDay];
     const status=a&&a.s==='H'?'🎉 Holiday':a&&a.s==='A'?(a.k==='unplanned'?'⚠️ Absent · Unplanned':'🏖️ Absent · Planned'):h>0?'✅ Present':'No data';
     detail=`<div class="panel"><h2>${fmt(selDay)}</h2><div class="det"><span>⏱️ Time spent: ${H(h)}</span><span>${status}</span></div>${a&&(a.s==='A'||a.s==='H')&&a.desc?`<p class="meta">📝 ${esc(a.desc)}</p>`:''}${dt.map((x,i)=>card(x,ord[x.id],day,i===dt.length-1)).join('')}${dt.length?'':'<p class="meta">No tasks on this day.</p>'}<button class="btn full" data-a="addday" data-d="${selDay}">➕ Add task or attendance on this day</button>${a&&(a.s==='A'||a.s==='H')?`<div class="row2"><button class="btn alt" data-a="editlv" data-d="${selDay}">✏️ Edit this ${a.s==='H'?'holiday':'absence'}</button><button class="btn alt" data-a="clratt">🗑️ Clear</button></div>`:''}</div>`;
   }
@@ -704,7 +705,7 @@ const sanityOn=()=>U().sanityOn!==false;   /* the Sanity tab is on unless you sw
 const jiraOn=()=>U().jiraOn!==false;   /* the Jira tab is on unless you switch it off in Settings */
 const dayCls=h=>{const t=target();return h<t?'c-y':h===t?'c-b':'c-r'};   /* under target yellow, on target blue, over target red */
 const PCOL={'c-y':[.85,.6,0],'c-b':[.1,.4,.95],'c-r':[.85,.1,.15]};
-function dayMap(l){const day=dayTotals(),last={},m={};[...l].sort((a,b)=>a.at-b.at).forEach(x=>last[x.date]=x.id);Object.keys(last).forEach(d=>m[last[d]]=day[d]);return m}
+function dayMap(l){const day=dayTotals(),last={},m={};[...l].sort(byDate).forEach(x=>last[x.date]=x.id);Object.keys(last).forEach(d=>m[last[d]]=day[d]);return m}
 const isMust=f=>f.type==='yn'?false:(f.must===undefined?!!f.req:!!f.must);   /* Mandatory or Optional, set per field */
 const lab=k=>k==='hours'?(U().hoursLabel||'Hours'):((FIELDS().find(f=>f.k===k)||BASE.find(b=>b.k===k)||{}).label||k);
 function getV(x,k){
@@ -720,7 +721,7 @@ function colDefs(dm){   /* columns used by the tables, CSV and PDF, in the order
   out.splice(at+1,0,...extra);return out;
 }
 function jiraHTML(ord){
-  const pend=[...T()].filter(x=>x.jira==='pending').sort((a,b)=>a.at-b.at),untracked=T().filter(x=>!x.jira).length,h=r2(pend.reduce((a,x)=>a+x.hours,0));
+  const pend=[...T()].filter(x=>x.jira==='pending').sort(byDate),untracked=T().filter(x=>!x.jira).length,h=r2(pend.reduce((a,x)=>a+x.hours,0));
   const fs=shown(),hd=fs.some(f=>f.k==='defect'),hs=fs.some(f=>f.k==='desc');
   const head=`<div class="panel"><h2>🔗 Jira</h2><div class="det"><span>${pend.length} task${pend.length===1?'':'s'} to save in Jira</span><span>⏱️ ${H(h)} to log</span></div><p class="ro" style="margin:0 0 8px">When you have saved a task's hours in Jira, tap <b>Not saved in Jira</b> to mark it done. It leaves this tab only. The task stays in your Tasks list.</p>${pend.length>1?'<button class="btn alt full" data-a="jall" style="margin-top:0">✅ Mark all as saved</button>':''}${untracked?`<button class="btn alt full" data-a="jearly">➕ Add my ${untracked} earlier task${untracked===1?'':'s'} to this list</button>`:''}</div>`;
   if(!pend.length)return head+'<div class="empty"><span class="big">🎉</span>Nothing waiting. New tasks you add will appear here until their hours are saved in Jira.</div>';
@@ -759,7 +760,7 @@ function buildForm(x){
   const ph={defect:'1234',desc:'Service issue',notes:'Anything to remember'};
   $('pf').innerHTML=shown().map(f=>{
     const id=fidOf(f),wide=f.type==='text',opt=isMust(f)?' <span class="rq" title="Mandatory">*</span>':(f.type==='yn'?'':' <span class="op">(optional)</span>');
-    const ctl=f.type==='text'?`<input id="${id}" maxlength="${f.k==='notes'?300:200}" placeholder="${esc(ph[f.k]||'')}">`:f.type==='num'?`<input id="${id}" type="number" step="any">`:f.type==='yn'?`<select id="${id}"><option value="no">No</option><option value="yes">Yes</option></select>`:`<select id="${id}"></select>`;
+    const ctl=f.type==='text'?`<input id="${id}" maxlength="${f.k==='notes'||f.k==='desc'?1000:200}" placeholder="${esc(ph[f.k]||'')}">`:f.type==='num'?`<input id="${id}" type="number" step="any">`:f.type==='yn'?`<select id="${id}"><option value="no">No</option><option value="yes">Yes</option></select>`:`<select id="${id}"></select>`;
     return `<div class="${wide?'full':''}"><label for="${id}">${esc(f.label)}${opt}</label>${ctl}</div>`;
   }).join('')+(shown().some(f=>f.type==='def')?`<p class="ro full" id="dhint">${D().length?'These lists come from 📋 Default values. Choose a Sprint ID to see only its Task IDs and Iterations. Choosing a Task ID fills the others.':'No default values yet. Add them in 📋 Default values to pick from the lists.'}</p>`:'');
   shown().forEach(f=>{
@@ -936,10 +937,10 @@ function buildPdf(title,sub,sections){
   return out;
 }
 function pdfFor(title,l,at){
-  const ord={};[...T()].sort((a,b)=>a.at-b.at).forEach((x,i)=>ord[x.id]=i+1);
+  const ord={};[...T()].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);
   const h=r2(l.reduce((s,x)=>s+x.hours,0)),cols=colDefs(dayMap(l));
   const secs=[{head:'Tasks',cols:[['#',0],['Date',0],...cols.map(c=>[c.label,c.k==='desc'?500:c.k==='notes'?1:0])],
-    rows:[...l].sort((a,b)=>a.at-b.at).map(x=>[ord[x.id],dmy(x.date),...cols.map(c=>{const v=c.get(x);if(c.k==='day'&&v!=='')return{t:v,c:PCOL[dayCls(c.raw(x))]};return v===''?'-':v})])}];
+    rows:[...l].sort(byDate).map(x=>[ord[x.id],dmy(x.date),...cols.map(c=>{const v=c.get(x);if(c.k==='day'&&v!=='')return{t:v,c:PCOL[dayCls(c.raw(x))]};return v===''?'-':v})])}];
   if(at.length)secs.push({head:'Attendance (absent days and holidays)',cols:[['Date',0],['Attendance',0],['Description',1]],rows:at.map(a=>[dmy(a.date),a.s==='H'?'Holiday':a.k==='unplanned'?'Absent - Unplanned':'Absent - Planned',a.desc||'-'])});
   return buildPdf(title,`${U().name}  |  ${l.length} task(s)  |  ${H(h)}  |  made on ${dmy(iso(new Date()))}`,secs);
 }
@@ -954,14 +955,14 @@ function downloadPdf(){
 const attList=(f,e)=>Object.keys(A()).filter(d=>(!f||d>=f)&&(!e||d<=e)&&(A()[d].s==='A'||A()[d].s==='H')).sort().map(d=>({date:d,s:A()[d].s,k:A()[d].k||'',desc:A()[d].desc||''}));
 function buildCsv(l,at){
   const q=s=>'"'+String(s).replace(/"/g,'""')+'"',cols=colDefs(dayMap(l));
-  const ord={};[...T()].sort((a,b)=>a.at-b.at).forEach((x,i)=>ord[x.id]=i+1);
-  const rows=[['No','Date',...cols.map(c=>c.label)].map(q).join(',')].concat([...l].sort((a,b)=>a.at-b.at).map(x=>[ord[x.id],dmy(x.date),...cols.map(c=>c.csv?c.csv(x):c.get(x))].map(q).join(',')));
+  const ord={};[...T()].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);
+  const rows=[['No','Date',...cols.map(c=>c.label)].map(q).join(',')].concat([...l].sort(byDate).map(x=>[ord[x.id],dmy(x.date),...cols.map(c=>c.csv?c.csv(x):c.get(x))].map(q).join(',')));
   if(at.length){rows.push('');rows.push(['Date','Attendance','Leave type','Description'].join(','));at.forEach(a=>rows.push([dmy(a.date),a.s==='H'?'Holiday':'Absent',a.k,a.desc||''].map(q).join(',')))}
   return rows.join('\n');
 }
 function showList(title,l,at,name){
-  const ord={};[...T()].sort((a,b)=>a.at-b.at).forEach((x,i)=>ord[x.id]=i+1);
-  const h=r2(l.reduce((s,x)=>s+x.hours,0)),dd=new Set(l.map(x=>x.date)).size,srt=[...l].sort((a,b)=>a.at-b.at),cols=colDefs(dayMap(l)),ih=cols.findIndex(c=>c.k==='hours');
+  const ord={};[...T()].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);
+  const h=r2(l.reduce((s,x)=>s+x.hours,0)),dd=new Set(l.map(x=>x.date)).size,srt=[...l].sort(byDate),cols=colDefs(dayMap(l)),ih=cols.findIndex(c=>c.k==='hours');
   csvText=buildCsv(l,at);csvName=name;const pt=title.replace('–','to').replace(/[^\x20-\x7E]+/g,' ').replace(/\s+/g,' ').trim();pdfDoc=()=>pdfFor(pt,l,at);$('rmsg').textContent='';$('rtitle').textContent=title;
   $('rbody').innerHTML=`<div class="rsum"><span>✅ ${l.length} task${l.length===1?'':'s'}</span><span>⏱️ ${H(h)}</span><span>📅 ${dd} day${dd===1?'':'s'} worked</span>${at.some(a=>a.s!=='H')?`<span>🏖️ ${at.filter(a=>a.s!=='H').length} absent day${at.filter(a=>a.s!=='H').length===1?'':'s'}</span>`:''}${at.some(a=>a.s==='H')?`<span>🎉 ${at.filter(a=>a.s==='H').length} holiday${at.filter(a=>a.s==='H').length===1?'':'s'}</span>`:''}</div>`+
    (l.length?`<div class="tw"><table class="tbl"><thead><tr><th>#</th><th>Date</th>${cols.map(c=>`<th${c.k==='desc'?' style="min-width:500px"':''}>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${srt.map(x=>`<tr><td>${ord[x.id]}</td><td>${fmt(x.date)}</td>${cols.map((c,i)=>{const v=c.get(x);if(c.k==='day'&&v!=='')return `<td><span class="dpill ${dayCls(c.raw(x))}">${esc(v)}</span></td>`;return `<td${c.k==='desc'?' style="min-width:500px"':''}>${i===0?'<b>':''}${esc(v===''?'-':v)}${i===0?'</b>':''}</td>`}).join('')}</tr>`).join('')}</tbody><tfoot><tr><td colspan="${2+ih}">Total</td><td>${H(h)}</td><td colspan="${Math.max(1,cols.length-ih-1)}"></td></tr></tfoot></table></div>`:'<div class="empty"><span class="big">🦉</span>No tasks found.</div>')+
@@ -1014,7 +1015,7 @@ function restore(){
 /* ---------- task place (read only, from Default values) + copilot ---------- */
 function copList(){
   const seen=new Set();   /* Copilot tasks are defects set to Copilot Yes, listed by Defect ID */
-  return [...T()].sort((a,b)=>a.at-b.at).filter(x=>x.cop).filter(x=>{const k=ck(x.defect)||x.id;if(seen.has(k))return false;seen.add(k);return true}).map(x=>({defect:x.defect,desc:x.desc}));
+  return [...T()].sort(byDate).filter(x=>x.cop).filter(x=>{const k=ck(x.defect)||x.id;if(seen.has(k))return false;seen.add(k);return true}).map(x=>({defect:x.defect,desc:x.desc}));
 }
 function showCopilot(){
   const l=copList(),a=lab('defect'),b=lab('desc');
@@ -1219,7 +1220,7 @@ load();$('nm').value=DB.last||'';show();
  function copOn(){return shown().some(function(f){return f.k==='cop'})}
  function cf(l){if(!copOn())return l;return cpf==='yes'?l.filter(function(x){return x.cop}):cpf==='no'?l.filter(function(x){return !x.cop}):l}
  function uniq(l){
-  var s=[].concat(l).sort(function(a,b){return a.at-b.at}),g={},out=[];
+  var s=[].concat(l).sort(byDate),g={},out=[];
   s.forEach(function(x){var k=ck(x.defect||'');if(!k){out.push([x]);return}if(!g[k]){g[k]=[];out.push(g[k])}g[k].push(x)});
   return out.map(function(a){
    var f=a[0],m=Object.assign({},f),ds=a.map(function(x){return x.date}).filter(function(d,i,r){return r.indexOf(d)===i}).sort();
@@ -1530,7 +1531,7 @@ body.hide-notes #list .l3{display:none}
    {i:'📝',l:'Show notes on cards',st:'chk',on:!hideN,f:function(){setN(!hideN)}},
    {i:'🔗',l:'Show Jira tab',st:'chk',on:jiraOn(),f:function(){U().jiraOn=!jiraOn();save();render()}},
    {i:dark()?'☀️':'🌙',l:'Dark mode',st:'chk',on:dark(),f:function(){var n=dark()?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('taskmaint_theme',n)}catch(e){}}}]);
-  var sort=[['at','Saved order','🕒'],['date','Date','📅'],['defect',lab('defect'),'🐞'],['sprint',lab('sprint'),'🏁'],['hours',lab('hours'),'⏱️']].map(function(o){return{i:o[2],l:o[0]==='at'?o[1]:o[1],st:'rad',on:SORT.m===o[0],f:sortTo(o[0])}})
+  var sort=[['date','Date','📅'],['defect',lab('defect'),'🐞'],['sprint',lab('sprint'),'🏁'],['hours',lab('hours'),'⏱️']].map(function(o){return{i:o[2],l:o[0]==='at'?o[1]:o[1],st:'rad',on:SORT.m===o[0],f:sortTo(o[0])}})
    .concat([{sep:1},{i:'⬆️',l:'Ascending',st:'rad',on:SORT.d==='asc',f:sortTo(null,'asc')},{i:'⬇️',l:'Descending',st:'rad',on:SORT.d==='desc',f:sortTo(null,'desc')}]);
   return[
    {i:'👁️',l:'View',sub:view},
@@ -2104,7 +2105,7 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
  var $=function(i){return document.getElementById(i)},cur=null,rid=null,tm=null,fmt='pdf',flashT=null,picked={};
  function mk(id,html){var d=document.createElement('dialog');d.id=id;d.className='snd';d.innerHTML=html;document.body.appendChild(d);return d}
  var opts=SN_ST.map(function(s){return '<option>'+s[1]+'</option>'}).join('');
- var A=mk('sndlg','<div class="snh"><span class="snico" aria-hidden="true">✅</span><div><small>SANITY</small><h2 id="snt">Add environment</h2></div><button type="button" class="snx" data-a="close" aria-label="Close">✕</button></div><div class="snb"><label for="snn">Environment</label><select id="snn"></select><p class="snnone" id="snnone" hidden>No environments yet. <button type="button" class="snlink" data-a="defaults">Add them in Default values</button></p><div class="snr2"><div><label for="snd">Date</label><input type="date" id="snd"></div><div><label for="sns">Status</label><select id="sns">'+opts+'</select></div></div><p class="err" id="snerr" role="alert"></p></div><div class="snf"><button type="button" class="btn snrmb" id="sndel" hidden>Remove</button><button type="button" class="btn alt" data-a="close">Cancel</button><button type="button" class="btn" id="snok">OK</button></div>');
+ var A=mk('sndlg','<div class="snh"><span class="snico" aria-hidden="true">✅</span><div><small>SANITY</small><h2 id="snt">Add environment</h2></div><button type="button" class="snx" data-a="close" aria-label="Close">✕</button></div><div class="snb"><label for="snb">Environment</label><select id="snn" hidden></select><div class="msel" id="snm"><button type="button" class="mselb" id="snb" aria-haspopup="listbox" aria-expanded="false"><span id="snbt">Select environment</span><i aria-hidden="true">▾</i></button><div class="mselp snchips" id="snp" role="listbox" aria-label="Environments" hidden></div></div><p class="snnone" id="snnone" hidden>No environments yet. <button type="button" class="snlink" data-a="defaults">Add them in Default values</button></p><div class="snr2"><div><label for="snd">Date</label><input type="date" id="snd"></div><div><label for="sns">Status</label><select id="sns">'+opts+'</select></div></div><p class="err" id="snerr" role="alert"></p></div><div class="snf"><button type="button" class="btn snrmb" id="sndel" hidden>Remove</button><button type="button" class="btn alt" data-a="close">Cancel</button><button type="button" class="btn" id="snok">OK</button></div>');
  var R=mk('snrdlg','<div class="snh"><span class="snico" aria-hidden="true">🗑️</span><div><small>SANITY</small><h2>Remove environment?</h2></div></div><p class="snq" id="snrq"></p><div class="snf"><button type="button" class="btn alt" data-a="close">Cancel</button><button type="button" class="btn snrmb" id="snrok" style="margin-right:0!important">Remove</button></div>');
  var X=mk('snddlg','<div class="snh"><span class="snico" aria-hidden="true">⬇</span><div><small>SANITY</small><h2>Download report</h2></div><button type="button" class="snx" data-a="close" aria-label="Close">✕</button></div><div class="snb"><label for="sdb">Environment</label><div class="msel" id="sdm"><button type="button" class="mselb" id="sdb" aria-haspopup="listbox" aria-expanded="false"><span id="sdbt">All environments</span><i aria-hidden="true">▾</i></button><div class="mselp" id="sdp" role="group" aria-label="Environments" hidden></div></div><p class="snhint" id="sdh"></p><label>Format</label><div class="snfm"><label><input type="radio" name="sdf" value="pdf" checked><span>PDF<small>Print-ready report</small></span></label><label><input type="radio" name="sdf" value="csv"><span>CSV<small>Opens in Excel</small></span></label></div><p class="err" id="sderr" role="alert"></p></div><div class="snf"><button type="button" class="btn alt" data-a="close">Cancel</button><button type="button" class="btn" id="sdok">Download</button></div>');
  /* ----- environment list (Default values) ----- */
@@ -2115,8 +2116,11 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
  var F=$('fdlg'),sec=document.createElement('div');sec.className='envsec';
  sec.innerHTML='<h3>Environments</h3><p class="ro">Names for the Sanity calendar. This list is separate from Sprint ID, Task ID and Iteration.</p><div class="envrow"><input id="envn" maxlength="40" placeholder="e.g. DEV, QA, UAT" aria-label="Environment name" autocomplete="off"><button type="button" class="btn" data-a="envadd">Add environment</button></div><p class="err" id="enverr" role="alert"></p><div class="envl" id="envl"></div>';
  var cl=F.querySelector('button[data-a="close"]:last-of-type')||F.lastElementChild;F.insertBefore(sec,cl);
- function renderEnv(){var l=listed();$('envl').innerHTML=l.length?l.map(function(n){return '<span class="envchip">'+esc(n)+'<button type="button" data-a="envrm" data-n="'+esc(n)+'" aria-label="Remove '+esc(n)+'">×</button></span>'}).join(''):'<span class="ro">No environments yet.</span>'}
- new MutationObserver(function(){if(F.open){$('enverr').textContent='';renderEnv()}}).observe(F,{attributes:true,attributeFilter:['open']});
+ var envOpen=false;
+ function renderEnv(){var l=listed(),ch=l.length?l.map(function(n){return '<span class="envchip">'+esc(n)+'<button type="button" data-a="envrm" data-n="'+esc(n)+'" aria-label="Remove '+esc(n)+'">×</button></span>'}).join(''):'<span class="ro">No environments yet.</span>';
+  $('envl').innerHTML='<button type="button" class="envdd" id="envdd" aria-haspopup="true" aria-expanded="'+envOpen+'"><span>Added environments ('+l.length+')</span><i aria-hidden="true">▾</i></button><div class="envpn" id="envpn"'+(envOpen?'':' hidden')+'>'+ch+'</div>'}
+ $('envl').addEventListener('click',function(e){if(e.target.closest('#envdd')){envOpen=!envOpen;renderEnv()}});
+ new MutationObserver(function(){if(F.open){$('enverr').textContent='';envOpen=false;renderEnv()}}).observe(F,{attributes:true,attributeFilter:['open']});
  function envAdd(){var n=$('envn').value.trim(),er=$('enverr');if(!n){er.textContent='Enter an environment name.';return}
   if(listed().some(function(x){return x.toLowerCase()===n.toLowerCase()})){er.textContent=n+' is already in the list.';return}
   U().envs.push(n);save();$('envn').value='';er.textContent='';renderEnv();$('envn').focus()}
@@ -2130,9 +2134,14 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
  function err(t){$('snerr').textContent=t}
  function fillEnv(include){var l=listed();if(include&&!l.some(function(n){return n.toLowerCase()===include.toLowerCase()}))l=srt(l.concat([include]));
   $('snn').innerHTML='<option value="">Select environment</option>'+l.map(function(n){return '<option>'+esc(n)+'</option>'}).join('');
-  $('snnone').hidden=l.length>0;$('snok').disabled=!l.length}
- function openAdd(){cur=null;$('snt').textContent='Add environment';fillEnv('');$('snd').value=SNSEL||snToday();$('sns').value=SN_ST[0][1];err('');$('sndel').hidden=true;$('snok').textContent='OK';A.showModal();$('snn').focus()}
- function openEdit(id){var e=SN().find(function(x){return x.id===id});if(!e)return;cur=id;$('snt').textContent='Edit environment';fillEnv(e.env);$('snn').value=e.env;$('snd').value=e.date;$('sns').value=e.status;err('');$('sndel').hidden=false;$('snok').textContent='Save';A.showModal()}
+  $('snnone').hidden=l.length>0;$('snok').disabled=!l.length;snPick()}
+ function snPick(){var v=$('snn').value,l=[].map.call($('snn').options,function(o){return o.value||o.text}).filter(function(n,i){return $('snn').options[i].value!==''});
+  $('snbt').textContent=v||'Select environment';$('snb').disabled=!l.length;$('snp').hidden=true;$('snb').setAttribute('aria-expanded','false');
+  $('snp').innerHTML=l.map(function(n){return '<button type="button" role="option" class="snchip'+(n===v?' on':'')+'" aria-selected="'+(n===v)+'" data-n="'+esc(n)+'">'+esc(n)+'</button>'}).join('')}
+ $('snb').addEventListener('click',function(){var o=$('snp').hidden;$('snp').hidden=!o;this.setAttribute('aria-expanded',String(o))});
+ $('snp').addEventListener('click',function(e){var b=e.target.closest('.snchip');if(!b)return;$('snn').value=b.dataset.n;err('');snPick()});
+ function openAdd(){cur=null;$('snt').textContent='Add environment';fillEnv('');$('snd').value=SNSEL||snToday();$('sns').value=SN_ST[0][1];err('');$('sndel').hidden=true;$('snok').textContent='OK';A.showModal();$('snb').focus()}
+ function openEdit(id){var e=SN().find(function(x){return x.id===id});if(!e)return;cur=id;$('snt').textContent='Edit environment';fillEnv(e.env);$('snn').value=e.env;snPick();$('snd').value=e.date;$('sns').value=e.status;err('');$('sndel').hidden=false;$('snok').textContent='Save';A.showModal()}
  function saveEntry(){
   var name=$('snn').value,date=$('snd').value,st=$('sns').value;
   if(!name){err('Please select the environment.');return}
@@ -2242,7 +2251,7 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
 #fdlg .envsec h3{margin:0 0 4px;font-size:1rem}
 #fdlg .envrow{display:flex;gap:8px;margin-top:10px}#fdlg .envrow input{flex:1;margin:0;min-width:0}#fdlg .envrow .btn{width:auto;margin:0;padding:10px 18px;white-space:nowrap}
 #fdlg .envsec .err{min-height:1.1em;margin:6px 2px 0}
-#fdlg .envl{display:flex;flex-wrap:wrap;gap:8px}
+#fdlg .envl{display:block}#fdlg .envdd{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:0;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-weight:600;cursor:pointer;text-align:left}#fdlg .envdd i{font-style:normal;color:var(--mute);transition:transform .15s}#fdlg .envdd[aria-expanded="true"]{border-color:var(--acc,#8b5cf6)}#fdlg .envdd[aria-expanded="true"] i{transform:rotate(180deg)}#fdlg .envpn{margin-top:6px;padding:10px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);display:flex;flex-wrap:wrap;gap:8px;max-height:230px;overflow:auto}#fdlg .envpn[hidden]{display:none}
 #fdlg .envchip{display:inline-flex;align-items:center;gap:6px;padding:6px 8px 6px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:.84rem;font-weight:700}
 #fdlg .envchip button{border:0;background:none;color:var(--mute);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:1.05rem;line-height:1;padding:0;margin:0;display:grid;place-items:center}#fdlg .envchip button:hover{background:var(--line);color:var(--ink)}
 .snd .snnone{margin:-6px 0 14px;font-size:.84rem;color:var(--mute)}.snd .snlink{border:0;background:none;color:var(--fa);font:inherit;font-weight:700;cursor:pointer;padding:0;width:auto;margin:0;text-decoration:underline}
@@ -2255,6 +2264,7 @@ body.no-sanity .lvtabbtn[data-t="sanity"]{display:none}body.no-sanity #fdlg .env
 .snd .mselb{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:0;padding:12px 14px;border:1.5px solid var(--fb);border-radius:12px;background:var(--fin);color:var(--ink);font:inherit;font-size:.92rem;font-weight:600;cursor:pointer;text-align:left}
 .snd .mselb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.snd .mselb i{font-style:normal;color:var(--mute);transition:transform .15s}.snd .mselb[aria-expanded="true"]{border-color:var(--fa)}.snd .mselb[aria-expanded="true"] i{transform:rotate(180deg)}.snd .mselb:disabled{opacity:.5;cursor:not-allowed}
 .snd .mselp{margin-top:6px;padding:6px;border:1.5px solid var(--fb);border-radius:12px;background:var(--fbg);max-height:230px;overflow:auto}.snd .mselp[hidden]{display:none}
+.snd .snchips{display:flex;flex-direction:column;gap:2px;padding:6px}.snd .snchip{display:block;width:100%;margin:0;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:inherit;font-size:.9rem;font-weight:600;text-align:left;cursor:pointer}.snd .snchip:hover{background:var(--fs)}.snd .snchip.on{background:var(--fs);color:var(--fa)}
 .snd .mselq{width:100%;margin:0 0 6px;padding:9px 12px;font-size:.84rem}
 .snd label.mselr{display:flex;align-items:center;gap:10px;margin:0;padding:9px 10px;border-radius:8px;text-transform:none;letter-spacing:0;font-size:.88rem;font-weight:500;color:var(--ink);cursor:pointer}.snd label.mselr[hidden]{display:none}
 .snd label.mselr:hover{background:var(--fs)}.snd label.mselr.all{font-weight:700;border-bottom:1px solid var(--fb);border-radius:8px 8px 0 0;margin-bottom:4px}
