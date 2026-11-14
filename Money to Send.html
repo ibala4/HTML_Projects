@@ -138,6 +138,23 @@ body.locked .wrap{display:none}
 .brow .ba{width:112px;text-align:right;font-weight:700}
 .brows .brow:only-child .x{visibility:hidden}
 .bl{display:flex;justify-content:space-between;gap:12px}
+
+.debit{padding:20px 20px 18px}
+.cnum{font-size:clamp(18px,5.8vw,24px);font-weight:800;letter-spacing:.12em;margin:20px 0 14px;font-variant-numeric:tabular-nums;position:relative;z-index:1}
+.cmeta{display:flex;gap:26px;position:relative;z-index:1}
+.cmeta small,.bal small{display:block;font-size:10px;opacity:.7;letter-spacing:.1em;font-weight:700}
+.cmeta b{font-size:14px;letter-spacing:.06em;font-weight:700}
+.bal{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.22);position:relative;z-index:1}
+.bal .total{font-size:clamp(26px,8vw,34px);margin:2px 0 0;cursor:pointer}
+.viewbal{border:0;border-radius:999px;padding:9px 14px;background:rgba(255,255,255,.2);color:#fff;font-weight:700;flex:none}
+.debit .dsub,.debit .bar{position:relative;z-index:1}
+.debit .dsub{margin-top:10px}
+
+.lerr{color:var(--bad);min-height:18px;font-size:13px;margin:-4px 0 8px;font-weight:700}
+.lbox p{font-size:14px}
+
+.csaved{margin:0 0 12px;color:var(--ok);font-weight:700;font-size:14px}
+.csaved .link{margin-left:8px}
 </style>
 </head>
 <body class="locked">
@@ -145,13 +162,19 @@ body.locked .wrap{display:none}
   <div class="lbox">
     <div class="lic">💸</div>
     <h1>Money to send</h1>
-    <p>Enter your name to start</p>
+    <p>Enter your name to start. Card number and expiry are asked only the first time.</p>
     <input id="lname" placeholder="Your name" maxlength="30" autocomplete="given-name" aria-label="Your name">
+    <div id="cardFields">
+      <input id="lcard" placeholder="Card number (16 digits, optional)" inputmode="numeric" maxlength="19" autocomplete="off" aria-label="Card number">
+      <input id="lexp" placeholder="Expiry MM/YY (optional)" inputmode="numeric" maxlength="5" autocomplete="off" aria-label="Card expiry">
+    </div>
+    <div class="csaved" id="cardSaved" hidden>Card saved ✓ <button class="link" id="lreset" type="button">Reset card</button></div>
+    <div class="lerr" id="lerr" role="alert"></div>
     <button class="btn" id="lgo">Continue</button>
   </div>
 </section>
 <main class="wrap">
-  <div class="top"><div><h1>Money to send</h1><small class="who"><span id="hello"></span> · <button class="link" id="logout">Log out</button></small></div><button class="round" id="theme" aria-label="Switch light or dark theme">🌓</button></div>
+  <div class="top"><div><h1>Money to send</h1><small class="who"><span id="hello"></span> · <button class="link" id="logout">Log out</button> · <button class="link" id="rcard">Reset card</button></small></div><button class="round" id="theme" aria-label="Switch light or dark theme">🌓</button></div>
   <div class="mbar">
     <button class="round" id="prev" aria-label="Previous month">‹</button>
     <div class="mlabel" id="mlabel"></div>
@@ -161,9 +184,18 @@ body.locked .wrap{display:none}
 
   <section class="debit" aria-live="polite">
     <div class="dh"><div class="chip"></div><span id="cnt"></span></div>
-    <div class="total" id="total">₹0</div>
-    <div class="dsub"><span>Sent <b id="sentAmt"></b></span><span>Left <b id="leftAmt"></b></span></div>
-    <div class="bar"><i id="bar"></i></div>
+    <div class="cnum" id="cnum">0000 0000 0000 0000</div>
+    <div class="cmeta">
+      <div><small>CARD HOLDER</small><b id="chold">NAME</b></div>
+      <div><small>EXPIRES</small><b id="cexp">00/00</b></div>
+      <div><small>CVV</small><b>•••</b></div>
+    </div>
+    <div class="bal">
+      <div><small>BALANCE</small><div class="total" id="total">₹ ••••••</div></div>
+      <button class="viewbal" id="viewBal">View balance</button>
+    </div>
+    <div class="dsub" id="dsub" hidden><span>Sent <b id="sentAmt"></b></span><span>Left <b id="leftAmt"></b></span></div>
+    <div class="bar" id="barw" hidden><i id="bar"></i></div>
   </section>
 
   <div id="monthView">
@@ -194,7 +226,7 @@ body.locked .wrap{display:none}
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-function boot(USER){
+function boot(USER,CUST){
   var KEY="money-to-send-v2:"+USER,fmt=new Intl.NumberFormat("en-IN");
   var $=function(i){return document.getElementById(i)};
   var uid=function(){return Math.random().toString(36).slice(2,9)};
@@ -246,7 +278,8 @@ function boot(USER){
   function bankRow(n,a){return '<div class="brow"><input class="bn" value="'+esc(n)+'" placeholder="Bank name, e.g. KVB" autocomplete="off" aria-label="Bank name"><input class="ba" value="'+(a?a:"")+'" placeholder="Amount" inputmode="numeric" aria-label="Amount in rupees"><button type="button" class="x" data-sh="rmrow" aria-label="Remove this bank">×</button></div>'}
   function openSheet(mode,a){
     var b=$("sheetBody"),h="";
-    if(mode==="view"){
+    if(mode==="pass"){h='<h2>Enter password</h2><label class="fld"><span>Password to view balance</span><input id="fPass" type="password" inputmode="numeric" autocomplete="off" placeholder="Password"></label><div class="sbtns"><button class="btn pri" data-sh="unlock">Unlock</button><button class="btn alt" data-sh="close">Cancel</button></div>'}
+    else if(mode==="view"){
       var banks=a.items.filter(function(i){return i.label||Number(i.amount)}).map(function(i){return '<div class="bl"><span>'+esc(i.label||"Bank")+'</span><b>'+money(i.amount)+'</b></div>'}).join("");
       h='<h2>Account details</h2><dl class="dl"><dt>Banks</dt><dd>'+(banks||"—")+'</dd><dt>Total amount</dt><dd>'+(sum(a)?money(sum(a)):"No need to send")+'</dd><dt>Notes</dt><dd>'+esc(a.note||"—")+'</dd><dt>Date</dt><dd>'+fdate(a.date)+'</dd><dt>Status</dt><dd>'+(a.sent?"Sent ✓":"Not sent yet")+'</dd></dl>'+
         '<div class="sbtns"><button class="btn pri" data-sh="edit" data-a="'+a.id+'">Edit</button><button class="btn alt" data-sh="close">Close</button></div>';
@@ -262,6 +295,13 @@ function boot(USER){
     }
     b.innerHTML=h;$("sheet").hidden=false;
     if(mode==="add"){var f=b.querySelector(".bn");if(f)f.focus()}
+    if(mode==="pass"){var pf=$("fPass");if(pf)pf.focus()}
+  }
+  var PW="1103",lockT=null,CARD={no:"",name:"",exp:""};
+  function tryUnlock(){
+    var p=$("fPass"),v=p?p.value:"";
+    if(v===PW){S.unlocked=true;closeSheet();update();clearTimeout(lockT);lockT=setTimeout(function(){S.unlocked=false;update()},60000);toast("Balance unlocked")}
+    else{toast("Wrong password");if(p){p.value="";p.focus()}}
   }
   function closeSheet(){$("sheet").hidden=true;$("sheetBody").innerHTML=""}
   $("sheet").addEventListener("click",function(e){
@@ -271,6 +311,7 @@ function boot(USER){
     if(act==="close")closeSheet();
     else if(act==="edit"&&a)openSheet("edit",a);
     else if(act==="del"&&a){var idx=accs().indexOf(a);accs().splice(idx,1);lastDel={a:a,idx:idx,k:S.cur};closeSheet();render();toast("Deleted "+(a.name||"account"),true)}
+    else if(act==="unlock")tryUnlock();
     else if(act==="addrow"){$("bankRows").insertAdjacentHTML("beforeend",bankRow("",""));var ns=$("bankRows").querySelectorAll(".bn");ns[ns.length-1].focus()}
     else if(act==="rmrow"){var r=b.closest(".brow");if(r)r.remove()}
     else if(act==="save"){
@@ -290,6 +331,7 @@ function boot(USER){
   });
   $("sheet").addEventListener("input",function(e){var t=e.target;if(t.classList&&t.classList.contains("ba")){var v=t.value.replace(/[^0-9]/g,"");if(v!==t.value)t.value=v}});
   document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("sheet").hidden)closeSheet()});
+  document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.id==="fPass")tryUnlock()});
 
   function render(){
     var m=S.view==="month";
@@ -332,9 +374,10 @@ function boot(USER){
       el.querySelector(".am").textContent=s?money(s):"No need to send";
       el.querySelector(".info b").textContent=a.name||"Unnamed";
       el.querySelector(".av").textContent=(a.name||"?").trim().charAt(0).toUpperCase()||"?";});
-    countTo($("total"),total,shownTotal);shownTotal=total;
-    $("sentAmt").textContent=money(sent);$("leftAmt").textContent=money(total-sent);
-    $("bar").style.width=(total?Math.round(sent/total*100):0)+"%";
+    var un=!!S.unlocked;
+    $("dsub").hidden=!un;$("barw").hidden=!un;$("viewBal").textContent=un?"Hide":"View balance";
+    if(un){countTo($("total"),total,shownTotal);shownTotal=total;$("sentAmt").textContent=money(sent);$("leftAmt").textContent=money(total-sent);$("bar").style.width=(total?Math.round(sent/total*100):0)+"%"}
+    else{$("total").textContent="₹ ••••••";shownTotal=null}
     $("cnt").textContent=ns+" of "+n+" sent";
     $("msg").textContent=message();
     var done=total>0&&sent===total;if(done&&!wasAll)confetti();wasAll=done;
@@ -393,24 +436,33 @@ function boot(USER){
   function msgImage(cb){
     var K=2,W=540,rowH=64,live=accs().filter(function(a){return sum(a)>0}),total=0,sent=0,ns=0;
     live.forEach(function(a){var s=sum(a);total+=s;if(a.sent){sent+=s;ns++}});
-    var H=20+210+16+live.length*rowH+12+20,cs=getComputedStyle(document.documentElement),V=function(n,d){return cs.getPropertyValue(n).trim()||d};
+    var H=20+230+16+live.length*rowH+12+20,cs=getComputedStyle(document.documentElement),V=function(n,d){return cs.getPropertyValue(n).trim()||d};
     var font='"Plus Jakarta Sans",system-ui,"Segoe UI",sans-serif',c=document.createElement("canvas");
     c.width=W*K;c.height=H*K;var x=c.getContext("2d");x.scale(K,K);x.textBaseline="alphabetic";
     function rr(px,py,w,h,r){x.beginPath();x.moveTo(px+r,py);x.arcTo(px+w,py,px+w,py+h,r);x.arcTo(px+w,py+h,px,py+h,r);x.arcTo(px,py+h,px,py,r);x.arcTo(px,py,px+w,py,r);x.closePath()}
     x.fillStyle=V("--bg","#F2F4FA");x.fillRect(0,0,W,H);
-    var g=x.createLinearGradient(20,20,520,230);g.addColorStop(0,"#4B3BFF");g.addColorStop(.7,"#1D1280");
-    rr(20,20,500,210,26);x.fillStyle=g;x.fill();
-    x.save();rr(20,20,500,210,26);x.clip();
-    var rg=x.createRadialGradient(520,20,0,520,20,260);rg.addColorStop(0,"rgba(139,92,255,.9)");rg.addColorStop(1,"rgba(139,92,255,0)");x.fillStyle=rg;x.fillRect(20,20,500,210);
-    x.strokeStyle="rgba(255,255,255,.07)";x.lineWidth=34;x.beginPath();x.arc(470,250,95,0,Math.PI*2);x.stroke();x.restore();
+    var g=x.createLinearGradient(20,20,520,250);g.addColorStop(0,"#4B3BFF");g.addColorStop(.7,"#1D1280");
+    rr(20,20,500,230,26);x.fillStyle=g;x.fill();
+    x.save();rr(20,20,500,230,26);x.clip();
+    var rg=x.createRadialGradient(520,20,0,520,20,260);rg.addColorStop(0,"rgba(139,92,255,.9)");rg.addColorStop(1,"rgba(139,92,255,0)");x.fillStyle=rg;x.fillRect(20,20,500,230);
+    x.strokeStyle="rgba(255,255,255,.07)";x.lineWidth=34;x.beginPath();x.arc(470,270,95,0,Math.PI*2);x.stroke();x.restore();
     var cg=x.createLinearGradient(44,42,86,72);cg.addColorStop(0,"#FFD66B");cg.addColorStop(1,"#E4A11B");rr(44,42,42,30,8);x.fillStyle=cg;x.fill();
     x.strokeStyle="rgba(0,0,0,.2)";x.lineWidth=2;x.beginPath();x.moveTo(44,50);x.lineTo(86,50);x.moveTo(44,64);x.lineTo(86,64);x.stroke();
     x.fillStyle="#fff";x.globalAlpha=.85;x.font="700 13px "+font;x.textAlign="right";x.fillText(ns+" of "+live.length+" sent",496,62);
-    x.globalAlpha=1;x.textAlign="left";x.font="800 50px "+font;x.fillText(money(total),44,138);
-    x.globalAlpha=.92;x.font="600 14px "+font;x.fillText("Sent "+money(sent),44,170);x.textAlign="right";x.fillText("Left "+money(total-sent),496,170);x.globalAlpha=1;x.textAlign="left";
-    rr(44,184,452,7,4);x.fillStyle="rgba(255,255,255,.22)";x.fill();
-    if(total&&sent){rr(44,184,Math.max(7,452*sent/total),7,4);x.fillStyle="#6EF0C2";x.fill()}
-    var ly=246;rr(20,ly,500,live.length*rowH+12,24);x.fillStyle=V("--card","#FFFFFF");x.fill();
+    x.globalAlpha=1;x.textAlign="left";
+    try{x.letterSpacing="3px"}catch(e){}
+    x.font="800 22px "+font;x.fillText(CARD.no,44,112);
+    try{x.letterSpacing="1px"}catch(e){}
+    x.globalAlpha=.7;x.font="700 9px "+font;x.fillText("CARD HOLDER",44,140);x.fillText("EXPIRES",300,140);x.fillText("CVV",380,140);
+    x.globalAlpha=1;x.font="700 14px "+font;x.fillText(CARD.name,44,158);x.fillText(CARD.exp,300,158);x.fillText("•••",380,158);
+    try{x.letterSpacing="0px"}catch(e){}
+    x.fillStyle="rgba(255,255,255,.2)";x.fillRect(44,172,452,1);
+    x.fillStyle="#fff";x.globalAlpha=.7;x.font="700 9px "+font;x.fillText("BALANCE",44,192);
+    x.globalAlpha=1;x.font="800 30px "+font;x.fillText(money(total),44,222);
+    x.globalAlpha=.92;x.font="600 13px "+font;x.textAlign="right";x.fillText("Sent "+money(sent),496,200);x.fillText("Left "+money(total-sent),496,220);x.globalAlpha=1;x.textAlign="left";
+    rr(44,234,452,6,3);x.fillStyle="rgba(255,255,255,.22)";x.fill();
+    if(total&&sent){rr(44,234,Math.max(6,452*sent/total),6,3);x.fillStyle="#6EF0C2";x.fill()}
+    var ly=266;rr(20,ly,500,live.length*rowH+12,24);x.fillStyle=V("--card","#FFFFFF");x.fill();
     live.forEach(function(a,i){
       var y0=ly+6+i*rowH,cy=y0+rowH/2,nm0=a.name||"Unnamed";
       if(i>0){x.fillStyle=V("--line","#E4E7F2");x.fillRect(36,y0,468,1)}
@@ -462,31 +514,52 @@ function boot(USER){
       if(t-t0<2200)requestAnimationFrame(f);else x.clearRect(0,0,w,h)})(t0);
   }
 
+  function cardNo(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}var d="5";for(var j=0;j<15;j++){h=(Math.imul(h,1664525)+1013904223)>>>0;d+=h%10}return d.replace(/(.{4})/g,"$1 ").trim()}
+  var disp=(($("hello").textContent||"").replace(/^Hi,\s*/,"")||USER).toUpperCase().slice(0,22);
+  CARD={no:(CUST&&CUST.no)||cardNo(USER),name:disp,exp:(CUST&&CUST.exp)||String(now.getMonth()+1).padStart(2,"0")+"/"+String((now.getFullYear()+4)%100).padStart(2,"0")};
+  $("cnum").textContent=CARD.no;$("chold").textContent=CARD.name;$("cexp").textContent=CARD.exp;
+  $("viewBal").onclick=$("total").onclick=function(){if(S.unlocked){S.unlocked=false;clearTimeout(lockT);update()}else openSheet("pass")};
   ensure(S.cur);render();
+  document.getElementById("rcard").onclick=function(){try{localStorage.removeItem("money-to-send-card:"+USER)}catch(e){}location.reload()};
   document.getElementById("logout").onclick=function(){try{localStorage.removeItem("money-to-send-user")}catch(e){}location.reload()};
 }
 
 (function(){
-  var g=function(i){return document.getElementById(i)},KU="money-to-send-user";
-  function enter(name){
+  var g=function(i){return document.getElementById(i)},KU="money-to-send-user",KC="money-to-send-card:";
+  var saved=null;try{saved=localStorage.getItem(KU)}catch(e){}
+  function cardOf(n){try{return JSON.parse(localStorage.getItem(KC+n.trim().toLowerCase()))||{}}catch(e){return {}}}
+  function hasCard(c){return !!(c&&(c.set||c.no||c.exp))}
+  function sync(){var has=hasCard(cardOf(g("lname").value));g("cardFields").hidden=has;g("cardSaved").hidden=!has}
+  function err(m){g("lerr").textContent=m||""}
+  function enter(name,card){
     g("login").hidden=true;document.body.classList.remove("locked");
     g("hello").textContent="Hi, "+name;
-    boot(name.toLowerCase());
+    boot(name.toLowerCase(),card);
   }
   function submit(){
     var n=g("lname").value.trim().replace(/\s+/g," ");
-    if(!n){g("lname").focus();return}
+    if(!n){err("Enter your name");g("lname").focus();return}
+    var card=cardOf(n);
+    if(!g("cardFields").hidden){
+      var digits=g("lcard").value.replace(/\D/g,""),exp=g("lexp").value.trim();
+      if(digits&&digits.length!==16){err("Card number needs 16 digits");g("lcard").focus();return}
+      if(exp&&!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)){err("Expiry should look like 12/28");g("lexp").focus();return}
+      card={no:digits?digits.replace(/(.{4})/g,"$1 ").trim():"",exp:exp,set:true};
+      try{localStorage.setItem(KC+n.toLowerCase(),JSON.stringify(card))}catch(e){}
+    }
     try{localStorage.setItem(KU,n)}catch(e){}
-    enter(n);
+    enter(n,card);
   }
-  var saved=null;try{saved=localStorage.getItem(KU)}catch(e){}
-  if(saved)enter(saved);
-  else{
-    g("login").hidden=false;
-    g("lgo").onclick=submit;
-    g("lname").addEventListener("keydown",function(e){if(e.key==="Enter")submit()});
-    g("lname").focus();
-  }
+  g("login").hidden=false;
+  if(saved)g("lname").value=saved;
+  sync();
+  g("lname").addEventListener("change",sync);
+  g("lreset").onclick=function(){g("cardFields").hidden=false;g("cardSaved").hidden=true;g("lcard").value="";g("lexp").value="";g("lcard").focus()};
+  g("lcard").addEventListener("input",function(){var d=this.value.replace(/\D/g,"").slice(0,16);this.value=d.replace(/(.{4})/g,"$1 ").trim();err("")});
+  g("lexp").addEventListener("input",function(){var d=this.value.replace(/\D/g,"").slice(0,4);this.value=d.length>2?d.slice(0,2)+"/"+d.slice(2):d;err("")});
+  g("lgo").onclick=submit;
+  [g("lname"),g("lcard"),g("lexp")].forEach(function(el){el.addEventListener("keydown",function(e){if(e.key==="Enter")submit()})});
+  g("lname").focus();
 })();
 </script>
 </body>

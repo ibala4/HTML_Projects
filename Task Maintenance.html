@@ -632,6 +632,8 @@ function sanityHTML(){
 }
 
 /* ---------- main page ---------- */
+/* task numbers restart at 1 for every month */
+function monthOrd(l){const o={},c={};[...l].sort(byDate).forEach(x=>{const k=String(x.date||'').slice(0,7);c[k]=(c[k]||0)+1;o[x.id]=c[k]});return o}
 function render(){
   const u=U(),t=T(),now=new Date(),today=iso(now),day=dayTotals();
   $('hi').innerHTML=`<span class="avt">${avOf(u.name)}</span><span>Hi, ${esc((u.profile&&u.profile.first)||u.name)} 👋${statusPills()}<small>${t.length} task${t.length===1?'':'s'} saved</small></span>`;
@@ -640,7 +642,7 @@ function render(){
   applyLabels();
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===view));
   $('tview').hidden=view!=='tasks';$('cview').hidden=view!=='cal';$('sview').hidden=view!=='sprints';$('jview').hidden=view!=='jira';$('lvview').hidden=view!=='leave';$('snview').hidden=view!=='sanity';
-  const ord={};[...t].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);   /* saved order: 1st, 2nd, 3rd... */
+  const ord=monthOrd(t);   /* saved order: 1st, 2nd, 3rd... */
   if(view==='cal'){$('cview').innerHTML=calHTML(ord,day);return}
   if(view==='sprints'){$('sview').innerHTML=sprintHTML();return}
   if(view==='jira'){$('jview').innerHTML=jiraHTML(ord);return}
@@ -653,9 +655,10 @@ function render(){
   /* leave / holiday entries are listed with the tasks, in the order they were saved */
   const att=A(),lvs=[].concat(Object.keys(att).filter(d=>att[d]&&(att[d].s==='A'||att[d].s==='H')).map(d=>({lv:1,date:d,a:att[d],at:0}))).slice(0,0);   /* leave and holidays now live in the Leave tab */
   const all=rows.concat(lvs).sort(cmpFor());
-  const per=pageSize(),pages=Math.max(1,Math.ceil(all.length/per));if(page>pages)page=pages;if(page<1)page=1;
-  $('pager').innerHTML=pages>1?pagerHTML(all.length,per,pages):'';
-  $('list').innerHTML=all.length?(()=>{const lastOf={};rows.forEach(x=>lastOf[x.date]=x.id);return all.slice((page-1)*per,page*per).map(x=>x.lv?leaveCard(x):card(x,ord[x.id],day,lastOf[x.date]===x.id)).join('')})():`<div class="empty"><span class="big">🦉</span>${t.length?'No tasks match your filter.':'No tasks yet. Tap ➕ Add task to start.'}</div>`;
+  const mk=x=>String(x.date||'').slice(0,7),months=[...new Set(all.map(mk))],pages=Math.max(1,months.length);if(page>pages)page=pages;if(page<1)page=1;   /* every month is its own page */
+  const pageRows=all.filter(x=>mk(x)===months[page-1]);
+  $('pager').innerHTML=pages>1?monthPagerHTML(months,new Set(pageRows.map(x=>String(x.defect||'').trim()?String(x.defect).trim().toLowerCase():x.id)).size)   /* unique Defect IDs */:'';
+  $('list').innerHTML=all.length?(()=>{const lastOf={};rows.forEach(x=>lastOf[x.date]=x.id);return pageRows.map(x=>x.lv?leaveCard(x):card(x,ord[x.id],day,lastOf[x.date]===x.id)).join('')})():`<div class="empty"><span class="big">🦉</span>${t.length?'No tasks match your filter.':'No tasks yet. Tap ➕ Add task to start.'}</div>`;
 }
 function sprintHTML(){
   const g={};T().forEach(x=>{const k=(x.sprint||'').trim()||'No sprint';const o=g[k]=g[k]||{h:0,n:0,a:x.date,b:x.date};o.h=r2(o.h+x.hours);o.n++;if(x.date<o.a)o.a=x.date;if(x.date>o.b)o.b=x.date});
@@ -728,6 +731,11 @@ function jiraHTML(ord){
   return head+pend.map(x=>{
     const main=(hd?`<i>${esc(lab('defect'))}:</i> <b>${esc(x.defect||'-')}</b>`:'')+(hd&&hs?` <i>· ${esc(lab('desc'))}:</i> `:(hs?`<i>${esc(lab('desc'))}:</i> `:''))+(hs?esc(x.desc||'-'):'')||`<b>Task ${ord[x.id]}</b>`;
     return `<article class="task" style="--sc:${x.sprint?hue(x.sprint):'var(--acc)'}"><div class="l1"><span class="no">${ord[x.id]}</span><span class="ds" title="${esc(x.desc)}">${main}</span><span class="hrs">${H(x.hours)}</span></div><div class="jrow"><span class="jd">📅 ${fmt(x.date)}</span><button class="jbtn" data-a="jdone" data-id="${x.id}">⏳ Not saved in Jira</button></div></article>`}).join('');
+}
+function monthPagerHTML(months,n){
+  const nm=k=>MN[+k.slice(5,7)-1].slice(0,3)+' '+k.slice(0,4),pages=months.length;
+  const st=Math.max(0,Math.min(page-2,pages-2)),mid=months.map((k,i)=>[k,i]).slice(st,st+2).map(([k,i])=>`<button class="pgb ${i+1===page?'on':''}" data-a="pg" data-p="${i+1}" aria-label="${nm(k)}" ${i+1===page?'aria-current="page"':''}>${nm(k)}</button>`).join('');
+  return `<div class="pg"><button class="pgb" data-a="pg" data-p="${page-1}" ${page<=1?'disabled':''}>‹ Prev</button>${mid}<button class="pgb" data-a="pg" data-p="${page+1}" ${page>=pages?'disabled':''}>Next ›</button></div><p class="ro pgi">${MN[+months[page-1].slice(5,7)-1]} ${months[page-1].slice(0,4)} · ${n} task${n===1?'':'s'}</p>`;
 }
 function pagerHTML(n,per,pages){
   const from=(page-1)*per+1,to=Math.min(n,page*per),nums=[];
@@ -937,7 +945,7 @@ function buildPdf(title,sub,sections){
   return out;
 }
 function pdfFor(title,l,at){
-  const ord={};[...T()].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);
+  const ord=monthOrd(T());
   const h=r2(l.reduce((s,x)=>s+x.hours,0)),cols=colDefs(dayMap(l));
   const secs=[{head:'Tasks',cols:[['#',0],['Date',0],...cols.map(c=>[c.label,c.k==='desc'?500:c.k==='notes'?1:0])],
     rows:[...l].sort(byDate).map(x=>[ord[x.id],dmy(x.date),...cols.map(c=>{const v=c.get(x);if(c.k==='day'&&v!=='')return{t:v,c:PCOL[dayCls(c.raw(x))]};return v===''?'-':v})])}];
@@ -955,13 +963,13 @@ function downloadPdf(){
 const attList=(f,e)=>Object.keys(A()).filter(d=>(!f||d>=f)&&(!e||d<=e)&&(A()[d].s==='A'||A()[d].s==='H')).sort().map(d=>({date:d,s:A()[d].s,k:A()[d].k||'',desc:A()[d].desc||''}));
 function buildCsv(l,at){
   const q=s=>'"'+String(s).replace(/"/g,'""')+'"',cols=colDefs(dayMap(l));
-  const ord={};[...T()].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);
+  const ord=monthOrd(T());
   const rows=[['No','Date',...cols.map(c=>c.label)].map(q).join(',')].concat([...l].sort(byDate).map(x=>[ord[x.id],dmy(x.date),...cols.map(c=>c.csv?c.csv(x):c.get(x))].map(q).join(',')));
   if(at.length){rows.push('');rows.push(['Date','Attendance','Leave type','Description'].join(','));at.forEach(a=>rows.push([dmy(a.date),a.s==='H'?'Holiday':'Absent',a.k,a.desc||''].map(q).join(',')))}
   return rows.join('\n');
 }
 function showList(title,l,at,name){
-  const ord={};[...T()].sort(byDate).forEach((x,i)=>ord[x.id]=i+1);
+  const ord=monthOrd(T());
   const h=r2(l.reduce((s,x)=>s+x.hours,0)),dd=new Set(l.map(x=>x.date)).size,srt=[...l].sort(byDate),cols=colDefs(dayMap(l)),ih=cols.findIndex(c=>c.k==='hours');
   csvText=buildCsv(l,at);csvName=name;const pt=title.replace('–','to').replace(/[^\x20-\x7E]+/g,' ').replace(/\s+/g,' ').trim();pdfDoc=()=>pdfFor(pt,l,at);$('rmsg').textContent='';$('rtitle').textContent=title;
   $('rbody').innerHTML=`<div class="rsum"><span>✅ ${l.length} task${l.length===1?'':'s'}</span><span>⏱️ ${H(h)}</span><span>📅 ${dd} day${dd===1?'':'s'} worked</span>${at.some(a=>a.s!=='H')?`<span>🏖️ ${at.filter(a=>a.s!=='H').length} absent day${at.filter(a=>a.s!=='H').length===1?'':'s'}</span>`:''}${at.some(a=>a.s==='H')?`<span>🎉 ${at.filter(a=>a.s==='H').length} holiday${at.filter(a=>a.s==='H').length===1?'':'s'}</span>`:''}</div>`+
