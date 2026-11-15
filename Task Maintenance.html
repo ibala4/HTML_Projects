@@ -215,7 +215,7 @@ dialog::backdrop{backdrop-filter:none;background:rgba(0,0,0,.7)}
 #tmrem .tmtr{display:inline-block;white-space:nowrap;animation:tmmq linear infinite;will-change:transform}
 #tmrem .tmmq:hover .tmtr{animation-play-state:paused}
 #tmrem .tmi{display:inline-block;padding:0 60px 0 14px}
-#tmrem .tmtg{color:#f87171;font-weight:700}
+#tmrem .tmtg{color:#f87171;font-weight:700}#tmrem .tmpv{color:#fb923c;font-weight:700}
 #tmrem .tmm{display:inline-block;margin-right:44px}#tmrem .tmm:last-child{margin-right:0}
 @keyframes tmmq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(prefers-reduced-motion:reduce){#tmrem .tmmq{white-space:normal;padding:8px 10px}#tmrem .tmtr{animation:none!important;display:block;white-space:normal}#tmrem .tmi{padding:0}#tmrem .tmi+.tmi{display:none}}
@@ -544,6 +544,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const r2=n=>Math.round(n*100)/100,H=n=>r2(n)+' h',p2=n=>String(n).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const WDN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],wday=s=>s?WDN[new Date(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10)).getDay()]:'';   /* day name for a task date */
 const dmy=s=>s?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4):'',fmt=dmy;   /* dates are shown as DD/MM/YYYY */
 const hue=k=>{let h=0;for(const c of String(k))h=(h*31+c.charCodeAt(0))%360;return `hsl(${h} 68% 52%)`};
 const avOf=n=>AVS[[...String(n).toLowerCase()].reduce((a,c)=>a+c.charCodeAt(0),0)%AVS.length];
@@ -607,7 +608,7 @@ const card=(x,no,day,last)=>{
   const main=(hd?`<i>${esc(lab('defect'))}:</i> <b>${esc(x.defect||'-')}</b>`:'')+(hd&&hs?` <i>· ${esc(lab('desc'))}:</i> `:(hs?`<i>${esc(lab('desc'))}:</i> `:''))+(hs?esc(x.desc||'-'):'')||`<b>Task ${no}</b>`;
   const jst=jiraOn()&&x.jira?`<button class="jst ${x.jira==='done'?'ok':'wait'}" data-a="jtog" data-id="${x.id}" title="Tap to change">🔗 Jira ${x.jira==='done'?'saved':'pending'}</button>`:'';
   const nt=fs.some(f=>f.k==='notes')&&x.notes?`<div class="l3">📝 ${esc(x.notes)}</div>`:'';
-  return `<article class="task" style="--sc:${x.sprint?hue(x.sprint):'var(--acc)'}"><div class="l1"><span class="no">${no}</span><span class="ds" title="${esc(x.desc)}">${main}</span><span class="hrs">${H(x.hours)}</span></div><div class="l2">${chips}${jst}<span>${fmt(x.date)}</span>${last?`<span class="day ${dayCls(day[x.date]).replace('c-','t-')}" title="Daily target ${H(target())}">Spent that day ${H(day[x.date])}</span>`:''}<span class="ia"><button data-a="edit" data-id="${x.id}" aria-label="Edit ${esc(x.defect)}" title="Edit">✏️</button><button data-a="rm" data-id="${x.id}" aria-label="Delete ${esc(x.defect)}" title="Delete">🗑️</button></span></div>${nt}</article>`;
+  return `<article class="task" style="--sc:${x.sprint?hue(x.sprint):'var(--acc)'}"><div class="l1"><span class="no">${no}</span><span class="ds" title="${esc(x.desc)}">${main}</span><span class="hrs">${H(x.hours)}</span></div><div class="l2">${chips}${jst}<span>${fmt(x.date)} <span class="wdn">${wday(x.date)}</span></span>${last?`<span class="day ${dayCls(day[x.date]).replace('c-','t-')}" title="Daily target ${H(target())}">Spent that day ${H(day[x.date])}</span>`:''}<span class="ia"><button data-a="edit" data-id="${x.id}" aria-label="Edit ${esc(x.defect)}" title="Edit">✏️</button><button data-a="rm" data-id="${x.id}" aria-label="Delete ${esc(x.defect)}" title="Delete">🗑️</button></span></div>${nt}</article>`;
 };
 
 const byDate=(a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.at-b.at);   /* date order first, then the order saved */
@@ -1241,6 +1242,7 @@ load();$('nm').value=DB.last||'';show();
   /* all reminders in one scrolling line, separated by commas; the daily-target message is shown in red */
   var parts=[],tg=window.tmTarget?window.tmTarget():'';
   if(tg)parts.push({t:tg,c:'tmtg'});
+  var pv=window.tmPrev?window.tmPrev():'';if(pv)parts.push({t:pv,c:'tmpv'});
   m.forEach(function(t){parts.push({t:t.replace(/\.$/,''),c:''})});
   if(!parts.length){box.innerHTML='';box.dataset.k='';return}
   var esc=function(x){return x.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
@@ -2659,6 +2661,23 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
    var logged=r2(dayTotals()[d]||0),tg=target(),left=r2(tg-logged);
    if(dayOk(n)&&(now>=aT()||logged>0)&&left>0&&!(a&&(a.s==='A'||a.s==='H')))
     return 'Daily target not completed (logged '+H(logged)+' of '+H(tg)+' · '+H(left)+' remaining)';
+  }catch(e){}
+  return '';
+ };
+ /* earlier days where some time was logged but the daily target was not reached (days with no time logged are ignored) */
+ window.tmPrev=function(){
+  try{
+   if(!me||!U()||!aT()||!msgOn())return '';
+   var now=new Date(),today=iso(now),tg=target(),T=dayTotals(),at=A(),lim=new Date(now.getFullYear(),now.getMonth()-1,1),lo=iso(lim),out=[];
+   Object.keys(T).sort().reverse().forEach(function(d){
+    if(d>=today||d<lo)return;
+    var h=r2(T[d]||0);if(!(h>0)||h>=tg)return;                       /* nothing logged, or target already reached */
+    var a=at[d];if(a&&(a.s==='A'||a.s==='H'))return;                    /* leave or holiday */
+    var p=d.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]);if(!dayOk(dt))return;   /* a day switched off in Alert on */
+    out.push((+p[2])+' '+MN[+p[1]-1].slice(0,3)+' ('+H(r2(tg-h))+' short)')});
+   if(!out.length)return '';
+   var more=out.length>5?'; +'+(out.length-5)+' more day'+(out.length-5>1?'s':''):'';
+   return 'Earlier target not completed – '+out.slice(0,5).join('; ')+more;
   }catch(e){}
   return '';
  };
