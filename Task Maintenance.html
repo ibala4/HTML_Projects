@@ -655,7 +655,7 @@ function snSide(){
   if(SNSEL){const d=new Date(SNSEL+'T12:00:00');wd=d.toLocaleDateString('en-GB',{weekday:'long'})+' · '+d.getDate()+' '+MN[d.getMonth()]+' '+d.getFullYear()}
   return `<h3>Selected activity</h3><p class="snv-date">${SNSEL?esc(wd):'No date selected'}</p><div class="snv-ents">`+
    (es.length?es.map(e=>{const k=snKey(e.status);return `<div class="snv-ent s-${k}" data-id="${e.id}" title="Click to edit, double-click to remove"><div class="snv-et"><b>${esc(e.env)}</b><span class="snbtns"><button type="button" data-a="snedit" data-id="${e.id}" aria-label="Edit ${esc(e.env)}" title="Edit">✏️</button><button type="button" data-a="snrm" data-id="${e.id}" aria-label="Remove ${esc(e.env)}" title="Remove">🗑️</button></span></div><span class="snv-st"><i></i>${snLabel[k]}</span><small>${esc(e.status)} · ${dmy(e.date)}</small></div>`}).join(''):`<p class="snv-none">${SNSEL?'No activity on this date.':'Click a date marker to see its activity.'}</p>`)+
-   `</div><div class="snv-acts"><button type="button" class="snv-add" data-a="snadd"><b>+</b> Add environment</button><button type="button" class="snv-dl" data-a="sndl"><b>↓</b> Download report</button></div>`;
+   `</div><div class="snv-acts"><button type="button" class="snv-add" data-a="snadd"><b>+</b> Add environment</button><button type="button" class="snv-dl" data-a="sndl"><b>↓</b> Download report</button><button type="button" class="snv-dl snv-teams" data-a="snteams"><b>💬</b> Teams update</button></div>`;
 }
 function sanityHTML(){
   const y=SNC.y,m=SNC.m,N=new Date(y,m+1,0).getDate(),pre=y+'-'+String(m+1).padStart(2,'0'),ents=SN().filter(e=>e.date.startsWith(pre)),names=snNames();
@@ -2338,7 +2338,7 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
   var t=e.target,ent=t.closest&&t.closest('.snv-ent');
   if(ent&&!t.closest('.snbtns')){clearTimeout(tm);var id=ent.dataset.id;tm=setTimeout(function(){openEdit(id)},260);return}
   var chip=t.closest&&t.closest('.snchip'),cell=t.closest&&t.closest('.sndc');
-  if(chip){selectDate(chip.closest('.sndc').dataset.d);clearTimeout(tm);var cid=chip.dataset.id;tm=setTimeout(function(){openEdit(cid)},260);return}
+  if(chip&&chip.closest('.sndc')){selectDate(chip.closest('.sndc').dataset.d);   /* chips in the Add environment list are handled elsewhere */clearTimeout(tm);var cid=chip.dataset.id;tm=setTimeout(function(){openEdit(cid)},260);return}
   if(cell){selectDate(cell.dataset.d);return}
   var b=t.closest&&t.closest('[data-a^="sn"],[data-a^="env"],[data-a="sontoggle"]');if(!b)return;var a=b.dataset.a;
   if(a==='envadd'){envAdd();return}if(a==='envrm'){envRm(b.dataset.n);return}
@@ -2466,6 +2466,29 @@ html.tmbgon dialog{--card:var(--tms);--bg:var(--tmsb);--soft:var(--tmss)}
 .bgx{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:#e11d48;color:#fff;font-size:.9rem;line-height:1;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}.bgx:hover{background:#be123c}
 .bgrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}.bgbox input[type=range]{width:100%;accent-color:var(--acc)}
 .pgy{margin-top:0}.pgy b{color:var(--acc)}
+#tmsdlg{border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--ink);width:min(680px,95vw);max-height:94vh;padding:0;overflow:auto}#tmsdlg::backdrop{background:rgba(10,5,40,.6)}
+#tmsdlg .th{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
+#tmsdlg .th h2{margin:0;font-size:1.1rem}#tmsdlg .th small{display:block;color:var(--mute);font-size:.7rem;letter-spacing:.1em;font-weight:700}
+#tmsdlg .tx{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:1.2rem;cursor:pointer}
+#tmsdlg .tb{padding:16px 20px;display:grid;gap:12px}#tmsdlg .tg{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}
+#tmsdlg label{display:block;font-size:.78rem;font-weight:700;color:var(--mute);margin:0 0 5px}
+#tmsdlg input,#tmsdlg textarea{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:.9rem}
+#tmsdlg textarea{resize:vertical;line-height:1.5}#tmsdlg input:focus,#tmsdlg textarea:focus{outline:2px solid #a78bfa;outline-offset:1px}
+#tmsdlg .tsn{font-weight:400}
+#tmsdlg .ts{border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;background:rgba(127,127,127,.06)}
+#tmsdlg .tsh,#tmsdlg .tsrw{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+#tmsdlg .tst{font-weight:700}#tmsdlg .tsl{flex:0 0 110px;width:110px}#tmsdlg .tsv{flex:1;font-family:Consolas,monospace}
+#tmsdlg .ts button[data-t^=del]{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--mute);cursor:pointer}
+#tmsdlg .ts button[data-t^=del]:hover{background:#e11d48;border-color:#e11d48;color:#fff}
+#tmsdlg .tsadd{padding:6px 12px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:#a78bfa;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;margin:2px 0}
+#tmsdlg .tc{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}#tmsdlg .tc button{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}
+#tmsdlg .tc button:hover{border-color:#8b5cf6}
+#tmsdlg .tp{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--soft);font-size:.9rem;line-height:1.5}
+#tmsdlg .tp p{margin:4px 0}#tmsdlg .tp ul{margin:2px 0 8px;padding-left:34px}#tmsdlg .tp code{background:rgba(127,127,127,.22);padding:1px 7px;border-radius:6px;font-family:Consolas,monospace}
+#tmsdlg .tf{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;padding:0 20px 18px}
+#tmsdlg .tf button{padding:10px 18px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+#tmsdlg .tf .ok{background:#7c3aed;border-color:#7c3aed;color:#fff}
+@media(max-width:560px){#tmsdlg .tg{grid-template-columns:1fr}}
 #clkdlg{border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--ink);width:min(320px,92vw);padding:18px}#clkdlg::backdrop{background:rgba(10,5,40,.55)}
 #clkdlg .ch{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px}
 #clkdlg .ch button.seg{font:700 2.2rem/1 system-ui,sans-serif;padding:8px 12px;border-radius:12px;border:0;background:rgba(127,127,127,.15);color:var(--ink);cursor:pointer}
@@ -2818,6 +2841,111 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
   if(['bgop','bgbr','bgblur'].indexOf(e.target.id)<0)return;var c=get();c.o=+$('bgop').value;c.b=+$('bgbr').value;c.l=+$('bgblur').value;delete c.d;put(c);apply();ui()});
  new MutationObserver(apply).observe(root,{attributes:true,attributeFilter:['data-theme']});
  apply();ui();
+})();
+</script>
+<script>
+/* Sanity: build the "BASIC SANITY TESTING UPDATE" message for Teams. Headings stay the same every day; only the IDs change. */
+(function(){
+ var $=function(i){return document.getElementById(i)},MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],TK='tm_teams_tx';
+ var LINES={done:['✅ Basic sanity testing has been successfully completed.','✅ All validated scenarios are working as expected.','✅ No major issues were identified during testing.'],
+  prog:['🔄 Basic sanity testing is in progress.'],pend:['⏳ Basic sanity testing is pending.'],
+  fail:['❌ Basic sanity testing could not be completed.','❌ Issues were identified during testing. Details are below.']};
+ var DEF={secs:[{t:'Multiple Items with Partial Return',r:[['Sale',''],['Return','']]},{t:'Multiple Items with Full Return',r:[['Sale',''],['Return','']]}]};
+ /* Each date keeps its own transaction IDs. A new date starts with the saved headings and EMPTY IDs - nothing is copied from another date. */
+ var STORE=loadStore(),curDs=null,TX={secs:blankSecs()},autoEnv=true,autoRes=true,built=false;
+ function loadStore(){try{var o=JSON.parse(localStorage.getItem(TK)||'null');
+  if(o&&o.d&&typeof o.d==='object')return {d:o.d,tpl:Array.isArray(o.tpl)?o.tpl:null};
+  if(o&&Array.isArray(o.secs))return {d:{},tpl:o.secs.map(function(s){return {t:s.t,r:s.r.map(function(r){return [r[0],'']})}})}}catch(e){}
+  return {d:{},tpl:null}}
+ function blankSecs(){var src=(STORE&&STORE.tpl)||DEF.secs;return src.map(function(s){return {t:s.t,r:s.r.map(function(r){return [r[0],'']})}})}
+ function forDate(ds){var o=STORE.d[ds];return (o&&Array.isArray(o.secs))?JSON.parse(JSON.stringify(o)):{secs:blankSecs()}}
+ function ensure(ds){if(curDs===ds)return;curDs=ds;TX=forDate(ds);if($('tsx'))ui()}
+ function keep(){if(!curDs)return;STORE.d[curDs]={secs:TX.secs};STORE.tpl=TX.secs.map(function(s){return {t:s.t,r:s.r.map(function(r){return [r[0],'']})}});try{localStorage.setItem(TK,JSON.stringify(STORE))}catch(e){}}
+ function h(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ function dl(ds){return ds?ds.slice(8,10)+'-'+MS[+ds.slice(5,7)-1]+'-'+ds.slice(0,4):''}
+ function onDate(ds){return SN().filter(function(e){return e.date===ds}).sort(function(a,b){return a.env.localeCompare(b.env)})}
+ function stat(ds,env){var l=onDate(ds),e=l.filter(function(x){return x.env===env})[0]||l[0];return e?snKey(e.status):'done'}
+ function build(){
+  var ds=$('tsd').value||snToday(),env=$('tse').value.trim()||'\u2014';
+  var lines=$('tsr').value.split('\n').map(function(x){return x.trim()}).filter(Boolean);
+  var html='<p>Hi Everyone : <b>BASIC SANITY TESTING UPDATE</b></p><p>📅 <b>Test Date:</b> <code>'+h(dl(ds))+'</code></p><p>💻 <b>Environment:</b> <code>'+h(env)+'</code></p>';
+  var txt='Hi Everyone : BASIC SANITY TESTING UPDATE\nTest Date: '+dl(ds)+'\nEnvironment: '+env+'\n';
+  lines.forEach(function(l){html+='<p>'+h(l)+'</p>';txt+=l+'\n'});
+  var secs=TX.secs.map(function(s){return {t:(s.t||'').trim(),r:s.r.filter(function(r){return (r[1]||'').trim()})}}).filter(function(s){return s.r.length});
+  if(secs.length){
+   html+='<p><br><b>Transaction Details</b></p>';txt+='\nTransaction Details\n';
+   secs.forEach(function(s){
+    if(s.t){html+='<p><b>'+h(s.t)+'</b></p>';txt+=s.t+'\n'}
+    html+='<ul>'+s.r.map(function(r){return '<li>'+h((r[0]||'').trim())+': '+h(r[1].trim())+'</li>'}).join('')+'</ul>';
+    s.r.forEach(function(r){txt+='  \u2022 '+(r[0]||'').trim()+': '+r[1].trim()+'\n'});txt+='\n'})}
+  return {html:html,text:txt.replace(/\s+$/,'')+'\n'}
+ }
+ function paint(){$('tsp').innerHTML=build().html}
+ function ui(){   /* headings and labels stay; you only change the IDs */
+  var box=$('tsx');box.textContent='';
+  TX.secs.forEach(function(s,i){
+   var d=document.createElement('div');d.className='ts';d.dataset.i=i;
+   var hd='<div class="tsh"><input class="tst" value="'+h(s.t)+'" placeholder="Heading" aria-label="Heading"><button type="button" data-t="delsec" title="Remove this heading" aria-label="Remove heading">\u00D7</button></div>';
+   var rows=s.r.map(function(r,k){return '<div class="tsrw" data-k="'+k+'"><input class="tsl" value="'+h(r[0])+'" placeholder="Label" aria-label="Label"><input class="tsv" value="'+h(r[1])+'" placeholder="Paste or type the ID" aria-label="ID" spellcheck="false"><button type="button" data-t="delrow" title="Remove row" aria-label="Remove row">\u00D7</button></div>'}).join('');
+   d.innerHTML=hd+rows+'<button type="button" class="tsadd" data-t="addrow">+ Add row</button>';box.appendChild(d)});
+  var a=document.createElement('button');a.type='button';a.className='tsadd';a.dataset.t='addsec';a.textContent='+ Add heading';box.appendChild(a)}
+ function read(){   /* DOM -> TX (no redraw, so typing is never interrupted) */
+  TX.secs=[].map.call($('tsx').querySelectorAll('.ts'),function(d){return {t:d.querySelector('.tst').value,r:[].map.call(d.querySelectorAll('.tsrw'),function(w){return [w.querySelector('.tsl').value,w.querySelector('.tsv').value]})}});keep();paint()}
+ function chips(){
+  var l=onDate($('tsd').value||snToday()),box=$('tsc');box.textContent='';
+  if(!l.length)return;
+  var names=l.map(function(e){return e.env});
+  names.concat(names.length>1?[names.join(', ')]:[]).forEach(function(n,i){var b=document.createElement('button');b.type='button';b.textContent=(i>=names.length?'All: ':'')+n;b.dataset.env=n;box.appendChild(b)})}
+ function sync(force){
+  var ds=$('tsd').value||snToday(),l=onDate(ds);
+  ensure(ds);
+  if(force||autoEnv){var d=$('tsl');d.textContent='';var all={};SN().forEach(function(e){all[e.env]=1});Object.keys(all).sort().forEach(function(n){var o=document.createElement('option');o.value=n;d.appendChild(o)});
+   $('tse').value=l.length?l[0].env:($('tse').value||'');autoEnv=true}
+  if(force||autoRes){$('tsr').value=LINES[stat(ds,$('tse').value.trim())].join('\n');autoRes=true}
+  chips();paint()}
+ function make(){
+  var d=document.createElement('dialog');d.id='tmsdlg';
+  d.innerHTML='<div class="th"><div><small>SANITY</small><h2>💬 Teams update</h2></div><button type="button" class="tx" data-t="x" aria-label="Close">\u00D7</button></div>'+
+   '<div class="tb"><div class="tg"><div><label for="tsd">Test date</label><input type="date" id="tsd"></div><div><label for="tse">Environment</label><input id="tse" list="tsl" placeholder="e.g. dev-tc-1-02" autocomplete="off"><datalist id="tsl"></datalist><div class="tc" id="tsc"></div></div></div>'+
+   '<div><label for="tsr">Result lines (one per line)</label><textarea id="tsr" rows="3"></textarea></div>'+
+   '<div><label>Transaction details <span class="tsn">\u2013 headings are saved, IDs are saved separately for each test date</span></label><div id="tsx"></div>'+
+   '</div>'+
+   '<div><label>Preview (this is what Teams will show)</label><div class="tp" id="tsp"></div></div></div>'+
+   '<div class="tf"><button type="button" data-t="x">Close</button><button type="button" data-t="txt">Copy plain text</button><button type="button" class="ok" data-t="rich" id="tsok">📋 Copy for Teams</button></div>';
+  document.body.appendChild(d);ui();
+  d.addEventListener('input',function(e){
+   var t=e.target;
+   if(t.id==='tse'){autoEnv=false;if(autoRes)$('tsr').value=LINES[stat($('tsd').value||snToday(),t.value.trim())].join('\n')}
+   if(t.id==='tsr')autoRes=false;
+   if(t.id==='tsd'){autoEnv=true;autoRes=true;sync(true);return}
+   if(t.closest&&t.closest('#tsx')){read();return}
+   paint()});
+  d.addEventListener('click',function(e){
+   var b=e.target.closest('button');if(!b)return;
+   if(b.dataset.env!==undefined){$('tse').value=b.dataset.env;autoEnv=false;if(autoRes)$('tsr').value=LINES[stat($('tsd').value||snToday(),b.dataset.env.split(', ')[0])].join('\n');paint();return}
+   var k=b.dataset.t,sec=b.closest('.ts');
+   if(k==='x'){d.close();return}
+   if(!k)return;
+   if(!sec&&(k==='delsec'||k==='addrow'||k==='delrow'))return;
+   if(k==='addsec'){read();TX.secs.push({t:'',r:[['Sale',''],['Return','']]});keep();ui();paint();return}
+   if(k==='delsec'){read();TX.secs.splice(+sec.dataset.i,1);keep();ui();paint();return}
+   if(k==='addrow'){read();TX.secs[+sec.dataset.i].r.push(['','']);keep();ui();paint();return}
+   if(k==='delrow'){read();var rw=b.closest('.tsrw');if(rw)TX.secs[+sec.dataset.i].r.splice(+rw.dataset.k,1);keep();ui();paint();return}
+   if(k==='rich')copyRich(b);
+   if(k==='txt')copyTxt(b)});
+  built=true}
+ function done(b,label){var o=b.dataset.l||b.textContent;b.dataset.l=o;b.textContent=label;setTimeout(function(){b.textContent=o},1800)}
+ function copyTxt(b){var t=build().text;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t):Promise.reject()).then(function(){done(b,'\u2713 Copied')}).catch(function(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');done(b,'\u2713 Copied')}catch(e){done(b,'Copy failed')}a.remove()})}
+ function copyRich(b){
+  var o=build();
+  function fallback(){var p=$('tsp'),r=document.createRange();r.selectNodeContents(p);var s=getSelection();s.removeAllRanges();s.addRange(r);var ok=false;try{ok=document.execCommand('copy')}catch(e){}s.removeAllRanges();done(b,ok?'\u2713 Copied':'Copy failed')}
+  try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+   navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([o.html],{type:'text/html'}),'text/plain':new Blob([o.text],{type:'text/plain'})})]).then(function(){done(b,'\u2713 Copied')}).catch(fallback);return}}catch(e){}
+  fallback()}
+ document.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('[data-a="snteams"]'):null;if(!b)return;
+  if(!built)make();var d=$('tmsdlg');$('tsd').value=(typeof SNSEL!=='undefined'&&SNSEL)||snToday();autoEnv=true;autoRes=true;sync(true);d.showModal()});
 })();
 </script>
 </body></html>
