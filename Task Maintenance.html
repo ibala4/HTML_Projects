@@ -597,6 +597,9 @@ function show(){$('login').hidden=!!me;$('app').hidden=!me;if(me)render();else $
 
 /* ---------- helpers ---------- */
 const sprints=()=>[...new Set(T().map(x=>(x.sprint||'').trim()).filter(Boolean))].sort();
+/* greeting from the time of day */
+const gt=()=>{const h=new Date().getHours();return h>=5&&h<12?'Good Morning':h>=12&&h<17?'Good Afternoon':h>=17?'Good Evening':'Hello'};
+setInterval(()=>{document.querySelectorAll('.gtm').forEach(e=>{const g=gt();if(e.textContent!==g)e.textContent=g})},60000);
 const dayTotals=()=>{const m={};T().forEach(x=>m[x.date]=r2((m[x.date]||0)+x.hours));return m};
 const monday=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
 const sumRange=(t,a,b)=>r2(t.filter(x=>x.date>=a&&x.date<=b).reduce((s,x)=>s+x.hours,0));
@@ -670,7 +673,7 @@ function sanityHTML(){
 function monthOrd(l){const o={},c={};[...l].sort(byDate).forEach(x=>{const k=String(x.date||'').slice(0,7);c[k]=(c[k]||0)+1;o[x.id]=c[k]});return o}
 function render(){
   const u=U(),t=T(),now=new Date(),today=iso(now),day=dayTotals();
-  $('hi').innerHTML=`<span class="avt">${avOf(u.name)}</span><span>Hi, ${esc((u.profile&&u.profile.first)||u.name)} 👋${statusPills()}<small>${t.length} task${t.length===1?'':'s'} saved</small></span>`;
+  $('hi').innerHTML=`<span class="avt">${avOf(u.name)}</span><span><span class="gtm">${gt()}</span>, ${esc((u.profile&&u.profile.first)||u.name)} 👋${statusPills()}</span>`;
   const m1=monday(now),m2=new Date(m1);m2.setDate(m2.getDate()+6);
   const pre=today.slice(0,8);
   applyLabels();
@@ -691,7 +694,7 @@ function render(){
   const all=rows.concat(lvs).sort(cmpFor());
   const mk=x=>String(x.date||'').slice(0,7),months=[...new Set(all.map(mk))],pages=Math.max(1,months.length);if(page>pages)page=pages;if(page<1)page=1;   /* every month is its own page */
   const pageRows=all.filter(x=>mk(x)===months[page-1]);
-  $('pager').innerHTML=pages>1?monthPagerHTML(months,new Set(pageRows.map(x=>String(x.defect||'').trim()?String(x.defect).trim().toLowerCase():x.id)).size)   /* unique Defect IDs */:'';
+  $('pager').innerHTML=months.length?monthPagerHTML(months,new Set(pageRows.map(x=>String(x.defect||'').trim()?String(x.defect).trim().toLowerCase():x.id)).size)   /* unique Defect IDs */:'';
   $('list').innerHTML=all.length?(()=>{const lastOf={};rows.forEach(x=>lastOf[x.date]=x.id);return pageRows.map(x=>x.lv?leaveCard(x):card(x,ord[x.id],day,lastOf[x.date]===x.id)).join('')})():`<div class="empty"><span class="big">🦉</span>${t.length?'No tasks match your filter.':'No tasks yet. Tap ➕ Add task to start.'}</div>`;
 }
 function sprintHTML(){
@@ -766,10 +769,13 @@ function jiraHTML(ord){
     const main=(hd?`<i>${esc(lab('defect'))}:</i> <b>${esc(x.defect||'-')}</b>`:'')+(hd&&hs?` <i>· ${esc(lab('desc'))}:</i> `:(hs?`<i>${esc(lab('desc'))}:</i> `:''))+(hs?esc(x.desc||'-'):'')||`<b>Task ${ord[x.id]}</b>`;
     return `<article class="task" style="--sc:${x.sprint?hue(x.sprint):'var(--acc)'}"><div class="l1"><span class="no">${ord[x.id]}</span><span class="ds" title="${esc(x.desc)}">${main}</span><span class="hrs">${H(x.hours)}</span></div><div class="jrow"><span class="jd">📅 ${fmt(x.date)}</span><button class="jbtn" data-a="jdone" data-id="${x.id}">⏳ Not saved in Jira</button></div></article>`}).join('');
 }
+/* total tasks of one calendar year = the monthly counts added up (each month counts a Defect ID once); a new year starts again from the first task */
+function yearTotal(yr){const g={};T().forEach(x=>{const k=String(x.date||'').slice(0,7);if(k.slice(0,4)!==yr)return;(g[k]=g[k]||new Set()).add(String(x.defect||'').trim()?String(x.defect).trim().toLowerCase():x.id)});return Object.keys(g).reduce((a,k)=>a+g[k].size,0)}
 function monthPagerHTML(months,n){
   const nm=k=>MN[+k.slice(5,7)-1].slice(0,3)+' '+k.slice(0,4),pages=months.length;
   const st=Math.max(0,Math.min(page-2,pages-2)),mid=months.map((k,i)=>[k,i]).slice(st,st+2).map(([k,i])=>`<button class="pgb ${i+1===page?'on':''}" data-a="pg" data-p="${i+1}" aria-label="${nm(k)}" ${i+1===page?'aria-current="page"':''}>${nm(k)}</button>`).join('');
-  return `<div class="pg"><button class="pgb" data-a="pg" data-p="${page-1}" ${page<=1?'disabled':''}>‹ Prev</button>${mid}<button class="pgb" data-a="pg" data-p="${page+1}" ${page>=pages?'disabled':''}>Next ›</button></div><p class="ro pgi">${MN[+months[page-1].slice(5,7)-1]} ${months[page-1].slice(0,4)} · ${n} task${n===1?'':'s'}</p>`;
+  const yr=months[page-1].slice(0,4),yt=yearTotal(yr);
+  return `${pages>1?`<div class="pg"><button class="pgb" data-a="pg" data-p="${page-1}" ${page<=1?'disabled':''}>‹ Prev</button>${mid}<button class="pgb" data-a="pg" data-p="${page+1}" ${page>=pages?'disabled':''}>Next ›</button></div>`:''}<p class="ro pgi">${MN[+months[page-1].slice(5,7)-1]} ${months[page-1].slice(0,4)} · ${n} task${n===1?'':'s'}</p><p class="ro pgi pgy">Total tasks completed in ${yr}: <b>${yt}</b></p>`;
 }
 function pagerHTML(n,per,pages){
   const from=(page-1)*per+1,to=Math.min(n,page*per),nums=[];
@@ -1996,7 +2002,7 @@ canvas.crk{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z
  function greet(){
   var last=(DB&&DB.last)||'',names=[];try{names=Object.keys(DB.users).map(function(k){return DB.users[k].name}).filter(Boolean)}catch(e){}
   $('lgeye').textContent=last?'WELCOME BACK':'WELCOME';
-  $('lgh').textContent=last?'Hi, '+last+' \uD83D\uDC4B':'Let\u2019s get started';
+  $('lgh').textContent=last?gt()+', '+last+' \uD83D\uDC4B':'Let\u2019s get started';
   $('lgsub').textContent=last?'Pick up where you left off, or enter another name.':'Enter your name to open your tasks.';
   names.sort(function(a,b){return a===last?-1:b===last?1:a.localeCompare(b)});
   var box=$('lgchips');box.textContent='';
@@ -2458,6 +2464,7 @@ html.tmbgon dialog{--card:var(--tms);--bg:var(--tmsb);--soft:var(--tmss)}
 .bgwrap{position:relative}.bgwrap .bgsw{width:100%}
 .bgx{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:#e11d48;color:#fff;font-size:.9rem;line-height:1;padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}.bgx:hover{background:#be123c}
 .bgrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}.bgbox input[type=range]{width:100%;accent-color:var(--acc)}
+.pgy{margin-top:0}.pgy b{color:var(--acc)}
 #clkdlg{border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--ink);width:min(320px,92vw);padding:18px}#clkdlg::backdrop{background:rgba(10,5,40,.55)}
 #clkdlg .ch{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px}
 #clkdlg .ch button.seg{font:700 2.2rem/1 system-ui,sans-serif;padding:8px 12px;border-radius:12px;border:0;background:rgba(127,127,127,.15);color:var(--ink);cursor:pointer}
