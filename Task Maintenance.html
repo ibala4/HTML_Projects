@@ -599,7 +599,8 @@ function show(){$('login').hidden=!!me;$('app').hidden=!me;if(me)render();else $
 const sprints=()=>[...new Set(T().map(x=>(x.sprint||'').trim()).filter(Boolean))].sort();
 /* greeting from the time of day */
 const gt=()=>{const h=new Date().getHours();return h>=5&&h<12?'Good Morning':h>=12&&h<17?'Good Afternoon':h>=17?'Good Evening':'Hello'};
-setInterval(()=>{document.querySelectorAll('.gtm').forEach(e=>{const g=gt();if(e.textContent!==g)e.textContent=g})},60000);
+const gtUpd=()=>document.querySelectorAll('.gtm').forEach(e=>{const g=gt();if(e.textContent!==g)e.textContent=g});
+setInterval(gtUpd,30000);document.addEventListener('visibilitychange',gtUpd);window.addEventListener('focus',gtUpd);   /* also when you come back to the tab */
 const dayTotals=()=>{const m={};T().forEach(x=>m[x.date]=r2((m[x.date]||0)+x.hours));return m};
 const monday=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
 const sumRange=(t,a,b)=>r2(t.filter(x=>x.date>=a&&x.date<=b).reduce((s,x)=>s+x.hours,0));
