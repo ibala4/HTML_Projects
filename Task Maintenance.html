@@ -2704,7 +2704,7 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
     if(d>=today||d<lo)return;
     var h=r2(T[d]||0);if(!(h>0)||h>=tg)return;                       /* nothing logged, or target already reached */
     var a=at[d];if(a&&(a.s==='A'||a.s==='H'))return;                    /* leave or holiday */
-    var p=d.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]);if(!dayOk(dt))return;   /* a day switched off in Alert on */
+    var p=d.split('-');   /* time was logged that day, so it counts even if the day is switched off in Alert on (e.g. Sat/Sun) */
     out.push((+p[2])+' '+MN[+p[1]-1].slice(0,3)+' ('+H(r2(tg-h))+' short)')});
    if(!out.length)return '';
    var more=out.length>5?'; +'+(out.length-5)+' more day'+(out.length-5>1?'s':''):'';
