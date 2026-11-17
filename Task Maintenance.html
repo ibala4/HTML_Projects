@@ -742,6 +742,7 @@ const shown=()=>FIELDS().filter(f=>f.on);
 const has=k=>FIELDS().some(f=>f.k===k);   /* false once a field has been removed */
 const target=()=>U().dayTarget||9;
 const pageSize=()=>U().pageSize||10;
+const teamsOn=()=>U().teamsOn!==false;   /* the Teams update button is on unless you switch it off in Settings */
 const sanityOn=()=>U().sanityOn!==false;   /* the Sanity tab is on unless you switch it off in Settings */
 const jiraOn=()=>U().jiraOn!==false;   /* the Jira tab is on unless you switch it off in Settings */
 const dayCls=h=>{const t=target();return h<t?'c-y':h===t?'c-b':'c-r'};   /* under target yellow, on target blue, over target red */
@@ -801,7 +802,7 @@ function applyLabels(){
   q('[data-a="defaults"]').hidden=!(has('sprint')||has('taskId')||has('iter'));
   const jb=q('[data-t="jira"]'),pn=T().filter(x=>x.jira==='pending').length;jb.hidden=!jiraOn();jb.textContent='🔗 Jira'+(pn?' ('+pn+')':'');
   if(view==='jira'&&!jiraOn())view='tasks';
-  const sb=q('.tabs [data-t="sanity"]');if(sb)sb.hidden=!sanityOn();document.body.classList.toggle('no-sanity',!sanityOn());
+  const sb=q('.tabs [data-t="sanity"]');if(sb)sb.hidden=!sanityOn();document.body.classList.toggle('no-sanity',!sanityOn());document.body.classList.toggle('no-teams',!teamsOn());
   if(view==='sanity'&&!sanityOn())view='tasks';
   $('dleg').textContent='Spent that day:  🟨 under '+H(target())+'   🟦 exactly '+H(target())+'   🟥 over '+H(target());
 }
@@ -956,24 +957,27 @@ function colWidths(sec,avail){
 function buildPdf(title,sub,sections){
   const PW=842,PH=595,M=36,pages=[];let cur,y;
   const txt=(x,yy,t,sz,b)=>cur.push(`BT /${b?'F2':'F1'} ${sz} Tf ${x.toFixed(2)} ${yy} Td (${pesc(t)}) Tj ET`);
-  const ln=(x1,y1,x2,y2)=>cur.push(`0.6 w ${x1} ${y1} m ${x2.toFixed(2)} ${y2} l S`);
-  const np=()=>{cur=[];pages.push(cur);y=PH-M};
-  np();txt(M,y-10,title,15,1);txt(M,y-26,sub,9,0);y-=44;
+  const rgb=h=>[0,2,4].map(i=>(parseInt(h.substr(i,2),16)/255).toFixed(3)).join(' ');
+  const box=(x,yy,w,hh,col)=>cur.push(`${rgb(col)} rg ${x.toFixed(2)} ${yy.toFixed(2)} ${w.toFixed(2)} ${hh.toFixed(2)} re f`);
+  const fc=col=>cur.push(`${rgb(col)} rg`);
+  const ln=(x1,y1,x2,y2)=>cur.push(`${rgb('d3dae6')} RG 0.6 w ${x1} ${y1} m ${x2.toFixed(2)} ${y2} l S`);
+  const np=()=>{cur=[];pages.push(cur);box(0,PH-6,PW,6,'14284b');y=PH-M-6};
+  np();box(0,PH-70,PW,70,'14284b');box(0,PH-73,PW,3,'2f67e8');fc('ffffff');txt(M,PH-36,title,17,1);fc('c9d6ee');txt(M,PH-56,sub,9,0);y=PH-73-26;
   for(const sec of sections){
     const cw=colWidths(sec,PW-2*M),total=cw.reduce((a,b)=>a+b,0);
-    const hdr=()=>{let x=M;sec.cols.forEach((c,i)=>{txt(x,y-9,c[0],8,1);x+=cw[i]});ln(M,y-13,M+total,y-13);y-=18};
+    const hdr=()=>{box(M,y-15,total,20,'1f3a68');fc('ffffff');let x=M;sec.cols.forEach((c,i)=>{txt(x+4,y-8,c[0],8,1);x+=cw[i]});y-=20};
     if(y<M+70)np();
-    txt(M,y-10,sec.head,11,1);y-=20;hdr();
-    if(!sec.rows.length){txt(M,y-9,'No records.',8,0);y-=16}
-    for(const r of sec.rows){
+    box(M,y-12,4,15,'2f67e8');fc('14284b');txt(M+11,y-10,sec.head,11.5,1);y-=24;hdr();
+    if(!sec.rows.length){fc('4b5563');txt(M+4,y-9,'No records.',8,0);y-=16}
+    let ri=0;for(const r of sec.rows){
       const cells=r.map((v,i)=>wrapPt(v&&v.t!==undefined?v.t:v,cw[i]-8,8)),n=Math.max(...cells.map(c=>c.length)),h=n*10+5;
       if(y-h<M+14){np();hdr()}
-      let x=M;cells.forEach((c,i)=>{const col=r[i]&&r[i].c;if(col)cur.push(col.join(' ')+' rg');c.forEach((l,k)=>txt(x,y-9-k*10,l,8,0));if(col)cur.push('0 g');x+=cw[i]});
-      ln(M,y-h+2,M+total,y-h+2);y-=h;
+      if(ri%2)box(M,y-h+2,total,h,'f3f6fb');let x=M;cells.forEach((c,i)=>{const col=r[i]&&r[i].c;if(col)cur.push(col.join(' ')+' rg');else fc('1f2937');c.forEach((l,k)=>txt(x+4,y-9-k*10,l,8,0));x+=cw[i]});
+      ln(M,y-h+2,M+total,y-h+2);y-=h;ri++;
     }
     y-=14;
   }
-  const N=pages.length;pages.forEach((pg,i)=>pg.push(`BT /F1 8 Tf ${PW/2-30} 18 Td (${pesc('Page '+(i+1)+' of '+N)}) Tj ET`));
+  const N=pages.length;pages.forEach((pg,i)=>{const t='Page '+(i+1)+' of '+N;pg.push(`${rgb('c3cbd9')} RG 0.6 w ${M} 32 m ${PW-M} 32 l S`,`${rgb('6b7280')} rg`,`BT /F1 8 Tf ${M} 18 Td (${pesc(title)}) Tj ET`,`BT /F1 8 Tf ${(PW-M-tw(t,8)).toFixed(2)} 18 Td (${pesc(t)}) Tj ET`)});
   const objs=['','<< /Type /Catalog /Pages 2 0 R >>','','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'],kids=[];
   pages.forEach(pg=>{const po=objs.length,c=pg.join('\n');kids.push(po+' 0 R');
     objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${po+1} 0 R >>`);
@@ -1057,7 +1061,7 @@ async function backup(){say(await copyText(JSON.stringify(U()))?'Backup copied. 
 function restore(){
   try{const d=JSON.parse($('bk').value);if(!d||!Array.isArray(d.tasks))throw 0;
     if(!confirm('Replace your current data with this backup?'))return;
-    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,alertSound:d.alertSound};save();render();say('Backup restored.')}
+    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,teamsOn:d.teamsOn,alertSound:d.alertSound};save();render();say('Backup restored.')}
   catch(e){say('That does not look like a valid backup.')}
 }
 
@@ -1686,7 +1690,7 @@ body.hide-notes #list .l3{display:none}
  var $=function(i){return document.getElementById(i)},S=$('sdlg'),D=$('ddlg');
  function sec(root,txt){return [].filter.call(root.children,function(s){var h=s.classList.contains('sec')&&s.querySelector('h3');return h&&h.textContent.indexOf(txt)>-1})[0]}
  if(S&&D&&!$('swn')){
-  var sanSec=document.createElement('div');sanSec.className='sec';sanSec.innerHTML='<h3>✅ Sanity tab</h3><label class="chk"><input type="checkbox" id="son" data-a="sontoggle"> Show the Sanity tab and button</label><p class="meta" style="margin:0">Turn this off to hide Sanity from the sidebar, the toolbar and the right-click menu. Your Sanity entries are kept.</p>';
+  var sanSec=document.createElement('div');sanSec.className='sec';sanSec.innerHTML='<h3>✅ Sanity tab</h3><label class="chk"><input type="checkbox" id="son" data-a="sontoggle"> Show the Sanity tab and button</label><p class="meta" style="margin:0">Turn this off to hide Sanity from the sidebar, the toolbar and the right-click menu. Your Sanity entries are kept.</p><label class="chk" style="margin-top:12px"><input type="checkbox" id="tmon" data-a="tmtoggle"> Show the Teams update button</label><p class="meta" style="margin:0">Turn this off to hide the Teams update button on the Sanity page. Your saved Teams IDs are kept.</p>';
   var defs=[
    {k:'range',i:'📆',t:'Tasks done between two dates',d:'Pick dates and see the tasks you did',s:sec(S,'Tasks done between two dates')},
    {k:'backup',i:'💾',t:'Backup and restore',d:'Keep a copy of your data or move it',s:sec(S,'Backup and restore')},
@@ -1702,7 +1706,7 @@ body.hide-notes #list .l3{display:none}
     c.type='button';c.className='btn alt full';c.dataset.a='close';c.textContent='Close';
     w.appendChild(h);w.appendChild(d.s);w.appendChild(c);document.body.appendChild(w);d.w=w});
    [].slice.call(S.children).forEach(function(n){if(n.classList.contains('sec'))n.remove()});
-   function prep(){say('');$('jon').checked=jiraOn();$('son').checked=sanityOn();var n=new Date();$('rf').value=iso(new Date(n.getFullYear(),n.getMonth(),1));$('rt').value=iso(n);dsync('rf');dsync('rt');
+   function prep(){say('');$('jon').checked=jiraOn();$('son').checked=sanityOn();$('tmon').checked=teamsOn();var n=new Date();$('rf').value=iso(new Date(n.getFullYear(),n.getMonth(),1));$('rt').value=iso(n);dsync('rf');dsync('rt');
     $('rs').innerHTML='<option value="">All '+esc(lab('sprint'))+'</option>'+sprints().map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>'}).join('');$('bk').value=''}
    var sb=$('sb'),nav=document.createElement('div');nav.id='swn';nav.className='setnav';
    function item(o){var b=document.createElement('button'),i=document.createElement('b');b.type='button';if(o.sub)b.className='sub';if(o.w)b.dataset.w=o.w;if(o.a)b.dataset.a=o.a;i.textContent=o.i;b.appendChild(i);b.appendChild(document.createTextNode(o.t));nav.appendChild(b)}
@@ -2287,25 +2291,26 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
   function line(x1,y1,x2,y2,col,lw){c+=hex(col)+' RG '+(lw||0.8)+' w '+x1+' '+(H-y1)+' m '+x2+' '+(H-y2)+' l S\n'}
   function rr(x,yy,w,h,r,fill){var X=x,Y=H-yy-h,k=0.5523*r;c+=hex(fill)+' rg '+(X+r)+' '+Y+' m '+(X+w-r)+' '+Y+' l '+(X+w-r+k)+' '+Y+' '+(X+w)+' '+(Y+r-k)+' '+(X+w)+' '+(Y+r)+' c '+(X+w)+' '+(Y+h-r)+' l '+(X+w)+' '+(Y+h-r+k)+' '+(X+w-r+k)+' '+(Y+h)+' '+(X+w-r)+' '+(Y+h)+' c '+(X+r)+' '+(Y+h)+' l '+(X+r-k)+' '+(Y+h)+' '+X+' '+(Y+h-r+k)+' '+X+' '+(Y+h-r)+' c '+X+' '+(Y+r)+' l '+X+' '+(Y+r-k)+' '+(X+r-k)+' '+Y+' '+(X+r)+' '+Y+' c h f\n'}
   function text(x,yy,s,f,sz,col,tc){c+='BT /'+f+' '+sz+' Tf '+hex(col)+' rg '+(tc||0)+' Tc '+x+' '+(H-yy)+' Td ('+pe(s)+') Tj ET\n'}
-  function page(){if(c)pages.push(c);c=hex('2f67e8')+' rg 0 '+(H-6)+' '+W+' 6 re f\n';y=58}
+  function page(){if(c)pages.push(c);c=hex('14284b')+' rg 0 '+(H-8)+' '+W+' 8 re f\n';y=40}
   function dmyl(d){return d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4)}
   var PILL={done:['e6f4ec','1f7a46','Completed'],prog:['fdf1dc','a8620a','In progress'],pend:['e4edfc','2b5fb8','Pending'],fail:['fde8e8','b42323','Failed']},ROW=34,STX=L+Math.round(CW*0.48);
-  function th(){text(L+12,y+16,'DATE','F2',8.5,'6b7280',0.6);text(STX,y+16,'STATUS','F2',8.5,'6b7280',0.6);line(L,y+26,R,y+26,'dfe3ea',0.9);y+=28}
-  function head(env,cont){rr(L,y+3,8,8,4,'2f67e8');text(L+17,y+12,'Environment: '+env+(cont?' (continued)':''),'F2',14,'111827');y+=30}
+  function th(){rect(L,y,CW,26,'1f3a68');text(L+12,y+17,'DATE','F2',8.5,'ffffff',0.8);text(STX,y+17,'STATUS','F2',8.5,'ffffff',0.8);y+=26}
+  function head(env,cont){rect(L,y,CW,28,'e9eef7');rect(L,y,4,28,'14284b');text(L+16,y+18,'Environment: '+env+(cont?' (continued)':''),'F2',12.5,'14284b');y+=28}
   page();
-  text(L,y+30,'Sanity report','F2',30,'14284b');y+=44;
-  text(L,y+12,'Activity overview \xB7 '+dmyl(snToday()),'F1',11.5,'6b7280');y+=44;
+  rect(0,0,W,104,'14284b');rect(0,104,W,3,'2f67e8');text(L,50,'Sanity report','F2',26,'ffffff');y=104+34;
+  text(L,74,'Activity overview \xB7 '+dmyl(snToday()),'F1',11,'c9d6ee');
   groups.forEach(function(g,gi){
    if(y+30+28+ROW>H-BOT)page();
    head(g.env,false);th();
-   g.list.forEach(function(e){
-    if(y+ROW>H-BOT){page();head(g.env,true);th()}
+   g.list.forEach(function(e,ei){
+    if(y+ROW>H-BOT){page();head(g.env,true);th()}if(ei%2)rect(L,y,CW,ROW,'f4f6fa');
     var k=snKey(e.status),P=PILL[k],tx=P[2],pw=Math.round(tw(tx,9)+26);
     text(L+12,y+21,dmyl(e.date),'F1',10.5,'1f2933');
     rr(STX,y+7,pw,20,10,P[0]);text(STX+Math.round((pw-tw(tx,9))/2),y+20.5,tx,'F2',9,P[1]);
-    line(L,y+ROW,R,y+ROW,'eceff3',0.8);y+=ROW});
+    line(L,y+ROW,R,y+ROW,'d9dfe9',0.8);y+=ROW});
    y+=26});
   pages.push(c);
+  pages=pages.map(function(p,i){var t='Page '+(i+1)+' of '+pages.length;return p+hex('c3cbd9')+' RG 0.8 w '+L+' 46 m '+R+' 46 l S\n'+hex('6b7280')+' rg BT /F1 8 Tf '+L+' 30 Td (Sanity report) Tj ET\nBT /F1 8 Tf '+(R-tw(t,8))+' 30 Td ('+t+') Tj ET\n'});
   var objs=['<< /Type /Catalog /Pages 2 0 R >>',null,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'],kids=[];
   pages.forEach(function(p,i){objs.push('<< /Length '+p.length+' >>\nstream\n'+p+'endstream');objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+(5+2*i)+' 0 R >>');kids.push((6+2*i)+' 0 R')});
   objs[1]='<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+pages.length+' >>';
@@ -2340,9 +2345,10 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
   var chip=t.closest&&t.closest('.snchip'),cell=t.closest&&t.closest('.sndc');
   if(chip&&chip.closest('.sndc')){selectDate(chip.closest('.sndc').dataset.d);   /* chips in the Add environment list are handled elsewhere */clearTimeout(tm);var cid=chip.dataset.id;tm=setTimeout(function(){openEdit(cid)},260);return}
   if(cell){selectDate(cell.dataset.d);return}
-  var b=t.closest&&t.closest('[data-a^="sn"],[data-a^="env"],[data-a="sontoggle"]');if(!b)return;var a=b.dataset.a;
+  var b=t.closest&&t.closest('[data-a^="sn"],[data-a^="env"],[data-a="sontoggle"],[data-a="tmtoggle"]');if(!b)return;var a=b.dataset.a;
   if(a==='envadd'){envAdd();return}if(a==='envrm'){envRm(b.dataset.n);return}
   if(a==='sontoggle'){U().sanityOn=b.checked;save();render();return}
+  if(a==='tmtoggle'){U().teamsOn=b.checked;save();render();return}
   if(a==='snprev'||a==='snnext'){var d=new Date(SNC.y,SNC.m+(a==='snnext'?1:-1),1);SNC={y:d.getFullYear(),m:d.getMonth()};render()}
   else if(a==='sntoday'){var n=new Date();SNC={y:n.getFullYear(),m:n.getMonth()};SNSEL=snToday();render()}
   else if(a==='snday'){var ds=b.dataset.d,dd=new Date(ds+'T12:00:00');SNSEL=ds;if(dd.getMonth()!==SNC.m)SNC={y:dd.getFullYear(),m:dd.getMonth()};render()}
@@ -2369,7 +2375,7 @@ dialog.snd::backdrop{background:rgba(8,6,24,.62)}
 .snd .snhint{margin:-4px 0 14px;font-size:.76rem;color:var(--mute)}
 </style>
 <style>
-body.no-sanity .lvtabbtn[data-t="sanity"]{display:none}body.no-sanity #fdlg .envsec{display:none}
+body.no-teams .snv-teams{display:none!important}body.no-sanity .lvtabbtn[data-t="sanity"]{display:none}body.no-sanity #fdlg .envsec{display:none}
 .snd .msel{margin-bottom:6px}
 .snd .mselb{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:0;padding:12px 14px;border:1.5px solid var(--fb);border-radius:12px;background:var(--fin);color:var(--ink);font:inherit;font-size:.92rem;font-weight:600;cursor:pointer;text-align:left}
 .snd .mselb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.snd .mselb i{font-style:normal;color:var(--mute);transition:transform .15s}.snd .mselb[aria-expanded="true"]{border-color:var(--fa)}.snd .mselb[aria-expanded="true"] i{transform:rotate(180deg)}.snd .mselb:disabled{opacity:.5;cursor:not-allowed}
