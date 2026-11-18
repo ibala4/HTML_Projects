@@ -16,6 +16,11 @@ body{margin:0;min-height:100%;color:var(--ink);font:16px/1.45 system-ui,-apple-s
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 input,select{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px}
+textarea{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;resize:vertical}
+.chkg{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+#pf label.cgi{display:inline-flex;align-items:center;gap:8px;margin:0;padding:9px 14px;font-weight:600;font-size:.88rem;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}
+#pf label.cgi input{width:auto;margin:0;padding:0;accent-color:var(--acc)}
+#pf label.cgi:has(input:checked){border-color:var(--acc);background:var(--soft)}
 label{display:block;font-weight:600;font-size:.84rem;color:var(--mute);margin:12px 0 5px}
 .btn{display:inline-block;background:var(--g);color:#fff;font-weight:700;border-radius:12px;padding:11px 18px;box-shadow:0 6px 16px rgba(109,74,255,.3)}
 .btn.alt{background:var(--soft);color:var(--ink);box-shadow:none}.btn.bad{background:var(--bad);color:#fff;box-shadow:none}.btn.full{display:block;width:100%;margin-top:10px}
@@ -523,7 +528,7 @@ dialog::backdrop{backdrop-filter:none;background:rgba(0,0,0,.7)}
     <div id="flist"></div>
     <div class="fadd"><span class="fplus" aria-hidden="true">+</span><div class="fat"><b>Add a custom field</b><small>Create a field for this project</small></div><button type="button" class="fcfg" data-a="fconf" aria-expanded="false">Configure</button></div>
     <div id="nfpanel" hidden>
-      <div class="two"><div><label for="nfn">Field name</label><input id="nfn" maxlength="30" placeholder="Priority"></div><div><label for="nft">Type</label><select id="nft"><option value="text">Text</option><option value="num">Number</option><option value="sel">Dropdown</option></select></div></div>
+      <div class="two"><div><label for="nfn">Field name</label><input id="nfn" maxlength="30" placeholder="Priority"></div><div><label for="nft">Type</label><select id="nft"><option value="text">Text</option><option value="num">Number</option><option value="sel">Dropdown</option><option value="chk">Check</option><option value="rad">Single choice</option><option value="date">Date</option><option value="yesno">Yes / No</option><option value="url">Link</option><option value="area">Long text</option><option value="rate">Rating</option><option value="dur">Duration</option></select></div></div>
       <div id="nfo" hidden><label for="nfin">Dropdown choices</label><div id="nfchips"></div><input id="nfop" type="hidden"><p class="chhint">Type a choice and press <b>Enter</b> or <b>comma</b> to add it. Add as many as you need.</p></div>
       <p class="err" id="nferr" role="alert"></p>
       <button class="btn full" data-a="fadd">Add field</button>
@@ -730,6 +735,17 @@ function calHTML(ord,day){
 }
 
 /* ---------- configurable fields (names, order, show/hide, custom fields) ---------- */
+const HASO=t=>t==='sel'||t==='chk'||t==='rad';   /* types that have a list of options */
+const OPTLAB={sel:'Dropdown choices',chk:'Check options (for example User Story, Defect)',rad:'Choices (only one can be picked)'};
+function EXTRA(f,id){const t=f.type,q=esc;
+  if(t==='date')return `<input type="date" id="${id}">`;
+  if(t==='yesno')return `<select id="${id}"><option value="No">No</option><option value="Yes">Yes</option></select>`;
+  if(t==='url')return `<input type="url" id="${id}" maxlength="300" placeholder="https://">`;
+  if(t==='area')return `<textarea id="${id}" rows="3" maxlength="1000"></textarea>`;
+  if(t==='dur')return `<input type="number" id="${id}" step="any" min="0" placeholder="hours">`;
+  if(t==='rad'||t==='rate'){const o=t==='rate'?['1','2','3','4','5']:(f.opts||[]);return `<input type="hidden" id="${id}"><div class="chkg" role="radiogroup" aria-label="${q(f.label)}">${o.map(v=>`<label class="cgi"><input type="radio" name="${id}_r" data-cgi="${id}" value="${q(v)}"><span>${t==='rate'?'★'.repeat(+v):q(v)}</span></label>`).join('')||'<span class="ro">No choices yet. Add them in Project settings.</span>'}</div>`}
+  return null}
+function LNK(c,v){const fd=FIELDS().find(f=>f.k===c.k);return fd&&fd.type==='url'&&/^https?:\/\//i.test(v)?`<a href="${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>`:esc(v===''?'-':v)}
 const BASE=[{k:'defect',label:'Defect ID',type:'text',req:1},{k:'desc',label:'Description',type:'text',req:1},{k:'sprint',label:'Sprint ID',type:'def'},{k:'taskId',label:'Task ID',type:'def'},{k:'iter',label:'Iteration',type:'def'},{k:'cop',label:'Copilot',type:'yn'},{k:'notes',label:'Notes',type:'text'}];
 const fid={defect:'fd',desc:'fs',sprint:'fp',taskId:'ft',iter:'fi',cop:'fc',notes:'fn'};
 const fidOf=f=>fid[f.k]||'fx_'+f.k;
@@ -753,7 +769,7 @@ const lab=k=>k==='hours'?(U().hoursLabel||'Hours'):((FIELDS().find(f=>f.k===k)||
 function getV(x,k){
   const f=FIELDS().find(y=>y.k===k);
   if(k==='cop')return x.cop?'Yes':'No';
-  if(f&&f.custom)return (x.x||{})[k]||'';
+  if(f&&f.custom){const v=(x.x||{})[k]||'';if(!v)return '';return f.type==='date'?dmy(v):f.type==='rate'?v+'/5':f.type==='dur'&&!isNaN(+v)?H(+v):v}
   return x[k]==null?'':x[k];
 }
 function colDefs(dm){   /* columns used by the tables, CSV and PDF, in the order you set */
@@ -809,8 +825,8 @@ function applyLabels(){
 function buildForm(x){
   const ph={defect:'1234',desc:'Service issue',notes:'Anything to remember'};
   $('pf').innerHTML=shown().map(f=>{
-    const id=fidOf(f),wide=f.type==='text',opt=isMust(f)?' <span class="rq" title="Mandatory">*</span>':(f.type==='yn'?'':' <span class="op">(optional)</span>');
-    const ctl=f.type==='text'?`<input id="${id}" maxlength="${f.k==='notes'||f.k==='desc'?1000:200}" placeholder="${esc(ph[f.k]||'')}">`:f.type==='num'?`<input id="${id}" type="number" step="any">`:f.type==='yn'?`<select id="${id}"><option value="no">No</option><option value="yes">Yes</option></select>`:`<select id="${id}"></select>`;
+    const id=fidOf(f),wide=f.type==='text'||f.type==='chk'||f.type==='rad'||f.type==='rate'||f.type==='area',opt=isMust(f)?' <span class="rq" title="Mandatory">*</span>':(f.type==='yn'?'':' <span class="op">(optional)</span>');
+    const ctl=EXTRA(f,id)||(f.type==='text'?`<input id="${id}" maxlength="${f.k==='notes'||f.k==='desc'?1000:200}" placeholder="${esc(ph[f.k]||'')}">`:f.type==='num'?`<input id="${id}" type="number" step="any">`:f.type==='yn'?`<select id="${id}"><option value="no">No</option><option value="yes">Yes</option></select>`:f.type==='chk'?`<input type="hidden" id="${id}"><div class="chkg" role="group" aria-label="${esc(f.label)}">${(f.opts||[]).map(o=>`<label class="cgi"><input type="checkbox" data-cgi="${id}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join('')||'<span class="ro">No options yet. Add them in Project settings.</span>'}</div>`:`<select id="${id}"></select>`);
     return `<div class="${wide?'full':''}"><label for="${id}">${esc(f.label)}${opt}</label>${ctl}</div>`;
   }).join('')+(shown().some(f=>f.type==='def')?`<p class="ro full" id="dhint">${D().length?'These lists come from 📋 Default values. Choose a Sprint ID to see only its Task IDs and Iterations. Choosing a Task ID fills the others.':'No default values yet. Add them in 📋 Default values to pick from the lists.'}</p>`:'');
   shown().forEach(f=>{
@@ -818,20 +834,23 @@ function buildForm(x){
     if(f.type==='def')fillSel(fidOf(f),uniq(f.k),cur);
     else if(f.type==='sel')fillSel(fidOf(f),f.opts||[],cur);
     else if(f.type==='yn')el.value=x&&x.cop?'yes':'no';
+    else if(f.type==='yesno')el.value=cur||'No';
+    else if(f.type==='rad'||f.type==='rate'){el.value=cur;$('pf').querySelectorAll('input[data-cgi="'+el.id+'"]').forEach(c=>{c.checked=c.value===String(cur)})}
+    else if(f.type==='chk'){el.value=cur;const on=String(cur).split(',').map(s=>s.trim()).filter(Boolean);$('pf').querySelectorAll('input[data-cgi="'+el.id+'"]').forEach(c=>{c.checked=on.indexOf(c.value)>=0})}
     else el.value=cur;
   });
   depLists(true);
 }
 let fEdit=new Set();
 function renderFields(){
-  const f=FIELDS(),tl={text:'Text',num:'Number',sel:'Dropdown',def:'Default values',yn:'Yes / No'};
+  const f=FIELDS(),tl={text:'Text',num:'Number',sel:'Dropdown',chk:'Check',rad:'Single choice',date:'Date',yesno:'Yes / No',url:'Link',area:'Long text',rate:'Rating',dur:'Duration',def:'Default values',yn:'Yes / No'};
   const sw=(a,k,on,label)=>`<label class="xt"><span>${label}</span><input type="checkbox" class="hid" data-a="${a}" data-k="${k}" ${on?'checked':''}><i class="xtg" aria-hidden="true"></i></label>`;
   const eb=(k,name,ed)=>`<button type="button" class="fed" data-a="fedit" data-k="${k}" aria-expanded="${ed}" aria-label="Edit ${esc(name)}">✎</button>`;
   const he=fEdit.has('hours');
   const hc=`<div class="ffc lock${he?' edit':''}" data-k="hours"><div class="ffh"><span class="fic" aria-hidden="true">◷</span><span class="ffm"><b class="ffn">${esc(lab('hours'))}</b><small class="fft">Pinned first · always required</small></span><span class="flk">LOCKED</span>${eb('hours',lab('hours'),he)}</div><div class="ffe"${he?'':' hidden'}><label>Field name</label><input class="fl" data-k="hours" value="${esc(lab('hours'))}" maxlength="30" aria-label="Hours name"></div></div>`;
   const cards=f.map((x,i)=>{const ed=fEdit.has(x.k);
     return `<div class="ffc${x.on?'':' off'}${ed?' edit':''}" data-k="${x.k}"><div class="ffh"><span class="fgr" title="Drag to reorder" aria-hidden="true">⠿</span><b class="ffn">${esc(x.label)}</b>${eb(x.k,x.label,ed)}</div><small class="fft">${x.k==='desc'?'Long text':tl[x.type]}${x.custom?' · custom':''}</small>`+
-    `<div class="ffe"${ed?'':' hidden'}><label>Field name</label><input class="fl" data-k="${x.k}" value="${esc(x.label)}" maxlength="30" aria-label="Field name">${x.custom&&x.type==='sel'?`<label>Dropdown choices</label><div data-chk="${x.k}"></div><p class="chhint" data-chh="${x.k}">Type a choice and press Enter or comma. Click × to remove one.</p>`:''}<div class="fftools"><button type="button" data-a="fup" data-k="${x.k}" ${i===0?'disabled':''}>▲ Move up</button><button type="button" data-a="fdn" data-k="${x.k}" ${i===f.length-1?'disabled':''}>▼ Move down</button><button type="button" class="rmv" data-a="frem" data-k="${x.k}">Remove</button></div></div>`+
+    `<div class="ffe"${ed?'':' hidden'}><label>Field name</label><input class="fl" data-k="${x.k}" value="${esc(x.label)}" maxlength="30" aria-label="Field name">${x.custom&&HASO(x.type)?`<label>${x.type==='chk'?'Check options':x.type==='rad'?'Choices':'Dropdown choices'}</label><div data-chk="${x.k}"></div><p class="chhint" data-chh="${x.k}">Type a choice and press Enter or comma. Click × to remove one.</p>`:''}<div class="fftools"><button type="button" data-a="fup" data-k="${x.k}" ${i===0?'disabled':''}>▲ Move up</button><button type="button" data-a="fdn" data-k="${x.k}" ${i===f.length-1?'disabled':''}>▼ Move down</button><button type="button" class="rmv" data-a="frem" data-k="${x.k}">Remove</button></div></div>`+
     `<div class="ffs">${sw('fon',x.k,x.on,'Shown')}${x.type==='yn'?'<span class="ffno">No required setting</span>':sw('fmust',x.k,isMust(x),'Required')}</div></div>`}).join('');
   $('flist').innerHTML=hc+`<div class="ffg">${cards}</div>`+(f.length?'':'<p class="ro">All fields are removed. Add one back below, or add your own.</p>');
   $('flist').querySelectorAll('[data-chk]').forEach(box=>{const fd=FIELDS().find(y=>y.k===box.dataset.chk),hint=$('flist').querySelector('[data-chh="'+box.dataset.chk+'"]');if(!fd)return;
@@ -864,8 +883,8 @@ function addField(){
   NF.commit();const name=$('nfn').value.trim(),type=$('nft').value,opts=NF.get();
   if(!name){$('nferr').textContent='Enter a name for the field.';return}
   if(FIELDS().some(f=>f.label.toLowerCase()===name.toLowerCase())){$('nferr').textContent='A field with this name already exists.';return}
-  if(type==='sel'&&!opts.length){$('nferr').textContent='Enter at least one dropdown choice.';return}
-  FIELDS().push({k:'c'+Date.now().toString(36),label:name,type,on:true,custom:1,opts:type==='sel'?opts:undefined});
+  if(HASO(type)&&!opts.length){$('nferr').textContent=type==='chk'?'Enter at least one check option.':type==='rad'?'Enter at least one choice.':'Enter at least one dropdown choice.';return}
+  FIELDS().push({k:'c'+Date.now().toString(36),label:name,type,on:true,custom:1,opts:HASO(type)?opts:undefined});
   $('nfn').value='';NF.clear();$('nfop').value='';$('nferr').textContent='';save();renderFields();render();
 }
 
@@ -913,7 +932,7 @@ function saveTask(){
   let er='',bad=null;
   for(const f of shown()){
     if(!isMust(f))continue;
-    if(!String(f.custom?(v.x[f.k]||''):(v[f.k]||'')).trim()){er=(f.type==='def'||f.type==='sel'?'Select the ':'Enter the ')+f.label+'.';bad=f;break}
+    if(!String(f.custom?(v.x[f.k]||''):(v[f.k]||'')).trim()){er=(f.type==='def'||f.type==='sel'||f.type==='chk'||f.type==='rad'||f.type==='rate'?'Select the ':'Enter the ')+f.label+'.';bad=f;break}
   }
   if(!er&&!(v.hours>0&&v.hours<=24))er=lab('hours')+' must be between 0 and 24.';
   if(er){$('terr').textContent=er;const e=bad&&$(fidOf(bad));if(e)e.focus();return}
@@ -1018,7 +1037,7 @@ function showList(title,l,at,name){
   const h=r2(l.reduce((s,x)=>s+x.hours,0)),dd=new Set(l.map(x=>x.date)).size,srt=[...l].sort(byDate),cols=colDefs(dayMap(l)),ih=cols.findIndex(c=>c.k==='hours');
   csvText=buildCsv(l,at);csvName=name;const pt=title.replace('–','to').replace(/[^\x20-\x7E]+/g,' ').replace(/\s+/g,' ').trim();pdfDoc=()=>pdfFor(pt,l,at);$('rmsg').textContent='';$('rtitle').textContent=title;
   $('rbody').innerHTML=`<div class="rsum"><span>✅ ${l.length} task${l.length===1?'':'s'}</span><span>⏱️ ${H(h)}</span><span>📅 ${dd} day${dd===1?'':'s'} worked</span>${at.some(a=>a.s!=='H')?`<span>🏖️ ${at.filter(a=>a.s!=='H').length} absent day${at.filter(a=>a.s!=='H').length===1?'':'s'}</span>`:''}${at.some(a=>a.s==='H')?`<span>🎉 ${at.filter(a=>a.s==='H').length} holiday${at.filter(a=>a.s==='H').length===1?'':'s'}</span>`:''}</div>`+
-   (l.length?`<div class="tw"><table class="tbl"><thead><tr><th>#</th><th>Date</th>${cols.map(c=>`<th${c.k==='desc'?' style="min-width:500px"':''}>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${srt.map(x=>`<tr><td>${ord[x.id]}</td><td>${fmt(x.date)}</td>${cols.map((c,i)=>{const v=c.get(x);if(c.k==='day'&&v!=='')return `<td><span class="dpill ${dayCls(c.raw(x))}">${esc(v)}</span></td>`;return `<td${c.k==='desc'?' style="min-width:500px"':''}>${i===0?'<b>':''}${esc(v===''?'-':v)}${i===0?'</b>':''}</td>`}).join('')}</tr>`).join('')}</tbody><tfoot><tr><td colspan="${2+ih}">Total</td><td>${H(h)}</td><td colspan="${Math.max(1,cols.length-ih-1)}"></td></tr></tfoot></table></div>`:'<div class="empty"><span class="big">🦉</span>No tasks found.</div>')+
+   (l.length?`<div class="tw"><table class="tbl"><thead><tr><th>#</th><th>Date</th>${cols.map(c=>`<th${c.k==='desc'?' style="min-width:500px"':''}>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${srt.map(x=>`<tr><td>${ord[x.id]}</td><td>${fmt(x.date)}</td>${cols.map((c,i)=>{const v=c.get(x);if(c.k==='day'&&v!=='')return `<td><span class="dpill ${dayCls(c.raw(x))}">${esc(v)}</span></td>`;return `<td${c.k==='desc'?' style="min-width:500px"':''}>${i===0?'<b>':''}${LNK(c,v)}${i===0?'</b>':''}</td>`}).join('')}</tr>`).join('')}</tbody><tfoot><tr><td colspan="${2+ih}">Total</td><td>${H(h)}</td><td colspan="${Math.max(1,cols.length-ih-1)}"></td></tr></tfoot></table></div>`:'<div class="empty"><span class="big">🦉</span>No tasks found.</div>')+
    (at.length?`<div class="tw" style="margin-top:10px"><table class="tbl" style="min-width:0"><thead><tr><th>Date</th><th>Attendance</th><th>Description</th></tr></thead><tbody>${at.map(a=>`<tr><td>${fmt(a.date)}</td><td>${a.s==='H'?'🎉 Holiday':a.k==='unplanned'?'⚠️ Absent · Unplanned':'🏖️ Absent · Planned'}</td><td>${esc(a.desc||'-')}</td></tr>`).join('')}</tbody></table></div>`:'');
   $('rdlg').showModal();
 }
@@ -1137,7 +1156,8 @@ $('pf').addEventListener('change',e=>{
 });
 $('pgs').addEventListener('input',()=>{const v=Math.floor(+$('pgs').value);if(v>=1&&v<=200){U().pageSize=v;page=1;save();render()}});
 $('dtg').addEventListener('input',()=>{const v=+$('dtg').value;if(v>0&&v<=24){U().dayTarget=v;save();render()}});
-$('nft').addEventListener('change',()=>{$('nfo').hidden=$('nft').value!=='sel'});
+$('pf').addEventListener('change',e=>{const c=e.target.closest&&e.target.closest('[data-cgi]');if(!c)return;const id=c.dataset.cgi,el=$(id);if(el)el.value=[].map.call($('pf').querySelectorAll('input[data-cgi="'+id+'"]:checked'),i=>i.value).join(', ')});
+$('nft').addEventListener('change',()=>{const t=$('nft').value;$('nfo').hidden=!HASO(t);const lb=$('nfo').querySelector('label');if(lb)lb.textContent=OPTLAB[t]||'Dropdown choices'});
 $('flist').addEventListener('input',e=>{
   const t=e.target;if(!t.classList.contains('fl'))return;const v=t.value.trim()||'Field';
   if(t.dataset.k==='hours')U().hoursLabel=v;else FIELDS().find(f=>f.k===t.dataset.k).label=v;
