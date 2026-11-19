@@ -17,13 +17,13 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 input,select{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px}
 textarea{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;resize:vertical}
-#pf>.full,#pf>p{flex:0 0 100%}#pf>div{min-width:0}
+#pf>.full,#pf>p{flex:0 0 100%}#pf>div{min-width:0;display:flex;flex-direction:column;justify-content:flex-end;container-type:inline-size}#pf>div>label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:min(.84rem,max(.6rem,calc(100cqw / (var(--lc,20) * .6))))}#pf select{min-height:44px}
 @media(max-width:560px){#pf>div{flex:0 0 100%!important}}
 .fsz{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;margin-top:2px}
 .fsz .fsl{display:flex;flex-direction:column;justify-content:flex-end;margin:0;white-space:nowrap}.fsz .fsl small{white-space:normal}.fsz .fsl small{opacity:.7;font-weight:500}.fsz input{margin-top:4px}
 .chkg{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-#pf label.cgi{display:inline-flex;align-items:center;justify-content:center;flex:1 1 56px;min-width:0;gap:6px;margin:0;padding:10px 6px;font-weight:600;font-size:.86rem;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}
-#pf label.cgi input{width:auto;flex:none;margin:0;padding:0;accent-color:var(--acc)}#pf label.cgi span{white-space:nowrap}
+#pf label.cgi{display:inline-flex;align-items:center;justify-content:center;position:relative;flex:1 1 auto;min-width:max-content;gap:6px;margin:0;padding:10px 8px;font-weight:600;font-size:.82rem;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}
+#pf label.cgi input{width:auto;flex:none;margin:0;padding:0;accent-color:var(--acc)}#pf label.cgi span{white-space:nowrap}#pf .chkg.segrow{flex-wrap:nowrap;gap:0;height:44px;margin-top:0;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);container-type:inline-size}#pf .chkg.segrow label.cgi{flex:1 1 0;min-width:0;height:100%;padding:0 4px;border:0;border-radius:0;background:transparent;font-size:clamp(.62rem,6.6cqw,.84rem)}#pf .chkg.segrow label.cgi+label.cgi{border-left:1px solid var(--line)}#pf .chkg.segrow label.cgi span{overflow:hidden;text-overflow:ellipsis}#pf label.cgi.seg input{position:absolute;opacity:0;width:0;height:0;margin:0;pointer-events:none}#pf label.cgi.seg:has(input:checked){background:var(--acc);border-color:var(--acc);color:#fff}#pf label.cgi.seg:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 #pf label.cgi:has(input:checked){border-color:var(--acc);background:var(--soft)}
 label{display:block;font-weight:600;font-size:.84rem;color:var(--mute);margin:12px 0 5px}
 .btn{display:inline-block;background:var(--g);color:#fff;font-weight:700;border-radius:12px;padding:11px 18px;box-shadow:0 6px 16px rgba(109,74,255,.3)}
@@ -749,7 +749,7 @@ function EXTRA(f,id){const t=f.type,q=esc;
   if(t==='url')return `<input type="url" id="${id}" maxlength="300" placeholder="https://">`;
   if(t==='area')return `<textarea id="${id}" rows="${+f.h||3}" maxlength="1000"></textarea>`;
   if(t==='dur')return `<input type="number" id="${id}" step="any" min="0" placeholder="hours">`;
-  if(t==='rad'||t==='rate'){const o=t==='rate'?['1','2','3','4','5']:(f.opts||[]);return `<input type="hidden" id="${id}"><div class="chkg" role="radiogroup" aria-label="${q(f.label)}">${o.map(v=>`<label class="cgi"><input type="radio" name="${id}_r" data-cgi="${id}" value="${q(v)}"><span>${t==='rate'?'★'.repeat(+v):q(v)}</span></label>`).join('')||'<span class="ro">No choices yet. Add them in Project settings.</span>'}</div>`}
+  if(t==='rad'||t==='rate'){const o=t==='rate'?['1','2','3','4','5']:(f.opts||[]);return `<input type="hidden" id="${id}"><div class="chkg${o.length&&o.length<=3?' segrow':''}" role="radiogroup" aria-label="${q(f.label)}">${o.map(v=>`<label class="cgi seg"><input type="radio" name="${id}_r" data-cgi="${id}" value="${q(v)}"><span>${t==='rate'?'★'.repeat(+v):q(v)}</span></label>`).join('')||'<span class="ro">No choices yet. Add them in Project settings.</span>'}</div>`}
   return null}
 let fSnap={};
 function fSnapTake(k){if(fSnap[k])return;if(k==='hours'){fSnap[k]={hours:U().hoursLabel};return}const f=FIELDS().find(y=>y.k===k);if(f)fSnap[k]=JSON.parse(JSON.stringify({label:f.label,cw:f.cw,w:f.w,h:f.h,opts:f.opts}))}
@@ -856,6 +856,7 @@ function buildForm(x){
     else if(f.type==='chk'){el.value=cur;const on=String(cur).split(',').map(s=>s.trim()).filter(Boolean);$('pf').querySelectorAll('input[data-cgi="'+el.id+'"]').forEach(c=>{c.checked=on.indexOf(c.value)>=0})}
     else el.value=cur;
   });
+  $('pf').querySelectorAll(':scope>div>label').forEach(l=>l.style.setProperty('--lc',String(l.textContent.length)));   /* lets the label shrink to stay on one line */
   depLists(true);
 }
 let fEdit=new Set();
