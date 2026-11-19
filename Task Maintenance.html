@@ -17,9 +17,13 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 input,select{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px}
 textarea{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;resize:vertical}
-.chkg{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
-#pf label.cgi{display:inline-flex;align-items:center;gap:8px;margin:0;padding:9px 14px;font-weight:600;font-size:.88rem;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}
-#pf label.cgi input{width:auto;margin:0;padding:0;accent-color:var(--acc)}
+#pf>.full,#pf>p{flex:0 0 100%}#pf>div{min-width:0}
+@media(max-width:560px){#pf>div{flex:0 0 100%!important}}
+.fsz{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;margin-top:2px}
+.fsz .fsl{display:flex;flex-direction:column;justify-content:flex-end;margin:0;white-space:nowrap}.fsz .fsl small{white-space:normal}.fsz .fsl small{opacity:.7;font-weight:500}.fsz input{margin-top:4px}
+.chkg{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+#pf label.cgi{display:inline-flex;align-items:center;justify-content:center;flex:1 1 56px;min-width:0;gap:6px;margin:0;padding:10px 6px;font-weight:600;font-size:.86rem;color:var(--ink);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--bg)}
+#pf label.cgi input{width:auto;flex:none;margin:0;padding:0;accent-color:var(--acc)}#pf label.cgi span{white-space:nowrap}
 #pf label.cgi:has(input:checked){border-color:var(--acc);background:var(--soft)}
 label{display:block;font-weight:600;font-size:.84rem;color:var(--mute);margin:12px 0 5px}
 .btn{display:inline-block;background:var(--g);color:#fff;font-weight:700;border-radius:12px;padding:11px 18px;box-shadow:0 6px 16px rgba(109,74,255,.3)}
@@ -133,6 +137,7 @@ textarea{width:100%;min-height:70px;padding:10px;font:inherit;font-size:.8rem;co
 .task .l2 .day.t-y{color:#d9980a}.task .l2 .day.t-b{color:#2f80ff}.task .l2 .day.t-r{color:#e5383b}
 .rmv{background:none;border:0;padding:0;color:#e5383b;font-weight:400;font-size:.8rem;cursor:pointer}.rmv:hover{text-decoration:underline}.fr .opts .ftp{margin-left:auto}
 .rbk{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.rbk button{padding:6px 12px;border-radius:999px;background:var(--soft);font-weight:700;font-size:.8rem}
+.rbk .rch{display:inline-flex;align-items:center;border-radius:999px;background:var(--soft)}.rbk .rch button{background:none}.rbk .rch>button:first-child{padding-right:6px}.rbk .rch .rx{padding:6px 11px 6px 4px;color:var(--bad);opacity:.85;font-size:.78rem}.rbk .rch .rx:hover{opacity:1}
 .pg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin:10px 0 2px}.pgb{min-width:36px;height:36px;padding:0 10px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:.85rem}
 .pgb.on{background:var(--g);color:#fff;border-color:transparent}.pgb[disabled]{opacity:.4;cursor:default}.pgi{text-align:center;margin:4px 0 8px}.dots{color:var(--mute)}
 .jst{padding:0 8px;height:20px;border-radius:999px;font-size:.72rem;font-weight:700;background:none;border:1px solid currentColor;color:var(--mute)}.jst.ok{color:var(--good)}.jst.wait{color:#d9980a}
@@ -332,6 +337,7 @@ dialog::backdrop{backdrop-filter:none;background:rgba(0,0,0,.7)}
 #fldlg .fftools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 #fldlg .fftools button{width:auto;margin:0;padding:6px 12px;font-size:.76rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer}
 #fldlg .fftools button:disabled{opacity:.4;cursor:not-allowed}#fldlg .fftools .rmv{margin-left:auto;color:var(--bad);border-color:transparent;background:none}
+#fldlg .ffbtns{display:flex;justify-content:space-between;gap:8px;margin-top:10px}#fldlg .ffbtns .fbk,#fldlg .ffbtns .fsv,#fldlg .fftools .fbk,#fldlg .fftools .fsv{width:auto;margin:0;padding:6px 14px;font-size:.78rem;font-weight:700;border-radius:8px;cursor:pointer}#fldlg .ffbtns .fbk,#fldlg .fftools .fbk{background:var(--bg);color:var(--ink);border:1px solid var(--line)}#fldlg .ffbtns .fsv,#fldlg .fftools .fsv{background:var(--acc);color:#fff;border:1px solid transparent}#fldlg .fftools{align-items:center}#fldlg .fcen{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;flex:1 1 auto}#fldlg .fcen .rmv{margin-left:0}
 #fldlg .ffs{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 #fldlg label.xt{display:flex;align-items:center;gap:10px;margin:0;font-size:.74rem;color:var(--mute);font-weight:600;cursor:pointer;position:relative}
 #fldlg .ffno{font-size:.72rem;color:var(--mute)}
@@ -741,10 +747,19 @@ function EXTRA(f,id){const t=f.type,q=esc;
   if(t==='date')return `<input type="date" id="${id}">`;
   if(t==='yesno')return `<select id="${id}"><option value="No">No</option><option value="Yes">Yes</option></select>`;
   if(t==='url')return `<input type="url" id="${id}" maxlength="300" placeholder="https://">`;
-  if(t==='area')return `<textarea id="${id}" rows="3" maxlength="1000"></textarea>`;
+  if(t==='area')return `<textarea id="${id}" rows="${+f.h||3}" maxlength="1000"></textarea>`;
   if(t==='dur')return `<input type="number" id="${id}" step="any" min="0" placeholder="hours">`;
   if(t==='rad'||t==='rate'){const o=t==='rate'?['1','2','3','4','5']:(f.opts||[]);return `<input type="hidden" id="${id}"><div class="chkg" role="radiogroup" aria-label="${q(f.label)}">${o.map(v=>`<label class="cgi"><input type="radio" name="${id}_r" data-cgi="${id}" value="${q(v)}"><span>${t==='rate'?'★'.repeat(+v):q(v)}</span></label>`).join('')||'<span class="ro">No choices yet. Add them in Project settings.</span>'}</div>`}
   return null}
+let fSnap={};
+function fSnapTake(k){if(fSnap[k])return;if(k==='hours'){fSnap[k]={hours:U().hoursLabel};return}const f=FIELDS().find(y=>y.k===k);if(f)fSnap[k]=JSON.parse(JSON.stringify({label:f.label,cw:f.cw,w:f.w,h:f.h,opts:f.opts}))}
+function fDone(k,keep){const s=fSnap[k];
+  if(!keep&&s){if(k==='hours'){if(s.hours===undefined)delete U().hoursLabel;else U().hoursLabel=s.hours}else{const f=FIELDS().find(y=>y.k===k);if(f)['label','cw','w','h','opts'].forEach(p=>{if(p in s)f[p]=s[p];else delete f[p]})}}
+  fEdit['delete'](k);delete fSnap[k];save();renderFields();render();if(keep&&typeof toast==='function')try{toast('Field saved')}catch(e){}}
+function FBTN(k){return `<div class="ffbtns"><button type="button" class="fbk" data-a="fback" data-k="${k}" title="Close and undo the changes made in this panel">\u2190 Back</button><button type="button" class="fsv" data-a="fsave" data-k="${k}">\u2713 Save</button></div>`}
+function colsOf(f){return f.cw?+f.cw:(f.w==='full'||+f.w===2)?24:(f.w==='half'||+f.w===1)?12:0}   /* width in columns of a 24-column row; 0 = automatic */
+function SZ(x){const cw=colsOf(x)||((x.type==='text'||x.type==='chk'||x.type==='rad'||x.type==='rate'||x.type==='area')?24:12);   /* show the real current width, never a blank */
+  return `<label>Box size</label><div class="fsz"><label class="fsl">Width <small>(1–24 · 24 = full row)</small><input type="number" class="fw" data-k="${x.k}" min="1" max="24" step="1" placeholder="auto" value="${cw||''}" aria-label="Box width"></label>${x.type==='text'||x.type==='area'?`<label class="fsl">Height <small>(lines)</small><input type="number" class="fhh" data-k="${x.k}" min="1" max="10" step="1" placeholder="auto" value="${+x.h||(x.type==='area'?3:1)}" aria-label="Box height"></label>`:''}</div><p class="chhint">Decimals like 6.5 are allowed. Make the width smaller and the next field moves up beside this one. Make it bigger and the next field drops to the next row.</p>`}
 function LNK(c,v){const fd=FIELDS().find(f=>f.k===c.k);return fd&&fd.type==='url'&&/^https?:\/\//i.test(v)?`<a href="${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>`:esc(v===''?'-':v)}
 const BASE=[{k:'defect',label:'Defect ID',type:'text',req:1},{k:'desc',label:'Description',type:'text',req:1},{k:'sprint',label:'Sprint ID',type:'def'},{k:'taskId',label:'Task ID',type:'def'},{k:'iter',label:'Iteration',type:'def'},{k:'cop',label:'Copilot',type:'yn'},{k:'notes',label:'Notes',type:'text'}];
 const fid={defect:'fd',desc:'fs',sprint:'fp',taskId:'ft',iter:'fi',cop:'fc',notes:'fn'};
@@ -752,7 +767,8 @@ const fidOf=f=>fid[f.k]||'fx_'+f.k;
 function FIELDS(){
   const u=U();if(!Array.isArray(u.fields)){u.fields=BASE.map(b=>({...b,on:true}));u.removed=[]}
   if(!Array.isArray(u.removed))u.removed=[];
-  BASE.forEach(b=>{if(!u.fields.some(f=>f.k===b.k)&&!u.removed.some(r=>r.k===b.k))u.fields.push({...b,on:true})});return u.fields;
+  if(u.cwScale!==24){const m=f=>{if(f&&f.cw)f.cw=Math.min(24,Math.round(f.cw*20)/10)};u.fields.forEach(m);u.removed.forEach(m);u.cwScale=24}   /* widths used to be out of 12, now out of 24 */
+  const pg=Array.isArray(u.purged)?u.purged:[];BASE.forEach(b=>{if(!u.fields.some(f=>f.k===b.k)&&!u.removed.some(r=>r.k===b.k)&&pg.indexOf(b.k)<0)u.fields.push({...b,on:true})});return u.fields;   /* purged = built-in fields deleted for good */
 }
 const shown=()=>FIELDS().filter(f=>f.on);
 const has=k=>FIELDS().some(f=>f.k===k);   /* false once a field has been removed */
@@ -823,11 +839,12 @@ function applyLabels(){
   $('dleg').textContent='Spent that day:  🟨 under '+H(target())+'   🟦 exactly '+H(target())+'   🟥 over '+H(target());
 }
 function buildForm(x){
+  $('pf').style.display='flex';$('pf').style.flexWrap='wrap';
   const ph={defect:'1234',desc:'Service issue',notes:'Anything to remember'};
   $('pf').innerHTML=shown().map(f=>{
-    const id=fidOf(f),wide=f.type==='text'||f.type==='chk'||f.type==='rad'||f.type==='rate'||f.type==='area',opt=isMust(f)?' <span class="rq" title="Mandatory">*</span>':(f.type==='yn'?'':' <span class="op">(optional)</span>');
-    const ctl=EXTRA(f,id)||(f.type==='text'?`<input id="${id}" maxlength="${f.k==='notes'||f.k==='desc'?1000:200}" placeholder="${esc(ph[f.k]||'')}">`:f.type==='num'?`<input id="${id}" type="number" step="any">`:f.type==='yn'?`<select id="${id}"><option value="no">No</option><option value="yes">Yes</option></select>`:f.type==='chk'?`<input type="hidden" id="${id}"><div class="chkg" role="group" aria-label="${esc(f.label)}">${(f.opts||[]).map(o=>`<label class="cgi"><input type="checkbox" data-cgi="${id}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join('')||'<span class="ro">No options yet. Add them in Project settings.</span>'}</div>`:`<select id="${id}"></select>`);
-    return `<div class="${wide?'full':''}"><label for="${id}">${esc(f.label)}${opt}</label>${ctl}</div>`;
+    const id=fidOf(f),cw=colsOf(f),wide=cw?false:(f.type==='text'||f.type==='chk'||f.type==='rad'||f.type==='rate'||f.type==='area'),opt=isMust(f)?' <span class="rq" title="Mandatory">*</span>':(f.type==='yn'?'':' <span class="op">(optional)</span>');
+    const ctl=(f.type==='text'&&+f.h>1?`<textarea id="${id}" rows="${+f.h}" maxlength="${f.k==='notes'||f.k==='desc'?1000:200}" placeholder="${esc(ph[f.k]||'')}"></textarea>`:'')||EXTRA(f,id)||(f.type==='text'?`<input id="${id}" maxlength="${f.k==='notes'||f.k==='desc'?1000:200}" placeholder="${esc(ph[f.k]||'')}">`:f.type==='num'?`<input id="${id}" type="number" step="any">`:f.type==='yn'?`<select id="${id}"><option value="no">No</option><option value="yes">Yes</option></select>`:f.type==='chk'?`<input type="hidden" id="${id}"><div class="chkg" role="group" aria-label="${esc(f.label)}">${(f.opts||[]).map(o=>`<label class="cgi"><input type="checkbox" data-cgi="${id}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join('')||'<span class="ro">No options yet. Add them in Project settings.</span>'}</div>`:`<select id="${id}"></select>`);
+    return `<div class="${wide?'full':''}"${wide?'':` style="flex:0 0 calc((100% - 184px) * ${cw||12} / 24 + ${((cw||12)-1)*8}px - .1px)"`}><label for="${id}">${esc(f.label)}${opt}</label>${ctl}</div>`;
   }).join('')+(shown().some(f=>f.type==='def')?`<p class="ro full" id="dhint">${D().length?'These lists come from 📋 Default values. Choose a Sprint ID to see only its Task IDs and Iterations. Choosing a Task ID fills the others.':'No default values yet. Add them in 📋 Default values to pick from the lists.'}</p>`:'');
   shown().forEach(f=>{
     const el=$(fidOf(f)),cur=x?(f.custom?((x.x||{})[f.k]||''):(x[f.k]==null?'':x[f.k])):'';
@@ -846,21 +863,21 @@ function renderFields(){
   const f=FIELDS(),tl={text:'Text',num:'Number',sel:'Dropdown',chk:'Check',rad:'Single choice',date:'Date',yesno:'Yes / No',url:'Link',area:'Long text',rate:'Rating',dur:'Duration',def:'Default values',yn:'Yes / No'};
   const sw=(a,k,on,label)=>`<label class="xt"><span>${label}</span><input type="checkbox" class="hid" data-a="${a}" data-k="${k}" ${on?'checked':''}><i class="xtg" aria-hidden="true"></i></label>`;
   const eb=(k,name,ed)=>`<button type="button" class="fed" data-a="fedit" data-k="${k}" aria-expanded="${ed}" aria-label="Edit ${esc(name)}">✎</button>`;
-  const he=fEdit.has('hours');
-  const hc=`<div class="ffc lock${he?' edit':''}" data-k="hours"><div class="ffh"><span class="fic" aria-hidden="true">◷</span><span class="ffm"><b class="ffn">${esc(lab('hours'))}</b><small class="fft">Pinned first · always required</small></span><span class="flk">LOCKED</span>${eb('hours',lab('hours'),he)}</div><div class="ffe"${he?'':' hidden'}><label>Field name</label><input class="fl" data-k="hours" value="${esc(lab('hours'))}" maxlength="30" aria-label="Hours name"></div></div>`;
-  const cards=f.map((x,i)=>{const ed=fEdit.has(x.k);
+  const he=fEdit.has('hours');if(he)fSnapTake('hours');
+  const hc=`<div class="ffc lock${he?' edit':''}" data-k="hours"><div class="ffh"><span class="fic" aria-hidden="true">◷</span><span class="ffm"><b class="ffn">${esc(lab('hours'))}</b><small class="fft">Pinned first · always required</small></span><span class="flk">LOCKED</span>${eb('hours',lab('hours'),he)}</div><div class="ffe"${he?'':' hidden'}><label>Field name</label><input class="fl" data-k="hours" value="${esc(lab('hours'))}" maxlength="30" aria-label="Hours name">${FBTN('hours')}</div></div>`;
+  const cards=f.map((x,i)=>{const ed=fEdit.has(x.k);if(ed)fSnapTake(x.k);
     return `<div class="ffc${x.on?'':' off'}${ed?' edit':''}" data-k="${x.k}"><div class="ffh"><span class="fgr" title="Drag to reorder" aria-hidden="true">⠿</span><b class="ffn">${esc(x.label)}</b>${eb(x.k,x.label,ed)}</div><small class="fft">${x.k==='desc'?'Long text':tl[x.type]}${x.custom?' · custom':''}</small>`+
-    `<div class="ffe"${ed?'':' hidden'}><label>Field name</label><input class="fl" data-k="${x.k}" value="${esc(x.label)}" maxlength="30" aria-label="Field name">${x.custom&&HASO(x.type)?`<label>${x.type==='chk'?'Check options':x.type==='rad'?'Choices':'Dropdown choices'}</label><div data-chk="${x.k}"></div><p class="chhint" data-chh="${x.k}">Type a choice and press Enter or comma. Click × to remove one.</p>`:''}<div class="fftools"><button type="button" data-a="fup" data-k="${x.k}" ${i===0?'disabled':''}>▲ Move up</button><button type="button" data-a="fdn" data-k="${x.k}" ${i===f.length-1?'disabled':''}>▼ Move down</button><button type="button" class="rmv" data-a="frem" data-k="${x.k}">Remove</button></div></div>`+
+    `<div class="ffe"${ed?'':' hidden'}><label>Field name</label><input class="fl" data-k="${x.k}" value="${esc(x.label)}" maxlength="30" aria-label="Field name">${SZ(x)}${x.custom&&HASO(x.type)?`<label>${x.type==='chk'?'Check options':x.type==='rad'?'Choices':'Dropdown choices'}</label><div data-chk="${x.k}"></div><p class="chhint" data-chh="${x.k}">Type a choice and press Enter or comma. Click × to remove one.</p>`:''}<div class="fftools"><button type="button" class="fbk" data-a="fback" data-k="${x.k}" title="Close and undo the changes made in this panel">\u2190 Back</button><span class="fcen"><button type="button" data-a="fup" data-k="${x.k}" ${i===0?'disabled':''}>▲ Move up</button><button type="button" data-a="fdn" data-k="${x.k}" ${i===f.length-1?'disabled':''}>▼ Move down</button><button type="button" class="rmv" data-a="frem" data-k="${x.k}">Remove</button></span><button type="button" class="fsv" data-a="fsave" data-k="${x.k}">\u2713 Save</button></div></div>`+
     `<div class="ffs">${sw('fon',x.k,x.on,'Shown')}${x.type==='yn'?'<span class="ffno">No required setting</span>':sw('fmust',x.k,isMust(x),'Required')}</div></div>`}).join('');
   $('flist').innerHTML=hc+`<div class="ffg">${cards}</div>`+(f.length?'':'<p class="ro">All fields are removed. Add one back below, or add your own.</p>');
   $('flist').querySelectorAll('[data-chk]').forEach(box=>{const fd=FIELDS().find(y=>y.k===box.dataset.chk),hint=$('flist').querySelector('[data-chh="'+box.dataset.chk+'"]');if(!fd)return;
     const note=v=>{if(hint){hint.classList.toggle('warn',!v.length);hint.textContent=v.length?'Type a choice and press Enter or comma. Click \u00D7 to remove one.':'Add at least one choice, or this dropdown will be empty.'}};
     chipsEditor(box,fd.opts||[],v=>{fd.opts=v;save();note(v)},true);note(fd.opts||[])});
   const r=U().removed||[];
-  $('rlist').innerHTML=r.length?`<div class="frm"><h3 class="fh">Removed fields</h3><p class="fhint">Tap one to add it back to the form.</p><div class="rbk">${r.map(x=>`<button data-a="fback" data-k="${x.k}">➕ ${esc(x.label)}</button>`).join('')}</div></div>`:'';
+  $('rlist').innerHTML=r.length?`<div class="frm"><h3 class="fh">Removed fields</h3><p class="fhint">Tap one to add it back to the form. Tap 🗑 to delete it permanently.</p><div class="rbk">${r.map(x=>`<span class="rch"><button type="button" data-a="fback" data-k="${x.k}">➕ ${esc(x.label)}</button><button type="button" class="rx" data-a="fpurge" data-k="${x.k}" title="Delete permanently" aria-label="Delete ${esc(x.label)} permanently">🗑</button></span>`).join('')}</div></div>`:'';
   $('fact').textContent=f.filter(x=>x.on).length+' ACTIVE';
 }
-function openFields(){window.adRender();window.asRender();$('arp').value=U().alertEvery||0;$('amsg').checked=U().alertMsg!==false;$('asnd').checked=U().alertSnd!==false;aoTxt();$('atm').value=U().alertTime===undefined?'17:00':U().alertTime;window.atmLbl();$('dtg').value=target();$('pgs').value=pageSize();$('nferr').textContent='';$('nfn').value='';NF.clear();$('nfop').value='';$('nft').value='text';$('nfo').hidden=true;$('nfpanel').hidden=true;const cb=document.querySelector('[data-a="fconf"]');if(cb)cb.setAttribute('aria-expanded','false');fEdit=new Set();renderFields();$('fldlg').showModal()}
+function openFields(){fSnap={};window.adRender();window.asRender();$('arp').value=U().alertEvery||0;$('amsg').checked=U().alertMsg!==false;$('asnd').checked=U().alertSnd!==false;aoTxt();$('atm').value=U().alertTime===undefined?'17:00':U().alertTime;window.atmLbl();$('dtg').value=target();$('pgs').value=pageSize();$('nferr').textContent='';$('nfn').value='';NF.clear();$('nfop').value='';$('nft').value='text';$('nfo').hidden=true;$('nfpanel').hidden=true;const cb=document.querySelector('[data-a="fconf"]');if(cb)cb.setAttribute('aria-expanded','false');fEdit=new Set();renderFields();$('fldlg').showModal()}
 function moveField(k,d){const f=FIELDS(),i=f.findIndex(x=>x.k===k),j=i+d;if(i<0||j<0||j>=f.length)return;[f[i],f[j]]=[f[j],f[i]];save();renderFields();render()}
 function chipsEditor(box,init,onChange,blurAdd){
   let vals=(init||[]).slice();
@@ -1080,7 +1097,7 @@ async function backup(){say(await copyText(JSON.stringify(U()))?'Backup copied. 
 function restore(){
   try{const d=JSON.parse($('bk').value);if(!d||!Array.isArray(d.tasks))throw 0;
     if(!confirm('Replace your current data with this backup?'))return;
-    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,teamsOn:d.teamsOn,alertSound:d.alertSound};save();render();say('Backup restored.')}
+    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,teamsOn:d.teamsOn,purged:d.purged,cwScale:d.cwScale,alertSound:d.alertSound};save();render();say('Backup restored.')}
   catch(e){say('That does not look like a valid backup.')}
 }
 
@@ -1157,6 +1174,9 @@ $('pf').addEventListener('change',e=>{
 $('pgs').addEventListener('input',()=>{const v=Math.floor(+$('pgs').value);if(v>=1&&v<=200){U().pageSize=v;page=1;save();render()}});
 $('dtg').addEventListener('input',()=>{const v=+$('dtg').value;if(v>0&&v<=24){U().dayTarget=v;save();render()}});
 $('pf').addEventListener('change',e=>{const c=e.target.closest&&e.target.closest('[data-cgi]');if(!c)return;const id=c.dataset.cgi,el=$(id);if(el)el.value=[].map.call($('pf').querySelectorAll('input[data-cgi="'+id+'"]:checked'),i=>i.value).join(', ')});
+['change','input'].forEach(ev=>$('flist').addEventListener(ev,e=>{const t=e.target;if(!t.classList||!(t.classList.contains('fw')||t.classList.contains('fhh')))return;const fd=FIELDS().find(y=>y.k===t.dataset.k);if(!fd)return;const isW=t.classList.contains('fw'),n=isW?Math.round(parseFloat(t.value)*10)/10:Math.round(+t.value);
+  if(t.value===''||!(n>0)){if(ev==='change'){if(isW){delete fd.cw;delete fd.w}else delete fd.h;t.value='';save()}return}
+  const v=isW?Math.min(24,Math.max(1,n)):Math.min(10,Math.max(1,n));if(isW){fd.cw=v;delete fd.w}else fd.h=v;if(ev==='change')t.value=v;save()}));
 $('nft').addEventListener('change',()=>{const t=$('nft').value;$('nfo').hidden=!HASO(t);const lb=$('nfo').querySelector('label');if(lb)lb.textContent=OPTLAB[t]||'Dropdown choices'});
 $('flist').addEventListener('input',e=>{
   const t=e.target;if(!t.classList.contains('fl'))return;const v=t.value.trim()||'Field';
@@ -1202,9 +1222,10 @@ document.addEventListener('click',e=>{
   else if(a==='fon'){const f=FIELDS().find(y=>y.k===b.dataset.k);if(f){f.on=b.checked;save();render()}return}
   else if(a==='fmust'){const f=FIELDS().find(y=>y.k===b.dataset.k);if(f){f.must=b.checked;save();render()}return}
   else if(a==='frem'){const f=FIELDS().find(y=>y.k===b.dataset.k);if(f&&confirm('Remove the field "'+f.label+'" from the form? Values already saved in tasks are kept, and you can add the field back from "Removed fields".')){U().removed=(U().removed||[]).concat([f]);U().fields=FIELDS().filter(y=>y.k!==f.k);save();renderFields();render()}}
+  else if(a==='fpurge'){const r=U().removed||[],f=r.find(y=>y.k===b.dataset.k);if(f&&confirm('Delete the field "'+f.label+'" permanently?\n\nIt will be gone from this list and cannot be added back one by one. Values already saved in tasks stay in your data but are no longer shown.')){U().removed=r.filter(y=>y.k!==f.k);if(BASE.some(y=>y.k===f.k))U().purged=(U().purged||[]).concat([f.k]);save();renderFields();render();if(typeof toast==='function')try{toast('Field deleted')}catch(e){}}}
   else if(a==='fback'){const r=U().removed||[],f=r.find(y=>y.k===b.dataset.k);if(f){FIELDS().push(f);U().removed=r.filter(y=>y.k!==f.k);save();renderFields();render()}}
   else if(a==='fadd')addField();
-  else if(a==='freset'){if(confirm('Reset field names, order and visibility to the default? Your own fields will be removed from the form.')){U().fields=null;U().removed=[];U().hoursLabel='';FIELDS();save();renderFields();render()}}
+  else if(a==='freset'){if(confirm('Reset field names, order and visibility to the default? Your own fields will be removed from the form.')){U().fields=null;U().removed=[];U().purged=[];U().hoursLabel='';FIELDS();save();renderFields();render()}}
   else if(a==='jtoggle'){U().jiraOn=b.checked;save();render();return}
   else if(a==='jdone'||a==='jtog'){const x=T().find(y=>y.id===b.dataset.id);if(x){x.jira=a==='jdone'?'done':(x.jira==='done'?'pending':'done');save();render()}}
   else if(a==='jall'){const n=T().filter(x=>x.jira==='pending');if(n.length&&confirm('Mark all '+n.length+' tasks as saved in Jira?')){n.forEach(x=>x.jira='done');save();render()}}
@@ -1810,8 +1831,9 @@ body.hide-notes #list .l3{display:none}
 (function(){
  var $=function(i){return document.getElementById(i)},L=$('fldlg'),fl=$('flist'),drag=null;if(!L||!fl)return;
  function card(k){return fl.querySelector('.ffc[data-k="'+k+'"]')}
- function toggle(k){var c=card(k);if(!c)return;var o=!fEdit.has(k);o?fEdit.add(k):fEdit['delete'](k);c.classList.toggle('edit',o);c.querySelector('.ffe').hidden=!o;var b=c.querySelector('.fed');if(b)b.setAttribute('aria-expanded',o);if(o){var i=c.querySelector('input.fl');if(i)i.focus()}}
+ function toggle(k){var c=card(k);if(!c)return;var o=!fEdit.has(k);if(o){fEdit.add(k);fSnapTake(k)}else{fEdit['delete'](k);delete fSnap[k]}c.classList.toggle('edit',o);c.querySelector('.ffe').hidden=!o;var b=c.querySelector('.fed');if(b)b.setAttribute('aria-expanded',o);if(o){var i=c.querySelector('input.fl');if(i)i.focus()}}
  fl.addEventListener('click',function(e){
+  var sv=e.target.closest('[data-a="fsave"],[data-a="fback"]');if(sv){fDone(sv.dataset.k,sv.dataset.a==='fsave');return}
   var b=e.target.closest('[data-a="fedit"]');if(b){toggle(b.dataset.k);return}
   if(e.target.closest('.xt,.fgr,button,input,label,.ffe'))return;
   var c=e.target.closest('.ffc');if(c)toggle(c.dataset.k)});
