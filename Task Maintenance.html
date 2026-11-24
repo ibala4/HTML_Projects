@@ -1104,7 +1104,7 @@ async function backup(){say(await copyText(JSON.stringify(U()))?'Backup copied. 
 function restore(){
   try{const d=JSON.parse($('bk').value);if(!d||!Array.isArray(d.tasks))throw 0;
     if(!confirm('Replace your current data with this backup?'))return;
-    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,teamsOn:d.teamsOn,celChamp:d.celChamp,celJira:d.celJira,celTitle:d.celTitle,jiraSince:d.jiraSince,bird:d.bird,champ:d.champ,purged:d.purged,cwScale:d.cwScale,alertSound:d.alertSound};save();render();say('Backup restored.')}
+    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,teamsOn:d.teamsOn,autoBk:d.autoBk,celChamp:d.celChamp,celJira:d.celJira,celTitle:d.celTitle,jiraSince:d.jiraSince,bird:d.bird,champ:d.champ,purged:d.purged,cwScale:d.cwScale,alertSound:d.alertSound};save();render();say('Backup restored.')}
   catch(e){say('That does not look like a valid backup.')}
 }
 
@@ -1482,7 +1482,7 @@ load();$('nm').value=DB.last||'';show();
   d.insertBefore(bx,$('smsg'));
   function month(o){var n=new Date();$('rf').value=iso(new Date(n.getFullYear(),n.getMonth()+o,1));$('rt').value=iso(new Date(n.getFullYear(),n.getMonth()+o+1,0));dsync('rf');dsync('rt');range()}
   $('tmthis').onclick=function(){month(0)};$('tmlast').onclick=function(){month(-1)};
-  $('tmbkf').onclick=function(){try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(U())],{type:'application/json'}));a.download=U().name+'-backup-'+iso(new Date())+'.json';a.click();try{localStorage.setItem('tm_lastbackup',Date.now())}catch(e){}say('Backup file download started.')}catch(e){say('Download is blocked here. Use Copy my backup instead.')}};
+  $('tmbkf').onclick=function(){try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(U())],{type:'application/json'}));a.download=U().name+'-backup-'+iso(new Date())+'.json';window.__dlKind='backup';a.click();try{localStorage.setItem('tm_lastbackup',Date.now())}catch(e){}}catch(e){say('Download is blocked here. Use Copy my backup instead.')}};
   $('tmrsf').onclick=function(){$('tmfile').click()};
   $('tmfile').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('bk').value=r.result;restore()};r.readAsText(f);this.value=''}}
  /* keyboard shortcuts */
@@ -1740,8 +1740,9 @@ body.hide-notes #list .l3{display:none}
  function sec(root,txt){return [].filter.call(root.children,function(s){var h=s.classList.contains('sec')&&s.querySelector('h3');return h&&h.textContent.indexOf(txt)>-1})[0]}
  if(S&&D&&!$('swn')){
   var sanSec=document.createElement('div');sanSec.className='sec';sanSec.innerHTML='<h3>✅ Sanity tab</h3><label class="chk"><input type="checkbox" id="son" data-a="sontoggle"> Show the Sanity tab and button</label><p class="meta" style="margin:0">Turn this off to hide Sanity from the sidebar, the toolbar and the right-click menu. Your Sanity entries are kept.</p><label class="chk" style="margin-top:12px"><input type="checkbox" id="tmon" data-a="tmtoggle"> Show the Teams update button</label><p class="meta" style="margin:0">Turn this off to hide the Teams update button on the Sanity page. Your saved Teams IDs are kept.</p>';
-  var menuSec=document.createElement('div');menuSec.className='sec';menuSec.innerHTML='<h3>🧭 Left menu</h3><label class=\"chk\"><input type=\"checkbox\" id=\"sbauto\"> Close menu groups automatically when the mouse leaves</label><p class=\"meta\" style=\"margin:0\">Off (default): a group such as Views or Tools stays open until you click its heading. On: it closes by itself shortly after the mouse moves away.</p>';
-  var funSec=document.createElement('div');funSec.className='sec';funSec.innerHTML='<h3>🎉 Celebrations</h3><label class="chk"><input type="checkbox" id="celChamp"> Celebration when the daily target is completed</label><p class="meta" style="margin:0">A trophy and confetti appear once a day when your spent hours reach the daily target.</p><label for=\"celTitle\" style=\"margin-top:12px\">Celebration title</label><input id=\"celTitle\" maxlength=\"24\" placeholder=\"Target Achieved!\"><label class="chk" style="margin-top:12px"><input type="checkbox" id="celJira"> Animation when a task is saved in Jira</label><p class="meta" style="margin:0">A small burst of sparkles appears when you mark a task as saved in Jira.</p>';
+  var menuSec=document.createElement('div');menuSec.className='sec';menuSec.innerHTML='<h3>🧭 Left menu</h3><label class=\"chk\"><input type=\"checkbox\" id=\"sbauto\"> Close menu groups automatically</label><label for=\"sbsec\" style=\"margin-top:12px\">Close after (seconds)</label><input type=\"number\" id=\"sbsec\" min=\"3\" max=\"300\" value=\"20\"><p class=\"meta\" style=\"margin:6px 0 0\">A group such as Views or Tools closes this many seconds after you choose an item or move the mouse away. Turn it off to keep groups open until you click their heading.</p>';
+  var fsSec=document.createElement('div');fsSec.className='sec';fsSec.innerHTML='<h3>📁 Download folder &amp; schedule</h3><label class=\"chk\"><input type=\"checkbox\" id=\"fsOn\"> Save reports and backups straight into my folder</label><p class=\"meta\" id=\"fsName\" style=\"margin:6px 0 10px\">No folder chosen yet.</p><div class=\"row2\"><button type=\"button\" class=\"btn alt\" id=\"fsPick\">📁 Choose folder</button><button type=\"button\" class=\"btn alt\" id=\"fsTest\" hidden>🧪 Save a test file</button></div><button type=\"button\" class=\"btn alt\" id=\"fsClear\" style=\"margin-top:8px\" hidden>✕ Remove folder</button><p class=\"meta\" style=\"margin:10px 0 0\">Choose any folder once. Month reports (PDF and CSV), the backup file and the Sanity PDF are saved there instead of the Downloads folder. A file with the same name is replaced. Works in Chrome and Edge. The browser may ask you to allow folder access once each time you open the app.</p><div class=\"bkdiv\"><b>⏰ Automatic backup</b></div><label class=\"chk\"><input type=\"checkbox\" id=\"bkOn\"> Back up my data automatically</label><label for=\"bkDays\" style=\"margin-top:12px\">Back up once every (days)</label><input type=\"number\" id=\"bkDays\" min=\"1\" max=\"30\" value=\"1\"><label style=\"margin-top:4px\">Set the time</label><div class=\"clk\"><select id=\"bkH\" aria-label=\"Hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"bkM\" aria-label=\"Minute\"><option>00</option><option>05</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option></select><b>:</b><select id=\"bkS\" aria-label=\"Second\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><select id=\"bkAP\" aria-label=\"AM or PM\"><option>AM</option><option>PM</option></select></div><p class=\"meta\" id=\"bkLbl\" style=\"margin:6px 0 0\"></p><p class=\"meta\" id=\"bkLast\" style=\"margin:6px 0 0\"></p><p class=\"meta\" style=\"margin:6px 0 0\">For example: every 1 day at 6:00 PM. The backup runs while the app is open. If the app was closed at that time, it runs the next time you open it. With the folder above chosen, the file goes into it and replaces the same-day file.</p><button type=\"button\" class=\"btn alt\" id=\"bkNow\" style=\"margin-top:10px\">💾 Back up now</button>';
+  var funSec=document.createElement('div');funSec.className='sec';funSec.innerHTML='<h3>🎉 Celebrations</h3><label class="chk"><input type="checkbox" id="celChamp"> Celebration when the daily target is completed</label><p class="meta" style="margin:0">A trophy and confetti appear once a day when your spent hours reach the daily target.</p><label for=\"celTitle\" style=\"margin-top:12px\">Celebration title</label><input id=\"celTitle\" maxlength=\"24\" placeholder=\"Target Achieved!\"><label class="chk" style="margin-top:12px"><input type="checkbox" id="celJira"> Animation when a task is saved in Jira</label><p class="meta" style="margin:0">A small burst of sparkles appears when you mark a task as saved in Jira.</p><label class=\"chk\" style=\"margin-top:12px\"><input type=\"checkbox\" id=\"celCurtain\"> Theatre curtains when I log in and log out</label><p class=\"meta\" style=\"margin:0\">Red curtains open when you log in and close when you log out.</p><button type=\"button\" class=\"btn alt\" id=\"curtainTest\" style=\"margin-top:10px\">🎭 Preview the curtains</button>';
   var birdSec=document.createElement('div');birdSec.className='sec';birdSec.innerHTML='<h3>🐦 Daily birds</h3><label class=\"chk\"><input type=\"checkbox\" id=\"birdOn\"> Let birds fly across the screen every day</label><div class=\"bclock\"><div class=\"bface\"><span class=\"bperch\" aria-hidden=\"true\">🐦</span><svg viewBox=\"0 0 120 120\" aria-hidden=\"true\"><circle cx=\"60\" cy=\"60\" r=\"56\" class=\"bf\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(0 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(30 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(60 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(90 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(120 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(150 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(180 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(210 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(240 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(270 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(300 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(330 60 60)\"/><text x=\"60\" y=\"32\" class=\"bn\">12</text><text x=\"91\" y=\"64\" class=\"bn\">3</text><text x=\"60\" y=\"96\" class=\"bn\">6</text><text x=\"29\" y=\"64\" class=\"bn\">9</text><line id=\"bHr\" x1=\"60\" y1=\"60\" x2=\"60\" y2=\"36\" class=\"bh1\"/><line id=\"bMn\" x1=\"60\" y1=\"60\" x2=\"60\" y2=\"22\" class=\"bh2\"/><circle cx=\"60\" cy=\"60\" r=\"4.5\" class=\"bdot\"/></svg></div><div class=\"bdig\"><div><b id=\"bdigT\">6:00</b><span id=\"bdigAP\">PM</span></div><small id=\"bdigI\"></small></div></div><label style=\"margin-top:4px\">Set the time</label><div class=\"clk\"><select id=\"birdH\" aria-label=\"Hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"birdM\" aria-label=\"Minute\"><option>00</option><option>05</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option></select><select id=\"birdAP\" aria-label=\"AM or PM\"><option>AM</option><option>PM</option></select></div><p class=\"meta\" id=\"birdLbl\" style=\"margin:6px 0 0\"></p><label for=\"birdN\" style=\"margin-top:12px\">How many birds</label><input type=\"number\" id=\"birdN\" min=\"1\" max=\"50\" value=\"8\"><p class=\"meta\" style=\"margin:6px 0 0\">The birds fly for 1 minute while the app is open. Tap ✕ on the message to send them away. If the app is opened within 30 minutes after this time, they still fly.</p><button type=\"button\" class=\"btn alt\" data-a=\"birdtest\" style=\"margin-top:10px\">▶ Preview the birds</button>';
   var defs=[
    {k:'range',i:'📆',t:'Tasks done between two dates',d:'Pick dates and see the tasks you did',s:sec(S,'Tasks done between two dates')},
@@ -1751,13 +1752,14 @@ body.hide-notes #list .l3{display:none}
    {k:'celebrate',i:'🎉',t:'Celebrations',d:'Champion and Jira save animations',s:funSec},
    {k:'bird',i:'🐦',t:'Daily birds',d:'Choose when the birds fly each day',s:birdSec},
    {k:'menu',i:'🧭',t:'Left menu',d:'Choose how the menu groups open and close',s:menuSec},
+   {k:'folder',i:'📁',t:'Download folder & schedule',d:'Folder, days and time for backups',s:fsSec},
    {k:'theme',i:'🎨',t:'Theme',d:'Switch between light and dark',s:sec(S,'Theme')},
    {k:'quick',i:'⚡',t:'Quick tools',d:'Month reports and backup files',s:$('tmx')},
    {k:'dspec',i:'🎯',t:'Delete specific data',s:sec(D,'Delete specific data'),del:1},
    {k:'dall',i:'🗑️',t:'Delete all',s:sec(D,'Delete all'),del:1}];
   if(!defs.some(function(d){return !d.s})){
    defs.forEach(function(d){var w=document.createElement('dialog'),h=document.createElement('div'),c=document.createElement('button');
-    w.id='sw_'+d.k;w.className='swin';h.className='dh';h.innerHTML='<h2></h2>';h.firstChild.textContent=d.i+' '+d.t;
+    w.id='sw_'+d.k;w.className='swin';h.className='dh';h.innerHTML='<h2></h2><button type="button" class="swx" data-a="close" aria-label="Close">✕</button>';h.firstChild.textContent=d.i+' '+d.t;
     c.type='button';c.className='btn alt full';c.dataset.a='close';c.textContent='Close';
     w.appendChild(h);w.appendChild(d.s);w.appendChild(c);document.body.appendChild(w);d.w=w});
    [].slice.call(S.children).forEach(function(n){if(n.classList.contains('sec'))n.remove()});
@@ -1766,9 +1768,10 @@ body.hide-notes #list .l3{display:none}
    var sb=$('sb'),nav=document.createElement('div');nav.id='swn';nav.className='setnav';
    function item(o){var b=document.createElement('button'),i=document.createElement('b');b.type='button';if(o.sub)b.className='sub';if(o.w)b.dataset.w=o.w;if(o.a)b.dataset.a=o.a;i.textContent=o.i;b.appendChild(i);b.appendChild(document.createTextNode(o.t));nav.appendChild(b)}
    item({i:'📄',t:'All my records',a:'records'});
-   defs.slice(0,6).forEach(function(d){item({i:d.i,t:d.t,w:d.k})});
+   var SUBK=['theme','quick','dspec','dall'];   /* only these stay inside the Delete records group; every other setting is its own entry */
+   defs.filter(function(d){return SUBK.indexOf(d.k)<0}).forEach(function(d){item({i:d.i,t:d.t,w:d.k})});
    var g=document.createElement('div');g.className='sgl';g.textContent='🧹 Delete records';nav.appendChild(g);
-   defs.slice(6).forEach(function(d){item({i:d.i,t:d.t,w:d.k,sub:1})});
+   defs.filter(function(d){return SUBK.indexOf(d.k)>=0}).forEach(function(d){item({i:d.i,t:d.t,w:d.k,sub:1})});
    var hd=document.createElement('h4');hd.textContent='Settings';
    var ab=sb&&sb.querySelector('.bar2'),ah=ab&&ab.previousElementSibling;
    if(sb){if(ah){sb.insertBefore(hd,ah);sb.insertBefore(nav,ah)}else{sb.appendChild(hd);sb.appendChild(nav)}}
@@ -1820,11 +1823,13 @@ body.hide-notes #list .l3{display:none}
   h.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog()}});
   if(window.matchMedia&&matchMedia('(hover: hover)').matches){   /* mouse users: close by itself shortly after the pointer leaves */
    var tm=null;
-   function auto(){try{return localStorage.getItem('tm_sbauto')==='1'}catch(e){return false}}
+   function auto(){try{return localStorage.getItem('tm_sbauto')!=='0'}catch(e){return true}}
+   function secs(){try{var s=+localStorage.getItem('tm_sbsec');return s>=3&&s<=300?s:20}catch(e){return 20}}
    function out(){clearTimeout(tm);if(!auto())return;tm=setTimeout(function(){if(!isOpen(k))return;var a=document.activeElement;
-    if(a&&a.matches&&a.matches(':focus-visible')&&(a===h||items.some(function(n){return n.contains(a)})))return;st[k]=false;store();paint()},400)}
+    if(a&&a.matches&&a.matches(':focus-visible')&&(a===h||items.some(function(n){return n.contains(a)})))return;st[k]=false;store();paint()},secs()*1000)}
    function inn(){clearTimeout(tm)}
-   [h].concat(items).forEach(function(n){n.addEventListener('mouseenter',inn);n.addEventListener('mouseleave',out)})}
+   [h].concat(items).forEach(function(n){n.addEventListener('mouseenter',inn);n.addEventListener('mouseleave',out)});
+   items.forEach(function(n){n.addEventListener('click',function(e){if(e.target.closest('button,a'))out()})})}   /* choosing an item also starts the timer */
   paint()}
  var keys={Views:'views',Tools:'tools',Settings:'settings',Actions:'actions'};
  [].forEach.call(sb.querySelectorAll(':scope>h4'),function(h){var k=keys[h.textContent.trim()],box=h.nextElementSibling;if(k&&box)wire(h,k,[box])});
@@ -3103,6 +3108,8 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
 @keyframes flap{from{transform:rotate(22deg)}to{transform:rotate(-42deg)}}
 .bmsg{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);pointer-events:auto;display:flex;align-items:center;gap:10px;padding:9px 10px 9px 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:.86rem;font-weight:600;white-space:nowrap;max-width:94vw}
 .bmsg button{border:0;border-radius:50%;width:26px;height:26px;background:var(--soft);color:var(--ink);cursor:pointer;font-size:.85rem}
+.swin{overflow-y:auto}.swin .dh{position:sticky;top:-18px;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px}.swin .dh .swx{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:rgba(127,127,127,.2);color:inherit;cursor:pointer;font-size:.9rem}.swin>button[data-a="close"]{position:sticky;bottom:-6px;z-index:5;background:var(--card);box-shadow:0 -14px 14px var(--card)}
+.bkdiv{margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--line);font-size:1rem}
 .clk{display:flex;align-items:center;gap:8px}.clk select{flex:1;min-width:0}.clk b{font-size:1.1rem}
 .bclock{display:flex;align-items:center;gap:18px;margin:12px 0 10px;padding:16px 18px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(56,189,248,.10),rgba(167,139,250,.10))}
 .bface{position:relative;flex:none;width:112px;height:112px}
@@ -3198,15 +3205,173 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
  window.funSync=function(){var u=U(),b=cfg();if(!$('celChamp'))return;
   $('celChamp').checked=u.celChamp!==false;$('celJira').checked=u.celJira!==false;$('celTitle').value=u.celTitle||'';$('birdOn').checked=!!b.on;$('birdN').value=b.n||8;
   var t=t12(b.time),mm=String(t.m).padStart(2,'0'),sel=$('birdM');if(![].some.call(sel.options,function(o){return o.value===mm})){var o=document.createElement('option');o.value=o.textContent=mm;sel.appendChild(o)}
-  $('birdH').value=t.h;sel.value=mm;$('birdAP').value=t.ap;lbl();if($('sbauto'))$('sbauto').checked=(function(){try{return localStorage.getItem('tm_sbauto')==='1'}catch(e){return false}})()};
+  $('birdH').value=t.h;sel.value=mm;$('birdAP').value=t.ap;lbl();if($('sbauto')){try{$('sbauto').checked=localStorage.getItem('tm_sbauto')!=='0';var q=+localStorage.getItem('tm_sbsec');$('sbsec').value=q>=3&&q<=300?q:20}catch(e){}}};
  document.addEventListener('change',function(e){var t=e.target,id=t&&t.id;if(!id||!has())return;
   if(id==='celChamp'){U().celChamp=t.checked;save()}else if(id==='celJira'){U().celJira=t.checked;save()}
   else if(id==='sbauto'){try{localStorage.setItem('tm_sbauto',t.checked?'1':'0')}catch(x){}}
+  else if(id==='sbsec'){var q2=Math.max(3,Math.min(300,Math.round(+t.value)||20));t.value=q2;try{localStorage.setItem('tm_sbsec',String(q2))}catch(x){}}
   else if(id==='celTitle'){U().celTitle=t.value.trim();save()}
   else if(id==='birdOn'){cfg().on=t.checked;save()}
   else if(id==='birdN'){var n=Math.max(1,Math.min(50,Math.round(+t.value)||8));t.value=n;cfg().n=n;save()}
   else if(id==='birdH'||id==='birdM'||id==='birdAP'){var h=(+$('birdH').value%12)+($('birdAP').value==='PM'?12:0);cfg().time=String(h).padStart(2,'0')+':'+$('birdM').value;cfg().last='';save();lbl()}});
  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-a="birdtest"]');if(!b)return;e.stopPropagation();e.preventDefault();flyBird('Preview \u2013 tap \u2715 to send the birds away')},true);
+})();
+</script>
+<style>
+/* download message */
+.dlpop{position:fixed;inset:auto auto calc(24px + env(safe-area-inset-bottom,0px)) 50%;transform:translateX(-50%);margin:0;padding:0;border:0;background:transparent;overflow:visible;color:var(--ink);z-index:99999;max-width:94vw}
+.dlbox{display:flex;align-items:center;gap:12px;padding:12px 14px 12px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.45);animation:dlin .35s cubic-bezier(.2,1.3,.4,1)}
+.dlbox .dlok{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(52,211,153,.18);color:#34d399;font-size:1.05rem;font-weight:800}
+.dlbox .dlt{display:flex;flex-direction:column;min-width:0}.dlbox b{font-size:.9rem}
+.dlbox small{color:var(--mute);font-size:.76rem;overflow-wrap:anywhere}
+.dlbox button{flex:none;border:0;border-radius:50%;width:26px;height:26px;background:var(--soft);color:var(--ink);cursor:pointer;font-size:.8rem}
+@keyframes dlin{from{transform:translateY(20px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+</style>
+<script>
+/* message shown after a file is downloaded or saved (above any open window) */
+(function(){
+ var cur=null,tm;
+ window.showDl=function(title,sub){
+  if(cur){try{cur.hidePopover()}catch(e){}if(cur.parentNode)cur.parentNode.removeChild(cur);cur=null}clearTimeout(tm);
+  var d=document.createElement('div');d.className='dlpop';d.setAttribute('role','status');
+  d.innerHTML='<div class="dlbox"><span class="dlok" aria-hidden="true">\u2713</span><span class="dlt"><b></b><small></small></span><button type="button" aria-label="Close">\u2715</button></div>';
+  d.querySelector('b').textContent=title;d.querySelector('small').textContent=sub||'';
+  var end=function(){try{d.hidePopover()}catch(e){}if(d.parentNode)d.parentNode.removeChild(d);if(cur===d)cur=null};
+  d.querySelector('button').addEventListener('click',end);
+  try{d.setAttribute('popover','manual');document.body.appendChild(d);d.showPopover()}catch(e){if(!d.parentNode)document.body.appendChild(d)}
+  cur=d;tm=setTimeout(end,6000)};
+})();
+</script>
+<script>
+/* Save reports and backups straight into a chosen folder (replaces a file with the same name) */
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ var say=function(m){try{toast(m)}catch(e){}};
+ var LS={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}},del:function(k){try{localStorage.removeItem(k)}catch(e){}}};
+ var can=function(){return typeof window.showDirectoryPicker==='function'};
+ function db(){return new Promise(function(res,rej){var r=indexedDB.open('tm_fs',1);r.onupgradeneeded=function(){r.result.createObjectStore('h')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
+ function idb(mode,fn){return db().then(function(d){return new Promise(function(res,rej){var t=d.transaction('h',mode),q=fn(t.objectStore('h'));t.oncomplete=function(){res(q&&q.result)};t.onerror=function(){rej(t.error)}})})}
+ var getDir=function(){return idb('readonly',function(s){return s.get('dir')})};
+ var setDir=function(h){return idb('readwrite',function(s){return s.put(h,'dir')})};
+ var delDir=function(){return idb('readwrite',function(s){return s['delete']('dir')})};
+ var fsOn=function(){return LS.get('tm_fson')==='1'&&!!LS.get('tm_fsname')&&can()};
+ var clean=function(n){return String(n).replace(/[\\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,150)};
+ function dlTitle(k){return k==='auto'?'Automatic backup done':k==='backup'?'Backup downloaded':'Download started'}
+ async function writeFile(name,blob,kind){
+  var dir=await getDir();if(!dir)return false;
+  var p=dir.queryPermission?await dir.queryPermission({mode:'readwrite'}):'granted';
+  if(p!=='granted'&&dir.requestPermission)p=await dir.requestPermission({mode:'readwrite'});
+  if(p!=='granted'){say('Folder access was not allowed, so the file was downloaded normally.');return false}
+  var fh=await dir.getFileHandle(clean(name),{create:true}),w=await fh.createWritable();await w.write(blob);await w.close();
+  if(window.showDl)showDl(kind==='auto'?'Automatic backup saved in your folder':kind==='backup'?'Backup saved in your folder':'Saved in your folder',clean(name)+'  \u00B7  folder "'+(LS.get('tm_fsname')||'')+'" (a file with the same name is replaced)');else say('Saved in "'+(LS.get('tm_fsname')||'your folder')+'": '+clean(name));return true}
+ /* every file the app downloads goes through here */
+ var orig=HTMLAnchorElement.prototype.click;
+ HTMLAnchorElement.prototype.click=function(){
+  var a=this;
+  if(a.download&&/^blob:/.test(a.href)&&!a.__tmfs&&fsOn()){
+   var url=a.href,name=a.download,kind=window.__dlKind;window.__dlKind=null;
+   fetch(url).then(function(r){return r.blob()}).then(function(b){return writeFile(name,b,kind)}).then(function(ok){if(!ok){a.__tmfs=1;orig.call(a);if(window.showDl)showDl(dlTitle(kind),name+'  \u00B7  check your Downloads folder (Ctrl+J)')}}).catch(function(){a.__tmfs=1;orig.call(a);if(window.showDl)showDl(dlTitle(kind),name+'  \u00B7  check your Downloads folder (Ctrl+J)')});
+   return}
+  var k2=window.__dlKind;window.__dlKind=null;var r=orig.apply(this,arguments);if(a.download&&/^blob:/.test(a.href)&&window.showDl)showDl(dlTitle(k2),a.download+'  \u00B7  check your Downloads folder (Ctrl+J)');return r};
+ /* settings */
+ function sync(){if(!$('fsOn'))return;var n=LS.get('tm_fsname');$('fsOn').checked=LS.get('tm_fson')==='1'&&!!n;$('fsOn').disabled=false;
+  $('fsName').textContent=!can()?'This browser cannot save into a folder. Files will download normally. (Chrome or Edge can do it.)':n?'\uD83D\uDCC1 Folder: '+n:'No folder chosen yet.';
+  $('fsPick').textContent=n?'\uD83D\uDCC1 Change folder':'\uD83D\uDCC1 Choose folder';$('fsClear').hidden=!n;$('fsTest').hidden=!n}
+ var _fs=window.funSync;window.funSync=function(){if(_fs)_fs();sync()};
+ document.addEventListener('change',function(e){if(e.target.id!=='fsOn')return;
+  if(e.target.checked&&!LS.get('tm_fsname')){e.target.checked=false;if(!can()){say('This browser cannot save into a folder. Use Chrome or Edge.');return}$('fsPick').click();return}   /* no folder yet: ticking the box opens the folder picker */
+  LS.set('tm_fson',e.target.checked?'1':'0');sync()});
+ document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('#fsPick,#fsClear,#fsTest');if(!b)return;
+  if(b.id==='fsPick'){if(!can()){say('This browser cannot pick a folder. Use Chrome or Edge.');return}
+   window.showDirectoryPicker({mode:'readwrite',id:'taskmaint'}).then(function(h){return setDir(h).then(function(){LS.set('tm_fsname',h.name);LS.set('tm_fson','1');sync();say('Folder set: '+h.name)})}).catch(function(x){if(x&&x.name!=='AbortError')say('Could not open the folder picker here. Open the app in its own tab and try again.')})}
+  else if(b.id==='fsClear'){delDir().then(function(){LS.del('tm_fsname');LS.set('tm_fson','0');sync();say('Folder removed. Files will download normally.')})}
+  else if(b.id==='fsTest'){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['Task Maintenance folder test - '+new Date().toString()],{type:'text/plain'}));a.download='Task-Maintenance-test.txt';a.click()}});
+})();
+</script>
+<script>
+/* Automatic backup: every N days at a chosen time (while the app is open, or the next time it is opened) */
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ var say=function(m){try{toast(m)}catch(e){}};
+ var has=function(){return typeof me!=='undefined'&&me&&DB.users[me]};
+ function cfg(){var u=U();if(!u.autoBk)u.autoBk={on:false,days:1,time:'18:00',last:0};var c=u.autoBk;c.days=Math.max(1,Math.min(30,Math.round(+c.days)||1));return c}
+ function slot(c){var p=String(c.time||'18:00:00').split(':'),h=+p[0]||0,m=+p[1]||0,s=+p[2]||0,b=c.last?new Date(c.last):new Date();return new Date(b.getFullYear(),b.getMonth(),b.getDate()+(c.last?c.days:0),h,m,s,0)}
+ function due(){var c=cfg();return !!c.on&&Date.now()>=slot(c).getTime()}
+ var running=false;
+ function run(auto){
+  if(!has()||running)return;running=true;var c=cfg();c.last=Date.now();save();
+  try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(U())],{type:'application/json'}));a.download=U().name+'-backup-'+iso(new Date())+'.json';window.__dlKind=auto?'auto':'backup';a.click();try{localStorage.setItem('tm_lastbackup',Date.now())}catch(e){}}catch(e){say('Backup is blocked here. Use Copy my backup instead.')}
+  running=false;sync()}
+ function tick(){if(!has())return;var app=$('app');if(app&&app.hidden)return;if(due())run(true)}
+ setInterval(tick,1000);setTimeout(tick,2000);
+ window.tmBackup={due:due,next:function(){return slot(cfg())},run:run};
+ /* settings */
+ function t12(hm){var p=String(hm||'18:00:00').split(':'),h=+p[0]||0;return {h:h%12||12,m:+p[1]||0,s:+p[2]||0,ap:h>=12?'PM':'AM'}}
+ function fmt(d){return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' at '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',second:'2-digit'})}
+ function sync(){if(!$('bkOn')||!has())return;var c=cfg(),t=t12(c.time),mm=String(t.m).padStart(2,'0'),sel=$('bkM');
+  if(![].some.call(sel.options,function(o){return o.value===mm})){var o=document.createElement('option');o.value=o.textContent=mm;sel.appendChild(o)}
+  $('bkOn').checked=!!c.on;$('bkDays').value=c.days;$('bkH').value=t.h;sel.value=mm;var ss=String(t.s).padStart(2,'0');$('bkS').value=ss;$('bkAP').value=t.ap;
+  $('bkLbl').textContent=c.on?'\uD83D\uDD52 Backs up '+(c.days===1?'every day':'once every '+c.days+' days')+' at '+t.h+':'+mm+':'+ss+' '+t.ap+'.':'Automatic backup is off.';
+  var lb=+localStorage.getItem('tm_lastbackup')||c.last||0;
+  $('bkLast').textContent=(lb?'Last backup: '+fmt(new Date(lb))+'. ':'No backup yet. ')+(c.on?'Next backup: '+fmt(slot(c))+'.':'')}
+ var _f=window.funSync;window.funSync=function(){if(_f)_f();sync()};
+ document.addEventListener('change',function(e){var id=e.target&&e.target.id;if(!id||id.indexOf('bk')!==0||!has())return;var c=cfg(),t=e.target;
+  if(id==='bkOn')c.on=t.checked;
+  else if(id==='bkDays'){c.days=Math.max(1,Math.min(30,Math.round(+t.value)||1));t.value=c.days}
+  else if(id==='bkH'||id==='bkM'||id==='bkS'||id==='bkAP'){var h=(+$('bkH').value%12)+($('bkAP').value==='PM'?12:0);c.time=String(h).padStart(2,'0')+':'+$('bkM').value+':'+$('bkS').value}
+  else return;
+  if(due())c.last=Date.now();   /* never back up the moment a setting is changed: the first backup is the next one */
+  save();sync()});
+ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#bkNow');if(!b)return;e.stopPropagation();e.preventDefault();run(false)},true);
+})();
+</script>
+<style>
+/* theatre curtains on log in / log out */
+.curtainlay{pointer-events:auto;background:transparent;z-index:100000}
+.curtainlay .cp{position:absolute;top:0;bottom:0;width:51vw;overflow:hidden;transition:transform 1.9s cubic-bezier(.65,0,.25,1);
+ background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(0,0,0,0) 14%,rgba(0,0,0,0) 86%,rgba(0,0,0,.45)),
+  repeating-linear-gradient(90deg,#7d0b0e 0,#a6121a 12px,#d9232a 26px,#ef3a3f 34px,#d9232a 42px,#a6121a 56px,#7d0b0e 68px);
+ box-shadow:0 0 40px rgba(0,0,0,.65)}
+.curtainlay .cp::after{content:"";position:absolute;left:0;right:0;bottom:9%;height:54px;
+ background:repeating-linear-gradient(90deg,transparent 0 10px,rgba(120,70,0,.55) 10px 12px),linear-gradient(#f3d77a,#b78621 22%,#f3d77a 45%,#8f6513 70%,#f3d77a);
+ border-top:3px solid #ffe9a0;border-bottom:3px solid #7a5410}
+.curtainlay .cl{left:0}.curtainlay .cr{right:0}
+.curtainlay.open .cl{transform:translateX(-84%)}.curtainlay.open .cr{transform:translateX(84%)}
+.curtainlay.fast .cp{transition-duration:1.15s}
+.curtainlay .cv{position:absolute;left:0;right:0;top:0;height:62px;z-index:2;
+ background:radial-gradient(circle at 50% 0,#8d0f12 0 30px,transparent 31px) 0 26px/84px 40px repeat-x,linear-gradient(#4d0609,#8d0f12) top/100% 40px no-repeat;
+ filter:drop-shadow(0 6px 8px rgba(0,0,0,.5));transition:opacity .6s}
+.curtainlay.gone .cv,.curtainlay.gone .cp{opacity:0;transition:opacity .5s}
+</style>
+<script>
+/* Theatre curtains: they open when you log in and close when you log out */
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ var lay=null,tm;
+ var on=function(){try{return localStorage.getItem('tm_curtain')!=='0'}catch(e){return true}};
+ var calm=function(){try{return matchMedia('(prefers-reduced-motion:reduce)').matches}catch(e){return false}};
+ function kill(){clearTimeout(tm);if(!lay)return;try{lay.hidePopover()}catch(e){}if(lay.parentNode)lay.parentNode.removeChild(lay);lay=null}
+ function make(open,fast){kill();var d=document.createElement('div');d.className='fx curtainlay'+(open?' open':'')+(fast?' fast':'');d.innerHTML='<div class="cp cl"></div><div class="cp cr"></div><div class="cv"></div>';
+  try{d.setAttribute('popover','manual');document.body.appendChild(d);d.showPopover()}catch(e){document.body.appendChild(d)}lay=d;return d}
+ function openC(){if(!lay)make(false,false);var d=lay;void d.offsetWidth;d.classList.add('open');tm=setTimeout(function(){if(lay===d){d.classList.add('gone');tm=setTimeout(kill,550)}},2000)}
+ function closeC(done){var d=make(true,true);void d.offsetWidth;d.classList.remove('open');tm=setTimeout(done,1200)}
+ /* only a real click on Continue (or Enter in the name box) counts as logging in, not a page refresh */
+ document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#go'))window.__lgNow=Date.now()},true);
+ document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='nm')window.__lgNow=Date.now()},true);
+ var _show=window.show;
+ window.show=function(){
+  var args=arguments,self=this,appOn=$('app')&&!$('app').hidden,loginOn=$('login')&&!$('login').hidden;
+  if(on()&&!calm()){
+   if(me&&loginOn&&window.__lgNow&&Date.now()-window.__lgNow<4000){window.__lgNow=0;make(false,false);var r=_show.apply(self,args);setTimeout(openC,200);return r}
+   if(!me&&appOn){closeC(function(){_show.apply(self,args);setTimeout(openC,250)});return}
+  }
+  return _show.apply(self,args)};
+ /* settings switch */
+ var _f=window.funSync;window.funSync=function(){if(_f)_f();if($('celCurtain'))$('celCurtain').checked=on()};
+ document.addEventListener('change',function(e){if(e.target.id==='celCurtain'){try{localStorage.setItem('tm_curtain',e.target.checked?'1':'0')}catch(x){}}});
+ window.playCurtains=function(){if(calm())return;closeC(function(){setTimeout(openC,200)})};
+ document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#curtainTest')){e.stopPropagation();window.playCurtains()}},true);
 })();
 </script>
 </body></html>
