@@ -1104,7 +1104,8 @@ async function backup(){say(await copyText(JSON.stringify(U()))?'Backup copied. 
 function restore(){
   try{const d=JSON.parse($('bk').value);if(!d||!Array.isArray(d.tasks))throw 0;
     if(!confirm('Replace your current data with this backup?'))return;
-    DB.users[me]={name:U().name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},fields:d.fields,pageSize:d.pageSize,jiraOn:d.jiraOn,removed:d.removed||[],hoursLabel:d.hoursLabel||'',dayTarget:d.dayTarget,alertTime:d.alertTime||'',alertMsg:d.alertMsg,alertSnd:d.alertSnd,alertEvery:d.alertEvery,alertDays:d.alertDays,teamsOn:d.teamsOn,autoBk:d.autoBk,celChamp:d.celChamp,celJira:d.celJira,celTitle:d.celTitle,jiraSince:d.jiraSince,bird:d.bird,champ:d.champ,purged:d.purged,cwScale:d.cwScale,alertSound:d.alertSound};save();render();say('Backup restored.')}
+    const cur=U();   /* bring back everything that is in the backup (Sanity, settings, profile ...), not only a fixed list */
+    DB.users[me]=Object.assign({},d,{name:cur.name,tasks:d.tasks,att:d.att||{},notes:d.notes||[],defaults:d.defaults||[],copilot:d.copilot||{},removed:d.removed||[],hoursLabel:d.hoursLabel||'',alertTime:d.alertTime||'',sanity:Array.isArray(d.sanity)?d.sanity:(cur.sanity||[])});save();render();say('Backup restored.')}
   catch(e){say('That does not look like a valid backup.')}
 }
 
@@ -1741,9 +1742,9 @@ body.hide-notes #list .l3{display:none}
  if(S&&D&&!$('swn')){
   var sanSec=document.createElement('div');sanSec.className='sec';sanSec.innerHTML='<h3>✅ Sanity tab</h3><label class="chk"><input type="checkbox" id="son" data-a="sontoggle"> Show the Sanity tab and button</label><p class="meta" style="margin:0">Turn this off to hide Sanity from the sidebar, the toolbar and the right-click menu. Your Sanity entries are kept.</p><label class="chk" style="margin-top:12px"><input type="checkbox" id="tmon" data-a="tmtoggle"> Show the Teams update button</label><p class="meta" style="margin:0">Turn this off to hide the Teams update button on the Sanity page. Your saved Teams IDs are kept.</p>';
   var menuSec=document.createElement('div');menuSec.className='sec';menuSec.innerHTML='<h3>🧭 Left menu</h3><label class=\"chk\"><input type=\"checkbox\" id=\"sbauto\"> Close menu groups automatically</label><label for=\"sbsec\" style=\"margin-top:12px\">Close after (seconds)</label><input type=\"number\" id=\"sbsec\" min=\"3\" max=\"300\" value=\"20\"><p class=\"meta\" style=\"margin:6px 0 0\">A group such as Views or Tools closes this many seconds after you choose an item or move the mouse away. Turn it off to keep groups open until you click their heading.</p>';
-  var fsSec=document.createElement('div');fsSec.className='sec';fsSec.innerHTML='<h3>📁 Download folder &amp; schedule</h3><label class=\"chk\"><input type=\"checkbox\" id=\"fsOn\"> Save reports and backups straight into my folder</label><p class=\"meta\" id=\"fsName\" style=\"margin:6px 0 10px\">No folder chosen yet.</p><div class=\"row2\"><button type=\"button\" class=\"btn alt\" id=\"fsPick\">📁 Choose folder</button><button type=\"button\" class=\"btn alt\" id=\"fsTest\" hidden>🧪 Save a test file</button></div><button type=\"button\" class=\"btn alt\" id=\"fsClear\" style=\"margin-top:8px\" hidden>✕ Remove folder</button><p class=\"meta\" style=\"margin:10px 0 0\">Choose any folder once. Month reports (PDF and CSV), the backup file and the Sanity PDF are saved there instead of the Downloads folder. A file with the same name is replaced. Works in Chrome and Edge. The browser may ask you to allow folder access once each time you open the app.</p><div class=\"bkdiv\"><b>⏰ Automatic backup</b></div><label class=\"chk\"><input type=\"checkbox\" id=\"bkOn\"> Back up my data automatically</label><label for=\"bkDays\" style=\"margin-top:12px\">Back up once every (days)</label><input type=\"number\" id=\"bkDays\" min=\"1\" max=\"30\" value=\"1\"><label style=\"margin-top:4px\">Set the time</label><div class=\"clk\"><select id=\"bkH\" aria-label=\"Hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"bkM\" aria-label=\"Minute\"><option>00</option><option>05</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option></select><b>:</b><select id=\"bkS\" aria-label=\"Second\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><select id=\"bkAP\" aria-label=\"AM or PM\"><option>AM</option><option>PM</option></select></div><p class=\"meta\" id=\"bkLbl\" style=\"margin:6px 0 0\"></p><p class=\"meta\" id=\"bkLast\" style=\"margin:6px 0 0\"></p><p class=\"meta\" style=\"margin:6px 0 0\">For example: every 1 day at 6:00 PM. The backup runs while the app is open. If the app was closed at that time, it runs the next time you open it. With the folder above chosen, the file goes into it and replaces the same-day file.</p><button type=\"button\" class=\"btn alt\" id=\"bkNow\" style=\"margin-top:10px\">💾 Back up now</button>';
+  var fsSec=document.createElement('div');fsSec.className='sec';fsSec.innerHTML='<h3>📁 Download folder &amp; schedule</h3><label class=\"chk\"><input type=\"checkbox\" id=\"fsOn\"> Save reports and backups straight into my folder</label><p class=\"meta\" id=\"fsName\" style=\"margin:6px 0 10px\">No folder chosen yet.</p><div class=\"row2\"><button type=\"button\" class=\"btn alt\" id=\"fsPick\">📁 Choose folder</button><button type=\"button\" class=\"btn alt\" id=\"fsTest\" hidden>🧪 Save a test file</button></div><button type=\"button\" class=\"btn alt\" id=\"fsClear\" style=\"margin-top:8px\" hidden>✕ Remove folder</button><p class=\"meta\" style=\"margin:10px 0 0\">Choose any folder once. Month reports (PDF and CSV), the backup file and the Sanity PDF are saved there instead of the Downloads folder. A file with the same name is replaced. Works in Chrome and Edge. The browser may ask you to allow folder access once each time you open the app.</p><div class=\"bkdiv\"><b>⏰ Automatic backup</b></div><label class=\"chk\"><input type=\"checkbox\" id=\"bkOn\"> Back up my data automatically</label><label for=\"bkDays\" style=\"margin-top:12px\">Back up once every (days)</label><input type=\"number\" id=\"bkDays\" min=\"1\" max=\"30\" value=\"1\"><label style=\"margin-top:4px\">Set the time</label><div class=\"cpk\" data-p=\"bk\" data-sec=\"1\" data-perch=\"💾\"></div><div class=\"clk\"><select id=\"bkH\" aria-label=\"Hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"bkM\" aria-label=\"Minute\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><b>:</b><select id=\"bkS\" aria-label=\"Second\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><select id=\"bkAP\" aria-label=\"AM or PM\"><option>AM</option><option>PM</option></select></div><label class=\"chk\" style=\"margin-top:12px\"><input type=\"checkbox\" id=\"bk2On\"> Back up twice a day (add a second time)</label><div id=\"bk2Wrap\" hidden><label style=\"margin-top:8px\">Second time</label><div class=\"cpk\" data-p=\"bk2\" data-sec=\"1\" data-perch=\"💾\"></div><div class=\"clk\"><select id=\"bk2H\" aria-label=\"Second time hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"bk2M\" aria-label=\"Second time minute\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><b>:</b><select id=\"bk2S\" aria-label=\"Second time second\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><select id=\"bk2AP\" aria-label=\"Second time AM or PM\"><option>AM</option><option>PM</option></select></div></div><p class=\"meta\" id=\"bkLbl\" style=\"margin:6px 0 0\"></p><p class=\"meta\" id=\"bkLast\" style=\"margin:6px 0 0\"></p><p class=\"meta\" style=\"margin:6px 0 0\">For example: every 1 day at 6:00 PM. The backup runs while the app is open. If the app was closed at that time, it runs the next time you open it. With the folder above chosen, the file goes into it and replaces the same-day file.</p><button type=\"button\" class=\"btn alt\" id=\"bkNow\" style=\"margin-top:10px\">💾 Back up now</button> <button type=\"button\" class=\"btn alt\" id=\"bkRestore\" style=\"margin-top:10px\">🔄 Restore time</button><p class=\"meta\" style=\"margin:8px 0 0\"><b>Restore time</b> starts the schedule again from now. The next backup happens at the next time set on the clock (or clocks), even if a backup already ran today or the every-N-days wait is not over. Change the time first, then press it.</p><p class=\"meta\" id=\"bkWhere\" style=\"margin:8px 0 0\"></p>';
   var funSec=document.createElement('div');funSec.className='sec';funSec.innerHTML='<h3>🎉 Celebrations</h3><label class="chk"><input type="checkbox" id="celChamp"> Celebration when the daily target is completed</label><p class="meta" style="margin:0">A trophy and confetti appear once a day when your spent hours reach the daily target.</p><label for=\"celTitle\" style=\"margin-top:12px\">Celebration title</label><input id=\"celTitle\" maxlength=\"24\" placeholder=\"Target Achieved!\"><label class="chk" style="margin-top:12px"><input type="checkbox" id="celJira"> Animation when a task is saved in Jira</label><p class="meta" style="margin:0">A small burst of sparkles appears when you mark a task as saved in Jira.</p><label class=\"chk\" style=\"margin-top:12px\"><input type=\"checkbox\" id=\"celCurtain\"> Theatre curtains when I log in and log out</label><p class=\"meta\" style=\"margin:0\">Red curtains open when you log in and close when you log out.</p><button type=\"button\" class=\"btn alt\" id=\"curtainTest\" style=\"margin-top:10px\">🎭 Preview the curtains</button>';
-  var birdSec=document.createElement('div');birdSec.className='sec';birdSec.innerHTML='<h3>🐦 Daily birds</h3><label class=\"chk\"><input type=\"checkbox\" id=\"birdOn\"> Let birds fly across the screen every day</label><div class=\"bclock\"><div class=\"bface\"><span class=\"bperch\" aria-hidden=\"true\">🐦</span><svg viewBox=\"0 0 120 120\" aria-hidden=\"true\"><circle cx=\"60\" cy=\"60\" r=\"56\" class=\"bf\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(0 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(30 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(60 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(90 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(120 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(150 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(180 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(210 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(240 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"20\" class=\"bt bt3\" transform=\"rotate(270 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(300 60 60)\"/><line x1=\"60\" y1=\"9\" x2=\"60\" y2=\"17\" class=\"bt\" transform=\"rotate(330 60 60)\"/><text x=\"60\" y=\"32\" class=\"bn\">12</text><text x=\"91\" y=\"64\" class=\"bn\">3</text><text x=\"60\" y=\"96\" class=\"bn\">6</text><text x=\"29\" y=\"64\" class=\"bn\">9</text><line id=\"bHr\" x1=\"60\" y1=\"60\" x2=\"60\" y2=\"36\" class=\"bh1\"/><line id=\"bMn\" x1=\"60\" y1=\"60\" x2=\"60\" y2=\"22\" class=\"bh2\"/><circle cx=\"60\" cy=\"60\" r=\"4.5\" class=\"bdot\"/></svg></div><div class=\"bdig\"><div><b id=\"bdigT\">6:00</b><span id=\"bdigAP\">PM</span></div><small id=\"bdigI\"></small></div></div><label style=\"margin-top:4px\">Set the time</label><div class=\"clk\"><select id=\"birdH\" aria-label=\"Hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"birdM\" aria-label=\"Minute\"><option>00</option><option>05</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option></select><select id=\"birdAP\" aria-label=\"AM or PM\"><option>AM</option><option>PM</option></select></div><p class=\"meta\" id=\"birdLbl\" style=\"margin:6px 0 0\"></p><label for=\"birdN\" style=\"margin-top:12px\">How many birds</label><input type=\"number\" id=\"birdN\" min=\"1\" max=\"50\" value=\"8\"><p class=\"meta\" style=\"margin:6px 0 0\">The birds fly for 1 minute while the app is open. Tap ✕ on the message to send them away. If the app is opened within 30 minutes after this time, they still fly.</p><button type=\"button\" class=\"btn alt\" data-a=\"birdtest\" style=\"margin-top:10px\">▶ Preview the birds</button>';
+  var birdSec=document.createElement('div');birdSec.className='sec';birdSec.innerHTML='<h3>🐦 Daily birds</h3><label class=\"chk\"><input type=\"checkbox\" id=\"birdOn\"> Let birds fly across the screen every day</label><label style=\"margin-top:4px\">Set the time</label><div class=\"cpk\" data-p=\"bird\" data-perch=\"🐦\"></div><div class=\"clk\"><select id=\"birdH\" aria-label=\"Hour\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><b>:</b><select id=\"birdM\" aria-label=\"Minute\"><option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>51</option><option>52</option><option>53</option><option>54</option><option>55</option><option>56</option><option>57</option><option>58</option><option>59</option></select><select id=\"birdAP\" aria-label=\"AM or PM\"><option>AM</option><option>PM</option></select></div><p class=\"meta\" id=\"birdLbl\" style=\"margin:6px 0 0\"></p><label for=\"birdN\" style=\"margin-top:12px\">How many birds</label><input type=\"number\" id=\"birdN\" min=\"1\" max=\"50\" value=\"8\"><p class=\"meta\" style=\"margin:6px 0 0\">The birds fly for 1 minute while the app is open. Tap ✕ on the message to send them away. If the app is opened within 30 minutes after this time, they still fly.</p><button type=\"button\" class=\"btn alt\" data-a=\"birdtest\" style=\"margin-top:10px\">▶ Preview the birds</button>';
   var defs=[
    {k:'range',i:'📆',t:'Tasks done between two dates',d:'Pick dates and see the tasks you did',s:sec(S,'Tasks done between two dates')},
    {k:'backup',i:'💾',t:'Backup and restore',d:'Keep a copy of your data or move it',s:sec(S,'Backup and restore')},
@@ -1767,11 +1768,18 @@ body.hide-notes #list .l3{display:none}
     $('rs').innerHTML='<option value="">All '+esc(lab('sprint'))+'</option>'+sprints().map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>'}).join('');$('bk').value=''}
    var sb=$('sb'),nav=document.createElement('div');nav.id='swn';nav.className='setnav';
    function item(o){var b=document.createElement('button'),i=document.createElement('b');b.type='button';if(o.sub)b.className='sub';if(o.w)b.dataset.w=o.w;if(o.a)b.dataset.a=o.a;i.textContent=o.i;b.appendChild(i);b.appendChild(document.createTextNode(o.t));nav.appendChild(b)}
-   item({i:'📄',t:'All my records',a:'records'});
-   var SUBK=['theme','quick','dspec','dall'];   /* only these stay inside the Delete records group; every other setting is its own entry */
-   defs.filter(function(d){return SUBK.indexOf(d.k)<0}).forEach(function(d){item({i:d.i,t:d.t,w:d.k})});
-   var g=document.createElement('div');g.className='sgl';g.textContent='🧹 Delete records';nav.appendChild(g);
-   defs.filter(function(d){return SUBK.indexOf(d.k)>=0}).forEach(function(d){item({i:d.i,t:d.t,w:d.k,sub:1})});
+   function grp(key,title){var g=document.createElement('div');g.className='sgl';g.dataset.g=key;g.textContent=title;nav.appendChild(g)}
+   function by(k){return defs.filter(function(d){return d.k===k})[0]}
+   function put(k){var d=by(k);if(d)item({i:d.i,t:d.t,w:d.k,sub:1})}
+   grp('g_rep','📊 Reports & backup');item({i:'📄',t:'All my records',a:'records',sub:1});['range','backup','folder'].forEach(put);
+   grp('g_feat','🧩 Features');['jira','sanity','celebrate','bird'].forEach(put);
+   grp('g_look','🎨 Look & menu');['theme','menu'].forEach(put);
+   var known=['range','backup','folder','jira','sanity','celebrate','bird','theme','menu','dspec','dall','quick'];
+   defs.filter(function(d){return known.indexOf(d.k)<0}).forEach(function(d){put(d.k)});   /* any future setting lands here */
+   grp('del','🧹 Delete records');['dspec','dall'].forEach(put);
+   /* Quick tools belongs with the other tools */
+   var th=[].filter.call(sb?sb.querySelectorAll(':scope>h4'):[],function(x){return x.textContent.trim()==='Tools'})[0],tb=th&&th.nextElementSibling,qd=by('quick');
+   if(tb&&qd){var qb=document.createElement('button'),qi=document.createElement('b');qb.type='button';qb.dataset.w='quick';qb.textContent=qd.i+' '+qd.t;tb.appendChild(qb)}
    var hd=document.createElement('h4');hd.textContent='Settings';
    var ab=sb&&sb.querySelector('.bar2'),ah=ab&&ab.previousElementSibling;
    if(sb){if(ah){sb.insertBefore(hd,ah);sb.insertBefore(nav,ah)}else{sb.appendChild(hd);sb.appendChild(nav)}}
@@ -1812,7 +1820,7 @@ body.hide-notes #list .l3{display:none}
 /* sidebar: click Views, Tools, Settings, Actions or Delete records to show / hide its items */
 (function(){
  var sb=document.getElementById('sb');if(!sb||sb.dataset.acc)return;sb.dataset.acc='1';
- var st={},def={views:1};try{st=JSON.parse(localStorage.getItem('tm_sbopen')||'{}')||{}}catch(e){}
+ var st={},def={views:1,g_rep:1,g_feat:1,g_look:1};try{st=JSON.parse(localStorage.getItem('tm_sbopen')||'{}')||{}}catch(e){}
  function isOpen(k){return k in st?!!st[k]:!!def[k]}
  function store(){try{localStorage.setItem('tm_sbopen',JSON.stringify(st))}catch(e){}}
  function wire(h,k,items){
@@ -1833,8 +1841,7 @@ body.hide-notes #list .l3{display:none}
   paint()}
  var keys={Views:'views',Tools:'tools',Settings:'settings',Actions:'actions'};
  [].forEach.call(sb.querySelectorAll(':scope>h4'),function(h){var k=keys[h.textContent.trim()],box=h.nextElementSibling;if(k&&box)wire(h,k,[box])});
- var g=sb.querySelector('#swn .sgl');
- if(g){var subs=[];for(var n=g.nextElementSibling;n;n=n.nextElementSibling)subs.push(n);wire(g,'del',subs)}
+ [].forEach.call(sb.querySelectorAll('#swn .sgl'),function(g){var subs=[];for(var n=g.nextElementSibling;n&&!n.classList.contains('sgl');n=n.nextElementSibling)subs.push(n);wire(g,g.dataset.g||'del',subs)});
 })();
 </script>
 <script>
@@ -3274,7 +3281,9 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
    return}
   var k2=window.__dlKind;window.__dlKind=null;var r=orig.apply(this,arguments);if(a.download&&/^blob:/.test(a.href)&&window.showDl)showDl(dlTitle(k2),a.download+'  \u00B7  check your Downloads folder (Ctrl+J)');return r};
  /* settings */
- function sync(){if(!$('fsOn'))return;var n=LS.get('tm_fsname');$('fsOn').checked=LS.get('tm_fson')==='1'&&!!n;$('fsOn').disabled=false;
+ function sync(){if(!$('fsOn'))return;var n=LS.get('tm_fsname');
+  var wh=$('bkWhere');if(wh){var on=LS.get('tm_fson')==='1'&&!!n&&can();wh.textContent=on?'\uD83D\uDCC1 Back up now saves into: '+n+' (a file with the same name is replaced).':n?'A folder is chosen, but the switch at the top is off. Turn it on so backups go to \uD83D\uDCC1 '+n+'.':'No folder chosen above, so backups go to your Downloads folder.'}
+ $('fsOn').checked=LS.get('tm_fson')==='1'&&!!n;$('fsOn').disabled=false;
   $('fsName').textContent=!can()?'This browser cannot save into a folder. Files will download normally. (Chrome or Edge can do it.)':n?'\uD83D\uDCC1 Folder: '+n:'No folder chosen yet.';
   $('fsPick').textContent=n?'\uD83D\uDCC1 Change folder':'\uD83D\uDCC1 Choose folder';$('fsClear').hidden=!n;$('fsTest').hidden=!n}
  var _fs=window.funSync;window.funSync=function(){if(_fs)_fs();sync()};
@@ -3295,12 +3304,22 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
  var $=function(i){return document.getElementById(i)};
  var say=function(m){try{toast(m)}catch(e){}};
  var has=function(){return typeof me!=='undefined'&&me&&DB.users[me]};
- function cfg(){var u=U();if(!u.autoBk)u.autoBk={on:false,days:1,time:'18:00',last:0};var c=u.autoBk;c.days=Math.max(1,Math.min(30,Math.round(+c.days)||1));return c}
- function slot(c){var p=String(c.time||'18:00:00').split(':'),h=+p[0]||0,m=+p[1]||0,s=+p[2]||0,b=c.last?new Date(c.last):new Date();return new Date(b.getFullYear(),b.getMonth(),b.getDate()+(c.last?c.days:0),h,m,s,0)}
+ function cfg(){var u=U();if(!u.autoBk)u.autoBk={on:false,days:1,time:'18:00:00',two:false,time2:'21:00:00',since:Date.now(),lastAuto:0};var c=u.autoBk;if(c.since===undefined){c.since=Date.now();c.lastAuto=0}   /* older saves: the schedule starts fresh */
+  if(c.time2===undefined){c.time2='21:00:00';c.two=false}
+  c.days=Math.max(1,Math.min(30,Math.round(+c.days)||1));return c}
+ /* Next backup. One or two times a day. After a run: the next later time the same day (when twice a day), otherwise the first time N days later. Before the first run: the next time the clock reaches a chosen time. A manual backup never moves it. */
+ function tp(t){var p=String(t||'18:00:00').split(':');return [(+p[0])||0,(+p[1])||0,(+p[2])||0]}
+ function onDay(c,y,m,d){var ts=[tp(c.time)];if(c.two)ts.push(tp(c.time2));return ts.map(function(t){return new Date(y,m,d,t[0],t[1],t[2],0)}).sort(function(a,b){return a-b})}
+ function slot(c){
+  if(c.lastAuto){var b=new Date(c.lastAuto),ds=onDay(c,b.getFullYear(),b.getMonth(),b.getDate());
+   for(var i=0;i<ds.length;i++)if(ds[i].getTime()>c.lastAuto+999)return ds[i];
+   return onDay(c,b.getFullYear(),b.getMonth(),b.getDate()+c.days)[0]}
+  var st=c.since||Date.now(),b2=new Date(st),cand=onDay(c,b2.getFullYear(),b2.getMonth(),b2.getDate()).concat(onDay(c,b2.getFullYear(),b2.getMonth(),b2.getDate()+1));
+  for(var j=0;j<cand.length;j++)if(cand[j].getTime()>=st)return cand[j];return cand[cand.length-1]}
  function due(){var c=cfg();return !!c.on&&Date.now()>=slot(c).getTime()}
  var running=false;
  function run(auto){
-  if(!has()||running)return;running=true;var c=cfg();c.last=Date.now();save();
+  if(!has()||running)return;running=true;var c=cfg();if(auto)c.lastAuto=Date.now();save();
   try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(U())],{type:'application/json'}));a.download=U().name+'-backup-'+iso(new Date())+'.json';window.__dlKind=auto?'auto':'backup';a.click();try{localStorage.setItem('tm_lastbackup',Date.now())}catch(e){}}catch(e){say('Backup is blocked here. Use Copy my backup instead.')}
   running=false;sync()}
  function tick(){if(!has())return;var app=$('app');if(app&&app.hidden)return;if(due())run(true)}
@@ -3312,18 +3331,27 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
  function sync(){if(!$('bkOn')||!has())return;var c=cfg(),t=t12(c.time),mm=String(t.m).padStart(2,'0'),sel=$('bkM');
   if(![].some.call(sel.options,function(o){return o.value===mm})){var o=document.createElement('option');o.value=o.textContent=mm;sel.appendChild(o)}
   $('bkOn').checked=!!c.on;$('bkDays').value=c.days;$('bkH').value=t.h;sel.value=mm;var ss=String(t.s).padStart(2,'0');$('bkS').value=ss;$('bkAP').value=t.ap;
-  $('bkLbl').textContent=c.on?'\uD83D\uDD52 Backs up '+(c.days===1?'every day':'once every '+c.days+' days')+' at '+t.h+':'+mm+':'+ss+' '+t.ap+'.':'Automatic backup is off.';
-  var lb=+localStorage.getItem('tm_lastbackup')||c.last||0;
+  var t2=t12(c.time2),mm2=String(t2.m).padStart(2,'0'),ss2=String(t2.s).padStart(2,'0'),sel2=$('bk2M');
+  $('bk2On').checked=!!c.two;$('bk2Wrap').hidden=!c.two;$('bk2H').value=t2.h;sel2.value=mm2;$('bk2S').value=ss2;$('bk2AP').value=t2.ap;
+  var one=t.h+':'+mm+':'+ss+' '+t.ap,two=t2.h+':'+mm2+':'+ss2+' '+t2.ap;
+  $('bkLbl').textContent=c.on?'\uD83D\uDD52 Backs up '+(c.days===1?'every day':'once every '+c.days+' days')+' at '+one+(c.two?' and again at '+two:'')+'.':'Automatic backup is off.';
+  var lb=+localStorage.getItem('tm_lastbackup')||c.lastAuto||0;
   $('bkLast').textContent=(lb?'Last backup: '+fmt(new Date(lb))+'. ':'No backup yet. ')+(c.on?'Next backup: '+fmt(slot(c))+'.':'')}
  var _f=window.funSync;window.funSync=function(){if(_f)_f();sync()};
  document.addEventListener('change',function(e){var id=e.target&&e.target.id;if(!id||id.indexOf('bk')!==0||!has())return;var c=cfg(),t=e.target;
-  if(id==='bkOn')c.on=t.checked;
+  if(id==='bkOn'){c.on=t.checked;if(c.on){c.since=Date.now();c.lastAuto=0}}
   else if(id==='bkDays'){c.days=Math.max(1,Math.min(30,Math.round(+t.value)||1));t.value=c.days}
+  else if(id==='bk2On'){c.two=t.checked}
+  else if(id==='bk2H'||id==='bk2M'||id==='bk2S'||id==='bk2AP'){var h2=(+$('bk2H').value%12)+($('bk2AP').value==='PM'?12:0);c.time2=String(h2).padStart(2,'0')+':'+$('bk2M').value+':'+$('bk2S').value}
   else if(id==='bkH'||id==='bkM'||id==='bkS'||id==='bkAP'){var h=(+$('bkH').value%12)+($('bkAP').value==='PM'?12:0);c.time=String(h).padStart(2,'0')+':'+$('bkM').value+':'+$('bkS').value}
   else return;
-  if(due())c.last=Date.now();   /* never back up the moment a setting is changed: the first backup is the next one */
+  if(due()){c.lastAuto=0;c.since=Date.now()}   /* never back up the moment a setting is changed: the first backup is the next time the clock reaches the chosen time */
   save();sync()});
  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#bkNow');if(!b)return;e.stopPropagation();e.preventDefault();run(false)},true);
+ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#bkRestore');if(!b||!has())return;e.stopPropagation();e.preventDefault();
+  var c=cfg();c.on=true;c.lastAuto=0;c.since=Date.now();save();sync();
+  var n=slot(c),sameDay=n.toDateString()===new Date().toDateString();
+  if(window.showDl)showDl('Schedule restored','Next backup: '+fmt(n)+(sameDay?' (today)':' (the time has already passed today)'));else say('Schedule restored. Next backup: '+fmt(n))},true);
 })();
 </script>
 <style>
@@ -3372,6 +3400,74 @@ dialog.tmdrag,dialog.tmdrag *{user-select:none!important}
  document.addEventListener('change',function(e){if(e.target.id==='celCurtain'){try{localStorage.setItem('tm_curtain',e.target.checked?'1':'0')}catch(x){}}});
  window.playCurtains=function(){if(calm())return;closeC(function(){setTimeout(openC,200)})};
  document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#curtainTest')){e.stopPropagation();window.playCurtains()}},true);
+})();
+</script>
+<style>
+/* clock time picker */
+.cpk+.clk{display:none}
+.cpick{display:flex;flex-direction:column;align-items:center;gap:12px;margin:10px 0;padding:16px 12px 14px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(56,189,248,.10),rgba(167,139,250,.10))}
+.cpd{display:flex;align-items:center;gap:4px;font-size:2.2rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.cpd>button{border:0;border-radius:12px;padding:4px 10px;background:var(--soft);color:var(--ink);font:inherit;cursor:pointer;min-width:2.1ch;line-height:1.15}
+.cpd>button.on{background:#38bdf8;color:#06283a}
+.cpd>b{opacity:.7}
+.cpap{display:flex;flex-direction:column;gap:4px;margin-left:10px}
+.cpap button{border:0;border-radius:8px;padding:4px 10px;background:var(--soft);color:var(--ink);font-size:.8rem;font-weight:800;cursor:pointer}
+.cpap button.on{background:#38bdf8;color:#06283a}
+.cps{width:232px;height:232px;max-width:100%;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
+.cps .fc{fill:var(--card);stroke:#38bdf8;stroke-width:3}
+.cps .tk{stroke:var(--mute);stroke-width:1.4;stroke-linecap:round}.cps .tk5{stroke:var(--ink);stroke-width:2.2}
+.cps .nm{fill:var(--ink);font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:central;font-family:inherit;pointer-events:none}
+.cps .hd{stroke:#38bdf8;stroke-width:3;stroke-linecap:round}
+.cps .bb{fill:#38bdf8}.cps .bt{fill:#06283a;font-size:14px;font-weight:800;text-anchor:middle;dominant-baseline:central;font-family:inherit;pointer-events:none}
+.cps .ct{fill:#fbbf24}
+.cph{margin:0;color:var(--mute);font-size:.8rem;text-align:center}
+.cpperch{font-size:1.4rem;line-height:1;margin-bottom:-6px}
+</style>
+<script>
+/* Clock time picker: tap or drag the clock to choose hour, minute and second */
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ var NS='http://www.w3.org/2000/svg',pk=[];
+ function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+ function pad(n){return String(n).padStart(2,'0')}
+ function init(host){
+  var p=host.dataset.p,hasS=host.dataset.sec==='1',H=$(p+'H'),M=$(p+'M'),S=hasS?$(p+'S'):null,AP=$(p+'AP');if(!H||!M||!AP||host.dataset.ok)return;host.dataset.ok='1';
+  var mode='h',drag=false;
+  host.innerHTML='<div class="cpick"><span class="cpperch" aria-hidden="true"></span><div class="cpd"><button type="button" data-u="h" aria-label="Hour"></button><b>:</b><button type="button" data-u="m" aria-label="Minute"></button>'+(hasS?'<b>:</b><button type="button" data-u="s" aria-label="Second"></button>':'')+'<div class="cpap"><button type="button" data-ap="AM">AM</button><button type="button" data-ap="PM">PM</button></div></div><svg class="cps" viewBox="0 0 240 240" role="slider" aria-label="Clock"></svg><p class="cph"></p></div>';
+  host.querySelector('.cpperch').textContent=host.dataset.perch||'';
+  var svg=host.querySelector('svg'),hint=host.querySelector('.cph');
+  var val=function(){return {h:+H.value||12,m:+M.value||0,s:S?(+S.value||0):0,ap:AP.value}};
+  function setSel(sel,v){sel.value=v;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+  function paint(){
+   var v=val(),cur=mode==='h'?v.h:mode==='m'?v.m:v.s,step=mode==='h'?30:6,ang=((mode==='h'?(v.h%12):cur)*step)*Math.PI/180;
+   host.querySelector('[data-u=h]').textContent=v.h;host.querySelector('[data-u=m]').textContent=pad(v.m);if(hasS)host.querySelector('[data-u=s]').textContent=pad(v.s);
+   [].forEach.call(host.querySelectorAll('[data-u]'),function(b){b.classList.toggle('on',b.dataset.u===mode)});
+   [].forEach.call(host.querySelectorAll('[data-ap]'),function(b){b.classList.toggle('on',b.dataset.ap===v.ap)});
+   hint.textContent=mode==='h'?'Tap or drag the clock to choose the hour':mode==='m'?'Now choose the minute (any minute 00 to 59)':'Now choose the second (any second 00 to 59)';
+   while(svg.firstChild)svg.removeChild(svg.firstChild);
+   svg.appendChild(el('circle',{cx:120,cy:120,r:112,'class':'fc'}));
+   if(mode==='h'){for(var i=1;i<=12;i++){var a=i*30*Math.PI/180;var t=el('text',{x:120+Math.sin(a)*86,y:120-Math.cos(a)*86,'class':'nm'});t.textContent=i;svg.appendChild(t)}}
+   else{for(var j=0;j<60;j++){var b=j*6*Math.PI/180,r1=j%5?102:98,r2=108;svg.appendChild(el('line',{x1:120+Math.sin(b)*r1,y1:120-Math.cos(b)*r1,x2:120+Math.sin(b)*r2,y2:120-Math.cos(b)*r2,'class':j%5?'tk':'tk tk5'}));
+     if(j%5===0){var t2=el('text',{x:120+Math.sin(b)*80,y:120-Math.cos(b)*80,'class':'nm'});t2.textContent=j;svg.appendChild(t2)}}}
+   var R=mode==='h'?86:80,hx=120+Math.sin(ang)*R,hy=120-Math.cos(ang)*R;
+   svg.appendChild(el('line',{x1:120,y1:120,x2:hx,y2:hy,'class':'hd'}));
+   svg.appendChild(el('circle',{cx:120,cy:120,r:5,'class':'ct'}));
+   svg.appendChild(el('circle',{cx:hx,cy:hy,r:18,'class':'bb'}));
+   var bt=el('text',{x:hx,y:hy,'class':'bt'});bt.textContent=mode==='h'?v.h:cur;svg.appendChild(bt);
+   svg.setAttribute('aria-valuenow',cur)}
+  function pick(e){var r=svg.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),a=(Math.atan2(dx,-dy)*180/Math.PI+360)%360;
+   if(mode==='h'){var h=Math.round(a/30)%12;setSel(H,String(h===0?12:h))}else{setSel(mode==='m'?M:S,pad(Math.round(a/6)%60))}paint()}
+  svg.addEventListener('pointerdown',function(e){drag=true;try{svg.setPointerCapture(e.pointerId)}catch(x){}pick(e);e.preventDefault()});
+  svg.addEventListener('pointermove',function(e){if(drag)pick(e)});
+  function up(){if(!drag)return;drag=false;mode=mode==='h'?'m':(mode==='m'&&hasS?'s':mode);paint()}
+  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',function(){drag=false});
+  host.addEventListener('click',function(e){var u=e.target.closest('[data-u]'),a=e.target.closest('[data-ap]');if(u){mode=u.dataset.u;paint()}if(a){setSel(AP,a.dataset.ap);paint()}});
+  host.addEventListener('keydown',function(e){var u=e.target.closest&&e.target.closest('[data-u]');if(!u||(e.key!=='ArrowUp'&&e.key!=='ArrowDown'))return;e.preventDefault();var d=e.key==='ArrowUp'?1:-1,k=u.dataset.u,v=val();
+   if(k==='h'){var h=((v.h-1+d+12)%12)+1;setSel(H,String(h))}else if(k==='m')setSel(M,pad((v.m+d+60)%60));else setSel(S,pad((v.s+d+60)%60));mode=k;paint()});
+  host._paint=paint;pk.push(host);paint()}
+ [].forEach.call(document.querySelectorAll('.cpk'),init);
+ var _f=window.funSync;window.funSync=function(){if(_f)_f();pk.forEach(function(h){h._paint()})};
+ document.addEventListener('change',function(e){var id=e.target&&e.target.id;if(id&&/^(bk|bk2|bird)(H|M|S|AP)$/.test(id))pk.forEach(function(h){h._paint()})});
 })();
 </script>
 </body></html>
